@@ -10,8 +10,8 @@ Aplikasi telah dibundle dan siap digunakan untuk perangkat Android maupun Window
 
 | Platform | Tipe File | Tautan Unduhan | Keterangan |
 | :--- | :--- | :--- | :--- |
-| **Android** | `.apk` | [📲 Unduh Sahabat-Mahasiswa.apk (dist)](dist/Sahabat-Mahasiswa.apk) <br> [🚀 Unduh via GitHub Release](https://github.com/NnoeeL/SAHABAT-MAHASISWA/releases/download/v1.0.0/Sahabat-Mahasiswa.apk) | Aplikasi Android Mobile (1.2 MB) |
-| **Windows** | `.exe` | [💻 Unduh Sahabat-Mahasiswa-Setup.exe (GitHub Release)](https://github.com/NnoeeL/SAHABAT-MAHASISWA/releases/download/v1.0.0/Sahabat-Mahasiswa-Setup.exe) <br> Path lokal: `dist/Sahabat-Mahasiswa-Setup.exe` | Installer Setup Windows x64 (150 MB) |
+| **Android** | `.apk` | [📲 Unduh Sahabat-Mahasiswa.apk (dist)](dist/Sahabat-Mahasiswa.apk) <br> [🚀 Unduh via GitHub Release](https://github.com/berkom-1/SAHABAT-MAHASISWA/releases/download/v1.0.0/Sahabat-Mahasiswa.apk) | Aplikasi Android Mobile (1.2 MB) |
+| **Windows** | `.exe` | [💻 Unduh Sahabat-Mahasiswa-Setup.exe (GitHub Release)](https://github.com/berkom-1/SAHABAT-MAHASISWA/releases/download/v1.0.0/Sahabat-Mahasiswa-Setup.exe) <br> Path lokal: [dist/Sahabat-Mahasiswa-Setup.exe](dist/Sahabat-Mahasiswa-Setup.exe) | Installer Setup Windows x64 (150 MB) |
 | **Windows Portable** | `.zip` | Path lokal: `dist/Sahabat-Mahasiswa-Windows-x64.zip` | Versi Portable langsung ekstrak |
 
 ---
@@ -73,7 +73,7 @@ SAHABAT MAHASISWA/
 
 1. Clone repositori ini:
    ```bash
-   git clone https://github.com/NnoeeL/SAHABAT-MAHASISWA.git
+   git clone https://github.com/berkom-1/SAHABAT-MAHASISWA.git
    cd SAHABAT-MAHASISWA
    ```
 2. Jalankan secara langsung di browser:
