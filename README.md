@@ -10,9 +10,9 @@ Aplikasi telah dibundle dan siap digunakan untuk perangkat Android maupun Window
 
 | Platform | Tipe File | Tautan Unduhan | Keterangan |
 | :--- | :--- | :--- | :--- |
-| **Android** | `.apk` | [📲 Unduh Sahabat-Mahasiswa.apk](dist/Sahabat-Mahasiswa.apk) | Aplikasi Android Mobile (1.2 MB) |
-| **Windows** | `.exe` | [💻 Unduh Sahabat-Mahasiswa-Setup.exe](dist/Sahabat-Mahasiswa-Setup.exe) | Installer Setup Windows x64 |
-| **Windows Portable** | `.zip` | [📦 Unduh Sahabat-Mahasiswa-Windows-x64.zip](dist/Sahabat-Mahasiswa-Windows-x64.zip) | Versi Portable langsung ekstrak |
+| **Android** | `.apk` | [📲 Unduh Sahabat-Mahasiswa.apk (dist)](dist/Sahabat-Mahasiswa.apk) <br> [🚀 Unduh via GitHub Release](https://github.com/NnoeeL/SAHABAT-MAHASISWA/releases/download/v1.0.0/Sahabat-Mahasiswa.apk) | Aplikasi Android Mobile (1.2 MB) |
+| **Windows** | `.exe` | [💻 Unduh Sahabat-Mahasiswa-Setup.exe (GitHub Release)](https://github.com/NnoeeL/SAHABAT-MAHASISWA/releases/download/v1.0.0/Sahabat-Mahasiswa-Setup.exe) <br> Path lokal: `dist/Sahabat-Mahasiswa-Setup.exe` | Installer Setup Windows x64 (150 MB) |
+| **Windows Portable** | `.zip` | Path lokal: `dist/Sahabat-Mahasiswa-Windows-x64.zip` | Versi Portable langsung ekstrak |
 
 ---
 
