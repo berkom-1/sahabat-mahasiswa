@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Pengaturan Akun | Sahabat Mahasiswa</title>
+  <link rel="icon" type="image/svg+xml" href="assets/logo-icon.svg">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#6C52EE">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="SahabatMhs">
+  <link rel="apple-touch-icon" href="assets/logo-icon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Supabase JS & Backend Client (dengan Graceful LocalStorage Fallback) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-client.js"></script>
+  <style>
+    :root {
+      --pri: #6A55C8;
+      --pri-hover: #5842B8;
+      --pri-light: #F0EDFD;
+      --pri-glow: rgba(106, 85, 200, 0.25);
+      --acc: #C9B9F7;
+      --bg: #F5F3FB;
+      --card: rgba(255, 255, 255, 0.94);
+      --card-border: rgba(231, 225, 244, 0.9);
+      --ink: #26203D;
+      --ink-muted: #746D8D;
+      --line: #E8E2F5;
+      --ok: #1FA363;
+      --ok-bg: #E8F7EE;
+      --bad: #E03E5F;
+      --bad-bg: #FDE8ED;
+      --shadow-sm: 0 4px 14px rgba(43, 37, 71, 0.05);
+      --shadow-lg: 0 20px 45px -12px rgba(80, 60, 160, 0.14);
+      --radius: 20px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #141121;
+        --card: rgba(30, 26, 48, 0.94);
+        --card-border: rgba(65, 57, 98, 0.6);
+        --ink: #F3EFFE;
+        --ink-muted: #A8A0C5;
+        --line: #373055;
+        --pri: #8A76EE;
+        --pri-hover: #9D8DF4;
+        --pri-light: rgba(138, 118, 238, 0.15);
+        --pri-glow: rgba(138, 118, 238, 0.35);
+        --ok-bg: rgba(31, 163, 99, 0.2);
+        --bad-bg: rgba(224, 62, 95, 0.2);
+        --shadow-lg: 0 20px 45px -10px rgba(0, 0, 0, 0.5);
+      }
+    }
+
+    [data-theme="dark"] {
+      --bg: #141121;
+      --card: rgba(30, 26, 48, 0.94);
+      --card-border: rgba(65, 57, 98, 0.6);
+      --ink: #F3EFFE;
+      --ink-muted: #A8A0C5;
+      --line: #373055;
+      --pri: #8A76EE;
+      --pri-hover: #9D8DF4;
+      --pri-light: rgba(138, 118, 238, 0.15);
+      --pri-glow: rgba(138, 118, 238, 0.35);
+      --ok-bg: rgba(31, 163, 99, 0.2);
+      --bad-bg: rgba(224, 62, 95, 0.2);
+      --shadow-lg: 0 20px 45px -10px rgba(0, 0, 0, 0.5);
+    }
+
+    [data-theme="light"] {
+      --bg: #F5F3FB;
+      --card: rgba(255, 255, 255, 0.94);
+      --card-border: rgba(231, 225, 244, 0.9);
+      --ink: #26203D;
+      --ink-muted: #746D8D;
+      --line: #E8E2F5;
+      --pri: #6A55C8;
+      --pri-hover: #5842B8;
+      --pri-light: #F0EDFD;
+      --pri-glow: rgba(106, 85, 200, 0.25);
+      --ok-bg: #E8F7EE;
+      --bad-bg: #FDE8ED;
+      --shadow-lg: 0 20px 45px -12px rgba(80, 60, 160, 0.14);
+    }
+
+    .theme-chooser-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 10px;
+    }
+    @media (max-width: 500px) {
+      .theme-chooser-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .theme-card-option {
+      background: var(--bg);
+      border: 2px solid var(--line);
+      border-radius: 14px;
+      padding: 14px 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: center;
+    }
+    .theme-card-option:hover {
+      border-color: var(--pri);
+      transform: translateY(-2px);
+    }
+    .theme-card-option.active {
+      border-color: var(--pri);
+      background: var(--pri-light);
+      box-shadow: 0 4px 12px var(--pri-glow);
+    }
+    .theme-card-icon {
+      font-size: 22px;
+    }
+    .theme-card-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+    .theme-card-sub {
+      font-size: 11px;
+      color: var(--ink-muted);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+      background-color: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      padding-bottom: 90px;
+      line-height: 1.5;
+    }
+
+    /* Ambient background blobs */
+    .bg-blobs {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(90px);
+      opacity: 0.45;
+    }
+    .blob-1 {
+      width: 400px;
+      height: 400px;
+      background: linear-gradient(135deg, #7C5CEE, #FF8AAE);
+      top: -120px;
+      right: -100px;
+    }
+    .blob-2 {
+      width: 320px;
+      height: 320px;
+      background: linear-gradient(135deg, #48C6EF, #6F86D6);
+      bottom: -60px;
+      left: -80px;
+      opacity: 0.3;
+    }
+
+    /* Top App Bar */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--card);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--card-border);
+      padding: 12px 20px;
+    }
+    .header-inner {
+      max-width: 680px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .nav-back-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: var(--pri-light);
+      color: var(--pri);
+      border: none;
+      text-decoration: none;
+      font-size: 16px;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    .nav-back-btn:hover {
+      background: var(--pri);
+      color: #fff;
+      transform: translateX(-2px);
+    }
+    .header-title {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+    }
+    .theme-toggle-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .theme-toggle-btn:hover {
+      border-color: var(--pri);
+      color: var(--pri);
+    }
+
+    /* Main Container */
+    main {
+      max-width: 680px;
+      margin: 24px auto 0;
+      padding: 0 18px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Cards */
+    .settings-card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 18px;
+      box-shadow: var(--shadow-sm);
+      backdrop-filter: blur(14px);
+    }
+
+    .card-title-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--line);
+    }
+    .card-title-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      background: var(--pri-light);
+      color: var(--pri);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+    }
+    .card-title-text {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    /* Profile Avatar Hero */
+    .avatar-hero {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .avatar-wrapper {
+      position: relative;
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      border: 3px solid var(--pri);
+      box-shadow: 0 8px 24px var(--pri-glow);
+      flex-shrink: 0;
+      background: var(--pri-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .avatar-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .avatar-fallback {
+      font-size: 36px;
+      font-weight: 800;
+      color: var(--pri);
+    }
+    .avatar-badge-edit {
+      position: absolute;
+      bottom: 2px;
+      right: 2px;
+      background: var(--pri);
+      color: #fff;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--card);
+      box-shadow: var(--shadow-sm);
+      cursor: pointer;
+    }
+    .avatar-info {
+      flex: 1;
+      min-width: 200px;
+    }
+    .avatar-name-display {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--ink);
+    }
+    .avatar-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 10px;
+      border-radius: 99px;
+      font-size: 11px;
+      font-weight: 700;
+      margin-top: 6px;
+    }
+    .badge-google {
+      background: #E8F0FE;
+      color: #1A73E8;
+      border: 1px solid rgba(26, 115, 232, 0.2);
+    }
+    .badge-email {
+      background: var(--ok-bg);
+      color: var(--ok);
+      border: 1px solid rgba(31, 163, 99, 0.2);
+    }
+
+    .avatar-actions-btns {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+    .btn-chip {
+      background: var(--bg);
+      border: 1px solid var(--line);
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .btn-chip:hover {
+      border-color: var(--pri);
+      color: var(--pri);
+      background: var(--pri-light);
+    }
+    .btn-chip-danger {
+      color: var(--bad);
+    }
+    .btn-chip-danger:hover {
+      background: var(--bad-bg);
+      border-color: var(--bad);
+      color: var(--bad);
+    }
+
+    /* Preset Avatars Row */
+    .preset-avatars-box {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px dashed var(--line);
+      display: none;
+    }
+    .preset-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink-muted);
+      margin-bottom: 8px;
+    }
+    .preset-list {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .preset-item {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      cursor: pointer;
+      object-fit: cover;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .preset-item:hover, .preset-item.selected {
+      border-color: var(--pri);
+      transform: scale(1.08);
+      box-shadow: 0 4px 10px var(--pri-glow);
+    }
+
+    /* Form Fields Grid */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 580px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .form-group.full {
+      grid-column: 1 / -1;
+    }
+    .form-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .label-badge {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--ink-muted);
+      background: var(--bg);
+      padding: 2px 8px;
+      border-radius: 99px;
+      border: 1px solid var(--line);
+    }
+    .label-badge.locked {
+      background: var(--ok-bg);
+      color: var(--ok);
+      border-color: rgba(31, 163, 99, 0.3);
+    }
+
+    .input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .input-icon {
+      position: absolute;
+      left: 14px;
+      color: var(--ink-muted);
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+    }
+    .form-input {
+      width: 100%;
+      padding: 12px 14px 12px 42px;
+      font-family: inherit;
+      font-size: 14px;
+      background: var(--card);
+      border: 1.5px solid var(--line);
+      border-radius: 13px;
+      color: var(--ink);
+      transition: all 0.2s ease;
+      outline: none;
+    }
+    .form-input:focus {
+      border-color: var(--pri);
+      box-shadow: 0 0 0 3px var(--pri-glow);
+    }
+    .form-input[readonly] {
+      background: var(--bg);
+      color: var(--ink-muted);
+      cursor: not-allowed;
+      border-style: dashed;
+    }
+
+    .form-help {
+      font-size: 11px;
+      color: var(--ink-muted);
+      margin-top: 3px;
+    }
+
+    /* Linked Account Info Box */
+    .linked-acc-box {
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 8px;
+    }
+    .linked-acc-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .linked-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-sm);
+      flex-shrink: 0;
+    }
+    .linked-info-title {
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .linked-info-sub {
+      font-size: 12px;
+      color: var(--ink-muted);
+    }
+
+    /* Floating Save Bar */
+    .bottom-save-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--card);
+      border-top: 1px solid var(--card-border);
+      padding: 14px 20px calc(14px + env(safe-area-inset-bottom, 0px));
+      backdrop-filter: blur(16px);
+      z-index: 90;
+      box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.06);
+    }
+    .save-bar-inner {
+      max-width: 680px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+    .save-status-text {
+      font-size: 13px;
+      color: var(--ink-muted);
+      font-weight: 500;
+    }
+
+    .btn-save {
+      background: linear-gradient(135deg, var(--pri), #7C67D8);
+      color: #fff;
+      border: none;
+      padding: 12px 26px;
+      border-radius: 14px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 6px 18px var(--pri-glow);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+    .btn-save:hover {
+      background: linear-gradient(135deg, var(--pri-hover), #6F5ACF);
+      transform: translateY(-1px);
+    }
+    .btn-save:active {
+      transform: translateY(0);
+    }
+
+    .btn-secondary {
+      background: var(--bg);
+      color: var(--ink);
+      border: 1px solid var(--line);
+      padding: 12px 18px;
+      border-radius: 14px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .btn-secondary:hover {
+      background: var(--pri-light);
+      border-color: var(--acc);
+      color: var(--pri);
+    }
+
+    /* Toast Notification */
+    .toast-container {
+      position: fixed;
+      top: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+      width: 90%;
+      max-width: 400px;
+    }
+    .toast {
+      padding: 12px 18px;
+      border-radius: 14px;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: var(--shadow-lg);
+      animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: auto;
+    }
+    .toast.success {
+      background: var(--ok-bg);
+      color: var(--ok);
+      border: 1px solid rgba(31, 163, 99, 0.3);
+    }
+    .toast.error {
+      background: var(--bad-bg);
+      color: var(--bad);
+      border: 1px solid rgba(224, 62, 95, 0.3);
+    }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Modal dialog */
+    dialog {
+      position: fixed;
+      inset: 0;
+      margin: auto;
+      width: min(90vw, 400px);
+      background: var(--card);
+      color: var(--ink);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 22px;
+      box-shadow: var(--shadow-lg);
+      z-index: 999;
+    }
+    dialog::backdrop {
+      background: rgba(18, 14, 34, 0.6);
+      backdrop-filter: blur(4px);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Blobs -->
+  <div class="bg-blobs">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+  </div>
+
+  <!-- Header -->
+  <header>
+    <div class="header-inner">
+      <div class="header-left">
+        <a href="index.html" class="nav-back-btn" title="Kembali ke Beranda">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          </svg>
+        </a>
+        <h1 class="header-title">Pengaturan Akun</h1>
+      </div>
+      <button class="theme-toggle-btn" id="btnThemeToggle" title="Ganti Tema">
+        <svg id="themeIconSun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none">
+          <circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/>
+        </svg>
+        <svg id="themeIconMoon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Toast Holder -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Main Content -->
+  <main>
+
+    <!-- SECTION 1: FOTO PROFIL & IDENTITAS UTAMA -->
+    <section class="settings-card">
+      <div class="avatar-hero">
+        <div class="avatar-wrapper" id="btnTriggerUpload" title="Klik untuk mengganti foto profil">
+          <img src="" alt="Foto Profil" class="avatar-img" id="imgAvatarPreview" style="display:none;">
+          <div class="avatar-fallback" id="txtAvatarFallback">M</div>
+          <div class="avatar-badge-edit" title="Ganti Foto">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Hidden File Input for Real Photo Upload -->
+        <input type="file" id="fileAvatarInput" accept="image/png, image/jpeg, image/webp" style="display:none;">
+
+        <div class="avatar-info">
+          <h2 class="avatar-name-display" id="displayNameTop">Nama Pengguna</h2>
+          <div id="badgeAuthProvider" class="avatar-status-badge badge-google">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            <span id="txtAuthProvider">Akun Google Terhubung</span>
+          </div>
+
+          <div class="avatar-actions-btns">
+            <button type="button" class="btn-chip" id="btnUploadPhoto">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+              Upload Foto
+            </button>
+            <button type="button" class="btn-chip" id="btnTogglePresets">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/></svg>
+              Pilih Avatar Karakter
+            </button>
+            <button type="button" class="btn-chip btn-chip-danger" id="btnRemoveAvatar" style="display:none;">
+              Hapus Foto
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Preset Avatars Chooser -->
+      <div class="preset-avatars-box" id="presetBox">
+        <div class="preset-title">Pilih Avatar Mahasiswa Keren:</div>
+        <div class="preset-list" id="presetListHolder"></div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: INFORMASI PRIBADI & KONTAK -->
+    <section class="settings-card">
+      <div class="card-title-row">
+        <div class="card-title-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+          </svg>
+        </div>
+        <div class="card-title-text">Informasi Pribadi & Kontak</div>
+      </div>
+
+      <div class="form-grid">
+        <!-- Nama Lengkap -->
+        <div class="form-group full">
+          <label class="form-label" for="inpNama">
+            <span>Nama Lengkap</span>
+            <span class="label-badge">Wajib</span>
+          </label>
+          <div class="input-wrap">
+            <span class="input-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+              </svg>
+            </span>
+            <input type="text" id="inpNama" class="form-input" placeholder="Masukkan nama lengkap Anda" required maxlength="60">
+          </div>
+        </div>
+
+        <!-- Email Tertaut (Readonly) -->
+        <div class="form-group">
+          <label class="form-label" for="inpEmail">
+            <span>Email Tertaut</span>
+            <span class="label-badge locked">Terkunci & Aman</span>
+          </label>
+          <div class="input-wrap">
+            <span class="input-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
+              </svg>
+            </span>
+            <input type="email" id="inpEmail" class="form-input" readonly title="Email login akun Anda">
+          </div>
+          <div class="form-help">Email login yang terhubung ke akun Anda</div>
+        </div>
+
+        <!-- Nomor Telepon (Opsional) -->
+        <div class="form-group">
+          <label class="form-label" for="inpTelp">
+            <span>Nomor Telepon / WhatsApp</span>
+            <span class="label-badge">Opsional</span>
+          </label>
+          <div class="input-wrap">
+            <span class="input-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+              </svg>
+            </span>
+            <input type="tel" id="inpTelp" class="form-input" placeholder="contoh: 081234567890" maxlength="16">
+          </div>
+          <div class="form-help">Untuk konfirmasi pemesanan kosan & lowongan part-time</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: DATA AKADEMIK KAMPUS -->
+    <section class="settings-card">
+      <div class="card-title-row">
+        <div class="card-title-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+        <div class="card-title-text">Data Akademik & Kampus</div>
+      </div>
+
+      <div class="form-grid">
+        <!-- Nama Universitas -->
+        <div class="form-group full">
+          <label class="form-label" for="inpKampus">
+            <span>Nama Universitas / Institut</span>
+            <span class="label-badge">Rekomendasi Kosan & Voucher</span>
+          </label>
+          <div class="input-wrap">
+            <span class="input-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 14v4M12 14v4M16 14v4"/>
+              </svg>
+            </span>
+            <input type="text" id="inpKampus" class="form-input" placeholder="contoh: Universitas Indonesia (UI)" list="kampusSuggest">
+            <datalist id="kampusSuggest">
+              <option value="Universitas Indonesia (UI)">
+              <option value="Institut Teknologi Bandung (ITB)">
+              <option value="Universitas Gadjah Mada (UGM)">
+              <option value="Universitas Padjadjaran (Unpad)">
+              <option value="Universitas Pendidikan Indonesia (UPI)">
+              <option value="Institut Pertanian Bogor (IPB)">
+              <option value="Universitas Diponegoro (Undip)">
+              <option value="Institut Teknologi Sepuluh Nopember (ITS)">
+              <option value="Universitas Airlangga (Unair)">
+              <option value="Universitas Brawijaya (UB)">
+              <option value="Universitas Siliwangi (Unsil)">
+              <option value="Universitas Negeri Jakarta (UNJ)">
+              <option value="Universitas Telkom (Tel-U)">
+            </datalist>
+          </div>
+        </div>
+
+        <!-- Fakultas -->
+        <div class="form-group">
+          <label class="form-label" for="inpFakultas">
+            <span>Fakultas</span>
+            <span class="label-badge">Akademik</span>
+          </label>
+          <div class="input-wrap">
+            <span class="input-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15z"/>
+              </svg>
+            </span>
+            <input type="text" id="inpFakultas" class="form-input" placeholder="contoh: Fakultas Ilmu Komputer" maxlength="60">
+          </div>
+        </div>
+
+        <!-- Jurusan / Program Studi -->
+        <div class="form-group">
+          <label class="form-label" for="inpJurusan">
+            <span>Jurusan / Program Studi</span>
+            <span class="label-badge">Akademik</span>
+          </label>
+          <div class="input-wrap">
+            <span class="input-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+            </span>
+            <input type="text" id="inpJurusan" class="form-input" placeholder="contoh: S1 Teknik Informatika" maxlength="60">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4: TAMPILAN & TEMA APLIKASI (BERLAKU KE SEMUA HALAMAN) -->
+    <section class="settings-card">
+      <div class="card-title-row">
+        <div class="card-title-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/>
+          </svg>
+        </div>
+        <div class="card-title-text">Tampilan & Tema Aplikasi</div>
+      </div>
+
+      <p style="font-size:13px; color:var(--ink-muted); margin-bottom:12px;">
+        Pilih preferensi tema visual. Pengaturan ini <b>otomatis diterapkan ke seluruh halaman</b> (Beranda, Login, dan Pengaturan).
+      </p>
+
+      <div class="theme-chooser-grid">
+        <div class="theme-card-option" id="optThemeLight" data-th="light">
+          <div class="theme-card-icon">☀️</div>
+          <div class="theme-card-title">Mode Terang</div>
+          <div class="theme-card-sub">Cerah & segar</div>
+        </div>
+
+        <div class="theme-card-option" id="optThemeDark" data-th="dark">
+          <div class="theme-card-icon">🌙</div>
+          <div class="theme-card-title">Mode Gelap</div>
+          <div class="theme-card-sub">Nyaman di mata</div>
+        </div>
+
+        <div class="theme-card-option" id="optThemeAuto" data-th="auto">
+          <div class="theme-card-icon">🖥️</div>
+          <div class="theme-card-title">Ikuti Sistem</div>
+          <div class="theme-card-sub">Otomatis perangkat</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 5: AKUN & KEAMANAN -->
+    <section class="settings-card">
+      <div class="card-title-row">
+        <div class="card-title-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+        </div>
+        <div class="card-title-text">Status Akun & Keamanan</div>
+      </div>
+
+      <div class="linked-acc-box">
+        <div class="linked-acc-left">
+          <div class="linked-icon" id="providerIconHolder">
+            <!-- Icon will be populated by JS -->
+          </div>
+          <div>
+            <div class="linked-info-title" id="providerTitleText">Tautan Akun</div>
+            <div class="linked-info-sub" id="providerDescText">Terhubung dengan aman</div>
+          </div>
+        </div>
+        <button type="button" class="btn-chip btn-chip-danger" id="btnLogoutAcc">
+          Keluar (Logout)
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Sticky Bottom Save Bar -->
+  <div class="bottom-save-bar">
+    <div class="save-bar-inner">
+      <div class="save-status-text" id="txtSaveStatus">Perubahan belum disimpan</div>
+      <div style="display:flex; gap:10px;">
+        <a href="index.html" class="btn-secondary">Kembali</a>
+        <button type="button" class="btn-save" id="btnSaveAll">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          Simpan Profil
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* =========================================================
+       1. UTILITAS & LOCAL STORAGE SYNC
+       ========================================================= */
+    const $ = s => document.querySelector(s);
+    const $$ = s => document.querySelectorAll(s);
+
+    const store = {
+      get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+      set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+    };
+
+    function showToast(msg, type = 'success', duration = 3500) {
+      const container = $('#toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      
+      const iconSvg = type === 'success' 
+        ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>'
+        : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
+
+      toast.innerHTML = `${iconSvg}<span>${msg}</span>`;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(-10px)';
+        toast.style.transition = 'all 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+      }, duration);
+    }
+
+    /* =========================================================
+       2. TEMA GELAP / TERANG (DARK / LIGHT) - GLOBAL MULTI-PAGE
+       ========================================================= */
+    const themeBtn = $('#btnThemeToggle');
+    const sunIcon = $('#themeIconSun');
+    const moonIcon = $('#themeIconMoon');
+    const optLight = $('#optThemeLight');
+    const optDark = $('#optThemeDark');
+    const optAuto = $('#optThemeAuto');
+
+    function applyTheme(themeChoice, notify = false) {
+      let effective = themeChoice;
+      if (!themeChoice || themeChoice === 'auto') {
+        effective = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        themeChoice = 'auto';
+      }
+
+      document.documentElement.setAttribute('data-theme', effective);
+      if (sunIcon && moonIcon) {
+        sunIcon.style.display = effective === 'dark' ? 'block' : 'none';
+        moonIcon.style.display = effective === 'dark' ? 'none' : 'block';
+      }
+
+      // Tandai kartu tema yang aktif
+      [optLight, optDark, optAuto].forEach(opt => {
+        if (opt) opt.classList.toggle('active', opt.dataset.th === themeChoice);
+      });
+
+      // Simpan ke localStorage agar berpengaruh ke SEMUA halaman
+      store.set('sm_theme', themeChoice === 'auto' ? effective : themeChoice);
+      store.set('sm_theme_pref', themeChoice);
+
+      if (notify) {
+        const labels = { light: 'Mode Terang (Light)', dark: 'Mode Gelap (Dark)', auto: 'Mengikuti Sistem' };
+        showToast(`${labels[themeChoice] || 'Tema'} aktif di semua halaman! ✨`, 'success', 2500);
+      }
+    }
+
+    const savedPref = store.get('sm_theme_pref') || store.get('sm_theme') || 'auto';
+    applyTheme(savedPref);
+
+    // Klik tombol di header
+    themeBtn.addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme') || 'light';
+      const target = cur === 'dark' ? 'light' : 'dark';
+      applyTheme(target, true);
+    });
+
+    // Klik pilihan kartu tema
+    if (optLight) optLight.addEventListener('click', () => applyTheme('light', true));
+    if (optDark) optDark.addEventListener('click', () => applyTheme('dark', true));
+    if (optAuto) optAuto.addEventListener('click', () => applyTheme('auto', true));
+
+    // Sinkronisasi otomatis antar-halaman / tab browser
+    window.addEventListener('storage', e => {
+      if (e.key === 'sm_theme' || e.key === 'sm_theme_pref') {
+        const val = e.newValue ? JSON.parse(e.newValue) : 'light';
+        applyTheme(val, false);
+      }
+    });
+
+    // Pantau perubahan mode sistem perangkat jika pengguna memilih 'auto'
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+      const currentPref = store.get('sm_theme_pref', 'auto');
+      if (currentPref === 'auto') {
+        applyTheme('auto', false);
+      }
+    });
+
+    /* =========================================================
+       3. AMBIL DATA USER DARI SESSION
+       ========================================================= */
+    let users = store.get('sm_users', []);
+    let sesi = store.get('sm_sesi', null);
+
+    // Jika belum login, alihkan ke login.html
+    if (!sesi) {
+      window.location.href = 'login.html?redirect=pengaturan.html';
+    }
+
+    let currentUser = users.find(u => u.email === sesi);
+
+    // Fallback jika sesi ada namun data user hilang
+    if (!currentUser && sesi) {
+      currentUser = {
+        email: sesi,
+        nama: sesi.split('@')[0],
+        kampus: 'Universitas Indonesia',
+        fakultas: '',
+        jurusan: '',
+        telp: '',
+        avatar: '',
+        provider: 'email'
+      };
+      users.push(currentUser);
+      store.set('sm_users', users);
+    }
+
+    /* =========================================================
+       4. PRESET AVATAR MAHASISWA PILIHAN
+       ========================================================= */
+    const PRESETS = [
+      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=160&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=160&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=160&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=160&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=160&auto=format&fit=crop&q=80"
+    ];
+
+    const presetHolder = $('#presetListHolder');
+    PRESETS.forEach(url => {
+      const img = document.createElement('img');
+      img.src = url;
+      img.className = 'preset-item';
+      img.alt = 'Avatar Preset';
+      img.addEventListener('click', () => {
+        setAvatar(url);
+        $$('.preset-item').forEach(p => p.classList.toggle('selected', p === img));
+      });
+      presetHolder.appendChild(img);
+    });
+
+    $('#btnTogglePresets').addEventListener('click', () => {
+      const pBox = $('#presetBox');
+      const isShown = pBox.style.display === 'block';
+      pBox.style.display = isShown ? 'none' : 'block';
+      $('#btnTogglePresets').textContent = isShown ? 'Pilih Avatar Karakter' : 'Tutup Pilihan Avatar';
+    });
+
+    /* =========================================================
+       5. MANAJEMEN FOTO PROFIL (UPLOAD & PREVIEW)
+       ========================================================= */
+    let currentAvatarData = currentUser.avatar || '';
+
+    function setAvatar(dataUrlOrHttp) {
+      currentAvatarData = dataUrlOrHttp || '';
+      const img = $('#imgAvatarPreview');
+      const fallback = $('#txtAvatarFallback');
+      const btnRemove = $('#btnRemoveAvatar');
+
+      if (currentAvatarData) {
+        img.src = currentAvatarData;
+        img.style.display = 'block';
+        fallback.style.display = 'none';
+        btnRemove.style.display = 'inline-flex';
+      } else {
+        img.style.display = 'none';
+        fallback.style.display = 'block';
+        const initial = (currentUser.nama || '?').trim().charAt(0).toUpperCase();
+        fallback.textContent = initial;
+        btnRemove.style.display = 'none';
+      }
+      markUnsaved();
+    }
+
+    // Trigger upload
+    $('#btnUploadPhoto').addEventListener('click', () => $('#fileAvatarInput').click());
+    $('#btnTriggerUpload').addEventListener('click', () => $('#fileAvatarInput').click());
+
+    $('#fileAvatarInput').addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      if (file.size > 2 * 1024 * 1024) {
+        showToast('Ukuran foto terlalu besar. Maksimal 2MB.', 'error');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = evt => {
+        setAvatar(evt.target.result);
+        showToast('Foto profil baru siap disimpan.', 'success');
+      };
+      reader.readAsDataURL(file);
+    });
+
+    $('#btnRemoveAvatar').addEventListener('click', () => {
+      setAvatar('');
+      showToast('Foto profil dihapus. Menggunakan inisial nama.', 'info');
+    });
+
+    /* =========================================================
+       6. ISI FORM DARI DATA USER
+       ========================================================= */
+    function populateForm() {
+      if (!currentUser) return;
+
+      $('#displayNameTop').textContent = currentUser.nama || 'Mahasiswa';
+      $('#inpNama').value = currentUser.nama || '';
+      $('#inpEmail').value = currentUser.email || '';
+      $('#inpTelp').value = currentUser.telp || '';
+      $('#inpKampus').value = currentUser.kampus || '';
+      $('#inpFakultas').value = currentUser.fakultas || '';
+      $('#inpJurusan').value = currentUser.jurusan || currentUser.jur || '';
+
+      setAvatar(currentUser.avatar);
+
+      // Badge status akun
+      const badge = $('#badgeAuthProvider');
+      const txt = $('#txtAuthProvider');
+      const pTitle = $('#providerTitleText');
+      const pDesc = $('#providerDescText');
+      const pIcon = $('#providerIconHolder');
+
+      if (currentUser.provider === 'google') {
+        badge.className = 'avatar-status-badge badge-google';
+        txt.textContent = 'Akun Google Terhubung';
+        pTitle.textContent = 'Google Identity Services';
+        pDesc.textContent = `Tertaut ke ${currentUser.email}`;
+        pIcon.innerHTML = `<svg width="22" height="22" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>`;
+      } else {
+        badge.className = 'avatar-status-badge badge-email';
+        txt.textContent = 'Akun Email Mahasiswa';
+        pTitle.textContent = 'Autentikasi Email Mandiri';
+        pDesc.textContent = `Tertaut ke ${currentUser.email}`;
+        pIcon.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--pri)" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>`;
+      }
+    }
+
+    populateForm();
+
+    /* =========================================================
+       7. DETEKSI PERUBAHAN & SIMPAN DATA
+       ========================================================= */
+    function markUnsaved() {
+      $('#txtSaveStatus').textContent = '⚠️ Ada perubahan yang belum disimpan';
+      $('#txtSaveStatus').style.color = 'var(--pri)';
+    }
+
+    ['#inpNama', '#inpTelp', '#inpKampus', '#inpFakultas', '#inpJurusan'].forEach(id => {
+      $(id).addEventListener('input', markUnsaved);
+    });
+
+    $('#btnSaveAll').addEventListener('click', async () => {
+      const nama = $('#inpNama').value.trim();
+      if (!nama) {
+        showToast('Nama lengkap tidak boleh kosong.', 'error');
+        $('#inpNama').focus();
+        return;
+      }
+
+      const telp = $('#inpTelp').value.trim();
+      const kampus = $('#inpKampus').value.trim();
+      const fakultas = $('#inpFakultas').value.trim();
+      const jurusan = $('#inpJurusan').value.trim();
+
+      // Sinkronisasi ke Supabase jika aktif
+      if (window.smBackend) {
+        await smBackend.updateProfile({
+          nama,
+          telp,
+          kampus,
+          fakultas,
+          jurusan,
+          avatar: currentAvatarData
+        });
+      }
+
+      // Update object user lokal
+      currentUser.nama = nama;
+      currentUser.telp = telp;
+      currentUser.kampus = kampus;
+      currentUser.fakultas = fakultas;
+      currentUser.jurusan = jurusan;
+      currentUser.jur = jurusan; // kompatibilitas dengan index.html
+      currentUser.avatar = currentAvatarData;
+
+      // Cari indeks di users array
+      const idx = users.findIndex(u => u.email === currentUser.email);
+      if (idx !== -1) {
+        users[idx] = currentUser;
+      } else {
+        users.push(currentUser);
+      }
+
+      store.set('sm_users', users);
+
+      $('#displayNameTop').textContent = nama;
+      $('#txtSaveStatus').textContent = '✓ Semua perubahan tersimpan rapi';
+      $('#txtSaveStatus').style.color = 'var(--ok)';
+
+      showToast('Profil akun berhasil diperbarui! 🎉', 'success');
+    });
+
+    /* =========================================================
+       8. LOGOUT
+       ========================================================= */
+    $('#btnLogoutAcc').addEventListener('click', async () => {
+      if (confirm('Yakin ingin keluar dari akun Sahabat Mahasiswa?')) {
+        if (window.smBackend) {
+          await smBackend.signOut();
+        }
+        store.set('sm_sesi', null);
+        showToast('Berhasil keluar. Mengalihkan ke login...', 'info');
+        setTimeout(() => {
+          window.location.href = 'login.html';
+        }, 600);
+      }
+    });
+
+    // Registrasi Service Worker PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('[PWA] Service Worker aktif:', reg.scope))
+          .catch(err => console.log('[PWA] Gagal registrasi Service Worker:', err));
+      });
+    }
+  </script>
+</body>
+</html>

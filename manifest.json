@@ -1,0 +1,24 @@
+{
+  "name": "Sahabat Mahasiswa",
+  "short_name": "SahabatMhs",
+  "description": "Portal kebutuhan kuliah, kosan terdekat, voucher diskon makanan, dompet mahasiswa, tugas, dan lowongan kerja",
+  "start_url": "index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#120F1D",
+  "theme_color": "#6C52EE",
+  "icons": [
+    {
+      "src": "assets/logo-icon.svg",
+      "sizes": "48x48 72x72 96x96 128x128 192x192 256x256 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

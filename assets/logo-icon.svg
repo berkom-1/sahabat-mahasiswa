@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" fill="none">
+  <!-- Rounded Purple Icon Badge -->
+  <rect x="5" y="5" width="90" height="90" rx="28" fill="#EDE7FD"/>
+  
+  <!-- Map Pin Marker -->
+  <path d="M50 16C37.3 16 27 26.3 27 39C27 53.8 46.3 74.3 48.6 76.7C49.4 77.5 50.6 77.5 51.4 76.7C53.7 74.3 73 53.8 73 39C73 26.3 62.7 16 50 16Z" fill="#5D45C9"/>
+  
+  <!-- Graduation Cap (Mortarboard Top Diamond) -->
+  <polygon points="50,27 65,34.5 50,42 35,34.5" fill="#FFFFFF"/>
+  
+  <!-- Graduation Cap Skull Base -->
+  <path d="M41.5 39.5V47.5C41.5 50.8 45.3 53.5 50 53.5C54.7 53.5 58.5 50.8 58.5 47.5V39.5L50 44L41.5 39.5Z" fill="#FFFFFF"/>
+  
+  <!-- Cap Tassel Ribbon (Golden Yellow) -->
+  <path d="M61 35V46" stroke="#FFC93E" stroke-width="2.4" stroke-linecap="round"/>
+  <circle cx="61" cy="47.5" r="2.5" fill="#FFC93E"/>
+</svg>

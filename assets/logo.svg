@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 100" width="340" height="100" fill="none">
+  <!-- Rounded Purple Icon Badge -->
+  <rect x="6" y="6" width="88" height="88" rx="28" fill="#EDE7FD"/>
+  
+  <!-- Map Pin Marker -->
+  <path d="M50 18C37.85 18 28 27.85 28 40C28 54.2 46.5 73.8 48.7 76.1C49.4 76.8 50.6 76.8 51.3 76.1C53.5 73.8 72 54.2 72 40C72 27.85 62.15 18 50 18Z" fill="#5D45C9"/>
+  
+  <!-- Graduation Cap (Mortarboard Top Diamond) -->
+  <polygon points="50,29 64,36 50,43 36,36" fill="#FFFFFF"/>
+  
+  <!-- Graduation Cap Skull Base -->
+  <path d="M42 41V48.5C42 51.5 45.6 54 50 54C54.4 54 58 51.5 58 48.5V41L50 45L42 41Z" fill="#FFFFFF"/>
+  
+  <!-- Cap Tassel Ribbon (Golden Yellow) -->
+  <path d="M60 36.5V47" stroke="#FFC93E" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="60" cy="48" r="2.2" fill="#FFC93E"/>
+
+  <!-- Text "Sahabat" -->
+  <text x="114" y="47" font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" font-size="34" font-weight="800" fill="#2E284A" letter-spacing="-0.8">Sahabat</text>
+  
+  <!-- Text "Mahasiswa" -->
+  <text x="114" y="83" font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" font-size="34" font-weight="800" fill="#6A53D6" letter-spacing="-0.8">Mahasiswa</text>
+</svg>

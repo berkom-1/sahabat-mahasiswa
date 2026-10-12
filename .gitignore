@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Build outputs > 100MB (GitHub blocks files > 100MB)
+SahabatMahasiswa-Windows/
+dist/*.zip
+dist/*.exe
+Sahabat-Mahasiswa.exe
+
+# Allow APK in dist
+!dist/Sahabat-Mahasiswa.apk
+!Sahabat-Mahasiswa.apk
+
+# Temporary & OS files
+.DS_Store
+Thumbs.db
+*.log

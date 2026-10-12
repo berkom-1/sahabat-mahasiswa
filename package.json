@@ -1,0 +1,11 @@
+{
+  "name": "sahabat-mahasiswa",
+  "version": "1.0.0",
+  "description": "Sahabat Mahasiswa - Portal Terlengkap Komunitas & Layanan Mahasiswa",
+  "main": "main.js",
+  "author": "Sahabat Mahasiswa",
+  "license": "ISC",
+  "scripts": {
+    "start": "electron ."
+  }
+}
