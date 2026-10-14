@@ -13,6 +13,7 @@ export default function VoucherTab() {
   const [vouchers] = useState<Voucher[]>(DEFAULT_VOUCHERS);
   const [search, setSearch] = useState("");
   const [platformFilter, setPlatformFilter] = useState<string>("all");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
 
   // Selected modals
   const [selectedClaimVoucher, setSelectedClaimVoucher] = useState<Voucher | null>(null);
@@ -57,9 +58,46 @@ export default function VoucherTab() {
 
     if (!matchSearch) return false;
 
-    if (platformFilter === "all") return true;
-    if (platformFilter === "diskon") return true;
-    return v.platform === platformFilter || v.platform.toLowerCase().includes(platformFilter.toLowerCase());
+    // Platform filter
+    if (platformFilter !== "all" && platformFilter !== "diskon") {
+      if (v.platform !== platformFilter && !v.platform.toLowerCase().includes(platformFilter.toLowerCase())) {
+        return false;
+      }
+    }
+
+    // Category filter
+    if (categoryFilter !== "all") {
+      if (categoryFilter === "makanan_berat") {
+        const isBerat =
+          v.kategori.toLowerCase().includes("makanan berat") ||
+          v.brandKey === "lazatto" ||
+          v.brandKey === "ayamhayam" ||
+          v.brandKey === "kfc" ||
+          v.brandKey === "padangampera" ||
+          v.brandKey === "wartegbahari" ||
+          v.brandKey === "dkriuk" ||
+          v.brandKey === "rocketchicken" ||
+          v.brandKey === "richeese";
+        if (!isBerat) return false;
+      } else if (categoryFilter === "mie") {
+        if (!v.brandKey?.includes("miegacoan") && !v.kategori.toLowerCase().includes("mie")) return false;
+      } else if (categoryFilter === "kopi_minuman") {
+        const isMinum =
+          v.brandKey === "mixue" ||
+          v.brandKey === "kopikenangan" ||
+          v.brandKey === "janjijiwa" ||
+          v.brandKey === "chatime" ||
+          v.kategori.toLowerCase().includes("kopi") ||
+          v.kategori.toLowerCase().includes("es krim") ||
+          v.kategori.toLowerCase().includes("minuman") ||
+          v.kategori.toLowerCase().includes("teh");
+        if (!isMinum) return false;
+      } else if (categoryFilter === "burger") {
+        if (!v.brandKey?.includes("burger") && !v.namaVoucher.toLowerCase().includes("burger")) return false;
+      }
+    }
+
+    return true;
   });
 
   if (platformFilter === "diskon") {
@@ -96,7 +134,7 @@ export default function VoucherTab() {
             </h2>
           </div>
           <p className="text-xs text-slate-600 dark:text-slate-400 max-w-md leading-relaxed">
-            Diskon makanan hemat hingga 58% dari TikTok GO Dining, GrabFood, GoFood & ShopeeFood khusus mahasiswa.
+            Diskon makanan hemat hingga 58% dari TikTok GO Dining, GrabFood, GoFood & ShopeeFood (Lazatto, Hayam Sambel Korek, Mie Gacoan, Richeese, KFC & Mixue).
           </p>
         </div>
 
@@ -124,15 +162,39 @@ export default function VoucherTab() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Cari Mixue, Kopi Kenangan, Boba, Chatime, Burger..."
+            placeholder="Cari Lazatto, Hayam, Mie Gacoan, Nasi Padang, Warteg, Mixue..."
             className="w-full text-xs font-medium bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-2xl pl-10 pr-4 py-3 border border-slate-200 dark:border-slate-800 shadow-sm outline-none focus:ring-2 focus:ring-[#FE2C55]"
           />
         </div>
 
-        {/* Horizontal Filter Row */}
+        {/* Horizontal Category Pills */}
         <div className="flex gap-2 overflow-x-auto pb-1 text-xs font-bold no-scrollbar">
           {[
-            { id: "all", label: "Semua Platform", icon: "🍽️" },
+            { id: "all", label: "Semua Menu", icon: "🍽️" },
+            { id: "makanan_berat", label: "Makanan Berat (Lazatto, Hayam)", icon: "🍗" },
+            { id: "mie", label: "Mie Gacoan & Dimsum", icon: "🍜" },
+            { id: "kopi_minuman", label: "Kopi & Minuman", icon: "☕" },
+            { id: "burger", label: "Burger & Fast Food", icon: "🍔" },
+          ].map((cat) => (
+            <button
+              key={cat.id}
+              onClick={() => setCategoryFilter(cat.id)}
+              className={`px-3.5 py-1.5 rounded-xl whitespace-nowrap transition flex items-center gap-1.5 text-[11px] font-black ${
+                categoryFilter === cat.id
+                  ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/25"
+                  : "bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
+              }`}
+            >
+              <span>{cat.icon}</span>
+              <span>{cat.label}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Horizontal Platform Filter Row */}
+        <div className="flex gap-2 overflow-x-auto pb-1 text-xs font-bold no-scrollbar">
+          {[
+            { id: "all", label: "Semua Platform", icon: "🌐" },
             { id: "TikTok GO Dining", label: "TikTok GO", icon: "🎵" },
             { id: "GrabFood", label: "GrabFood", icon: "🟢" },
             { id: "GoFood", label: "GoFood", icon: "🔴" },
