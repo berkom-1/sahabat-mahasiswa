@@ -68,6 +68,25 @@ export default function Home() {
     }
   }, []);
 
+  // Sync custom profile avatar
+  const [customAvatar, setCustomAvatar] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadCachedAvatar = () => {
+      try {
+        const cached = localStorage.getItem("sm_user_profile_cache");
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed.avatar_url) setCustomAvatar(parsed.avatar_url);
+        }
+      } catch (_) {}
+    };
+
+    loadCachedAvatar();
+    window.addEventListener("sm_profile_updated", loadCachedAvatar);
+    return () => window.removeEventListener("sm_profile_updated", loadCachedAvatar);
+  }, []);
+
   const handleToggleTheme = () => {
     const nextTheme = theme === "dark" ? "light" : "dark";
     setTheme(nextTheme);
@@ -85,14 +104,14 @@ export default function Home() {
         id: session.user.email || "nextauth-user",
         name: session.user.name,
         email: session.user.email,
-        image: session.user.image,
+        image: customAvatar || session.user.image,
       }
     : supabaseUser
     ? {
         id: supabaseUser.id,
         name: supabaseUser.user_metadata?.nama || supabaseUser.email?.split("@")[0],
         email: supabaseUser.email,
-        image: null,
+        image: customAvatar || null,
       }
     : null;
 

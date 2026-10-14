@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 import { signIn } from "next-auth/react";
 import {
@@ -22,6 +22,10 @@ import {
   ShieldCheck,
   Check,
   Plus,
+  Upload,
+  Image as ImageIcon,
+  Trash2,
+  RefreshCw,
 } from "lucide-react";
 import { PRESET_AVATARS, UNIVERSITAS_LIST } from "@/lib/data";
 import TikTokConfigModal from "./TikTokConfigModal";
@@ -51,6 +55,11 @@ export default function ProfileModal({
   const [semester, setSemester] = useState<number>(1);
   const [telp, setTelp] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string>("");
+  const [showUrlInput, setShowUrlInput] = useState(false);
+  const [customUrlTemp, setCustomUrlTemp] = useState("");
+
+  // Ref untuk native file input
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Dual-Account state
   const [googleEmail, setGoogleEmail] = useState<string | null>(null);
@@ -68,7 +77,6 @@ export default function ProfileModal({
   const [showTikTokModal, setShowTikTokModal] = useState(false);
   const [hasTikTokKey, setHasTikTokKey] = useState(false);
 
-  // Periksa apakah email utama merupakan email kampus atau google
   const isPrimaryGoogle = !!user?.email?.toLowerCase().includes("@gmail.com");
   const isPrimaryCampus =
     !!user?.email?.toLowerCase().includes(".ac.id") ||
@@ -78,9 +86,25 @@ export default function ProfileModal({
   useEffect(() => {
     if (!isOpen) return;
 
-    // Load initial values from user prop
-    setNama(user?.name || "");
-    setAvatarUrl(user?.image || PRESET_AVATARS[0]);
+    // Load initial values from cache first if available
+    try {
+      const cached = localStorage.getItem("sm_user_profile_cache");
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed.nama) setNama(parsed.nama);
+        if (parsed.kampus) setKampus(parsed.kampus);
+        if (parsed.fakultas) setFakultas(parsed.fakultas);
+        if (parsed.jurusan) setJurusan(parsed.jurusan);
+        if (parsed.telp) setTelp(parsed.telp);
+        if (parsed.avatar_url) setAvatarUrl(parsed.avatar_url);
+      } else {
+        setNama(user?.name || "");
+        setAvatarUrl(user?.image || PRESET_AVATARS[0]);
+      }
+    } catch (_) {
+      setNama(user?.name || "");
+      setAvatarUrl(user?.image || PRESET_AVATARS[0]);
+    }
 
     // Check TikTok config
     try {
@@ -106,7 +130,6 @@ export default function ProfileModal({
       }
     } catch (_) {}
 
-    // If logged in via Google initially, set primary Google
     if (isPrimaryGoogle) {
       setIsGoogleLinked(true);
       setGoogleEmail(user?.email || null);
@@ -152,6 +175,56 @@ export default function ProfileModal({
 
   if (!isOpen) return null;
 
+  // FITUR: PILIH DAN UNGGAH FOTO SENDIRI DARI GALERI / FILE HP / LAPTOP
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validasi file gambar
+    if (!file.type.startsWith("image/")) {
+      setStatusFeedback("Harap pilih file gambar (JPG, PNG, WEBP, GIF).");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        // Resize klien-side menggunakan canvas agar tidak membebani memori / database
+        const canvas = document.createElement("canvas");
+        const MAX_WIDTH = 360;
+        const MAX_HEIGHT = 360;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          const dataUrl = canvas.toDataURL("image/jpeg", 0.88);
+          setAvatarUrl(dataUrl);
+          setStatusFeedback("📸 Foto berhasil dipilih! Klik Simpan Profil untuk menerapkan.");
+          setTimeout(() => setStatusFeedback(null), 3500);
+        }
+      };
+      img.src = event.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  };
+
   // Handler: Tambahkan Email Mahasiswa (@kampus.uc.id dsb)
   const handleSaveStudentEmail = async () => {
     const val = inputStudentEmail.trim().toLowerCase();
@@ -170,7 +243,6 @@ export default function ProfileModal({
     setIsStudentVerified(true);
     setIsAddingStudent(false);
 
-    // Simpan ke local metadata
     try {
       const prev = JSON.parse(localStorage.getItem("sm_auth_metadata") || "{}");
       localStorage.setItem(
@@ -183,7 +255,6 @@ export default function ProfileModal({
       );
     } catch (_) {}
 
-    // Simpan ke Supabase jika ada profil
     if (user?.id) {
       await supabase
         .from("profiles")
@@ -235,7 +306,6 @@ export default function ProfileModal({
       setStatusFeedback("🔵 Akun Google berhasil ditautkan!");
       setTimeout(() => setStatusFeedback(null), 3000);
     } else {
-      // Trigger OAuth NextAuth jika ingin sign in langsung
       signIn("google");
     }
   };
@@ -248,7 +318,7 @@ export default function ProfileModal({
     try {
       const payload: any = {
         nama,
-        kampus: kampus || "Mahasiswa Indonesia",
+        kampus: kampus || "Universitas Siliwangi (UNSIL)",
         fakultas,
         jurusan,
         telp,
@@ -276,8 +346,11 @@ export default function ProfileModal({
         })
       );
 
+      // Trigger event agar Navbar & komponen lain tahu profil terupdate
+      window.dispatchEvent(new Event("sm_profile_updated"));
+
       setSaved(true);
-      setStatusFeedback("Profil mahasiswa berhasil disimpan!");
+      setStatusFeedback("Profil mahasiswa dan foto berhasil disimpan!");
       setTimeout(() => {
         setSaved(false);
         setStatusFeedback(null);
@@ -304,7 +377,7 @@ export default function ProfileModal({
                 Profil & Identitas Mahasiswa
               </h3>
               <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                Kelola identitas kampus, akun tertaut, dan pengaturan akun
+                Kelola foto profil, identitas kampus, dan akun tertaut
               </p>
             </div>
           </div>
@@ -325,42 +398,123 @@ export default function ProfileModal({
             </div>
           )}
 
-          {/* 1. SEKSI FOTO PROFIL / AVATAR */}
-          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 text-center">
-            <div className="relative inline-block mx-auto mb-3">
+          {/* 1. SEKSI FOTO PROFIL SENDIRI / AVATAR */}
+          <div className="p-5 rounded-3xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 text-center relative">
+            {/* Foto Avatar Utama */}
+            <div className="relative inline-block mx-auto mb-3.5 group">
               {avatarUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={avatarUrl}
-                  alt="Foto Profil"
-                  className="w-20 h-20 rounded-2xl object-cover border-2 border-indigo-500 shadow-md"
+                  alt="Foto Profil Mahasiswa"
+                  className="w-24 h-24 rounded-3xl object-cover border-4 border-indigo-500 shadow-xl transition-transform duration-300 group-hover:scale-105"
                 />
               ) : (
-                <div className="w-20 h-20 rounded-2xl bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-black text-2xl border-2 border-indigo-500 shadow-md">
+                <div className="w-24 h-24 rounded-3xl bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-black text-3xl border-4 border-indigo-500 shadow-xl">
                   {(nama || user?.email || "M")[0]?.toUpperCase()}
                 </div>
               )}
+
+              {/* Floating Camera Button on Avatar */}
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                title="Ganti Foto Profil Sendiri"
+                className="absolute -bottom-1 -right-1 p-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl shadow-lg shadow-indigo-600/40 border-2 border-white dark:border-slate-900 transition active:scale-90 flex items-center justify-center"
+              >
+                <Camera className="w-4 h-4" />
+              </button>
             </div>
 
-            <div className="text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-2">
-              Pilih Avatar Karakter Mahasiswa:
-            </div>
-            <div className="flex flex-wrap justify-center gap-2 max-w-sm mx-auto">
-              {PRESET_AVATARS.map((url, idx) => (
+            {/* Hidden Native File Input */}
+            <input
+              type="file"
+              ref={fileInputRef}
+              accept="image/*"
+              onChange={handleFileUpload}
+              className="hidden"
+            />
+
+            {/* Tombol Opsi Unggah Foto Sendiri & URL */}
+            <div className="flex flex-wrap items-center justify-center gap-2 mb-3.5">
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-black shadow-md shadow-indigo-600/20 flex items-center gap-1.5 transition active:scale-95"
+              >
+                <Upload className="w-3.5 h-3.5" />
+                <span>Unggah Foto Sendiri</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowUrlInput(!showUrlInput)}
+                className="px-3 py-1.5 bg-slate-200/80 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold flex items-center gap-1.5 transition active:scale-95"
+              >
+                <ImageIcon className="w-3.5 h-3.5" />
+                <span>Pakai Link Gambar</span>
+              </button>
+
+              {avatarUrl && (
                 <button
                   type="button"
-                  key={idx}
-                  onClick={() => setAvatarUrl(url)}
-                  className={`w-9 h-9 rounded-xl overflow-hidden border-2 transition ${
-                    avatarUrl === url
-                      ? "border-indigo-600 scale-110 shadow-md"
-                      : "border-transparent hover:border-slate-300 dark:hover:border-slate-600 opacity-80 hover:opacity-100"
-                  }`}
+                  onClick={() => setAvatarUrl(PRESET_AVATARS[0])}
+                  title="Reset ke Karakter Standar"
+                  className="p-1.5 text-slate-400 hover:text-rose-500 rounded-xl hover:bg-rose-50 dark:hover:bg-rose-950/30 transition"
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={url} alt={`Avatar ${idx + 1}`} className="w-full h-full object-cover" />
+                  <Trash2 className="w-4 h-4" />
                 </button>
-              ))}
+              )}
+            </div>
+
+            {/* Input URL Foto Kustom (Jika dipilih) */}
+            {showUrlInput && (
+              <div className="mb-3.5 max-w-sm mx-auto flex gap-2 animate-in fade-in">
+                <input
+                  type="url"
+                  placeholder="https://contoh.com/foto-anda.jpg"
+                  value={customUrlTemp}
+                  onChange={(e) => setCustomUrlTemp(e.target.value)}
+                  className="flex-1 text-xs bg-white dark:bg-slate-700 rounded-xl px-3 py-1.5 border border-slate-300 dark:border-slate-600 outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (customUrlTemp.trim()) {
+                      setAvatarUrl(customUrlTemp.trim());
+                      setShowUrlInput(false);
+                      setCustomUrlTemp("");
+                    }
+                  }}
+                  className="px-3 py-1.5 bg-indigo-600 text-white text-xs font-bold rounded-xl shadow-sm"
+                >
+                  Terapkan
+                </button>
+              </div>
+            )}
+
+            {/* Pilihan Cepat Avatar Karakter */}
+            <div className="pt-2 border-t border-slate-200/60 dark:border-slate-700/60">
+              <div className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">
+                Atau Pilih Avatar Karakter Cepat:
+              </div>
+              <div className="flex flex-wrap justify-center gap-2 max-w-sm mx-auto">
+                {PRESET_AVATARS.map((url, idx) => (
+                  <button
+                    type="button"
+                    key={idx}
+                    onClick={() => setAvatarUrl(url)}
+                    className={`w-9 h-9 rounded-xl overflow-hidden border-2 transition ${
+                      avatarUrl === url
+                        ? "border-indigo-600 scale-110 shadow-md"
+                        : "border-transparent hover:border-slate-300 dark:hover:border-slate-600 opacity-70 hover:opacity-100"
+                    }`}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={url} alt={`Avatar ${idx + 1}`} className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -374,7 +528,7 @@ export default function ProfileModal({
                 </h4>
               </div>
               <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full">
-                Fitur Eksklusif
+                Sinkronisasi
               </span>
             </div>
 
@@ -427,7 +581,6 @@ export default function ProfileModal({
                 )}
               </div>
 
-              {/* Form Tautkan Google jika belum terhubung */}
               {!isPrimaryGoogle && !isGoogleLinked && isAddingGoogle && (
                 <div className="mt-2 pt-2 border-t border-slate-100 dark:border-slate-700 flex gap-2">
                   <input
@@ -485,7 +638,6 @@ export default function ProfileModal({
                 )}
               </div>
 
-              {/* Form Input Email Mahasiswa */}
               {!isPrimaryCampus && !isStudentVerified && isAddingStudent && (
                 <div className="mt-2 pt-2 border-t border-slate-100 dark:border-slate-700 space-y-2">
                   <div className="flex gap-2">
@@ -505,7 +657,6 @@ export default function ProfileModal({
                     </button>
                   </div>
 
-                  {/* Quick Domain Badges */}
                   <div className="flex flex-wrap gap-1.5 text-[10px] font-semibold text-slate-500">
                     <span>Saran:</span>
                     {["@kampus.uc.id", "@unsil.ac.id", "@ui.ac.id", "@itb.ac.id", "@ugm.ac.id"].map(
@@ -573,9 +724,6 @@ export default function ProfileModal({
                 placeholder="Contoh: 081234567890"
                 className="w-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-xl p-2.5 outline-none focus:ring-2 focus:ring-indigo-500 border border-transparent dark:border-slate-700"
               />
-              <p className="text-[10px] text-slate-400 mt-1">
-                Digunakan untuk konfirmasi pesanan kosan dan kontak lowongan kerja part-time.
-              </p>
             </div>
           </div>
 
