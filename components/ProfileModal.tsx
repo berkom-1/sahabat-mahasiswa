@@ -306,7 +306,7 @@ export default function ProfileModal({
       setStatusFeedback("🔵 Akun Google berhasil ditautkan!");
       setTimeout(() => setStatusFeedback(null), 3000);
     } else {
-      signIn("google");
+      setIsAddingGoogle(true);
     }
   };
 

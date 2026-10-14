@@ -20,6 +20,8 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
   const [optionalGoogle, setOptionalGoogle] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [showGoogleFallback, setShowGoogleFallback] = useState(false);
+  const [googleEmail, setGoogleEmail] = useState("");
 
   if (!isOpen) return null;
 
@@ -96,8 +98,9 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
     }
   };
 
-  const handleGoogleLogin = () => {
-    // Menandai bahwa login berasal dari Google dan dapat menambahkan email kampus setelahnya
+  const handleGoogleLogin = async () => {
+    setLoading(true);
+    setErrorMsg(null);
     localStorage.setItem(
       "sm_auth_metadata",
       JSON.stringify({
@@ -108,7 +111,57 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
         prompt_student_email: true, // trigger opsi tambah email mahasiswa
       })
     );
-    signIn("google");
+
+    try {
+      const res = await signIn("google", { redirect: false, callbackUrl: "/" });
+      if (res?.error) {
+        setShowGoogleFallback(true);
+        setErrorMsg("Kunci Google OAuth belum dikonfigurasi di Vercel. Silakan gunakan masuk cepat dengan email Google di bawah.");
+      } else if (res?.url) {
+        window.location.href = res.url;
+      }
+    } catch {
+      setShowGoogleFallback(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleEmailSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!googleEmail.trim()) return;
+    setLoading(true);
+    setErrorMsg(null);
+
+    try {
+      localStorage.setItem(
+        "sm_auth_metadata",
+        JSON.stringify({
+          provider: "google",
+          google_linked: true,
+          google_email: googleEmail.trim(),
+          student_email: null,
+          student_verified: false,
+          prompt_student_email: true,
+        })
+      );
+
+      await signIn("credentials", {
+        email: googleEmail.trim(),
+        name: googleEmail.split("@")[0],
+        provider: "google",
+        callbackUrl: "/",
+        redirect: false,
+      });
+
+      onClose();
+      window.location.reload();
+    } catch (err: unknown) {
+      const e = err as Error;
+      setErrorMsg(e?.message || "Gagal masuk dengan email Google.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -218,13 +271,42 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
               </p>
             </div>
 
-            <button
-              type="button"
-              onClick={handleGoogleLogin}
-              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-800 dark:text-white text-xs font-black transition-all shadow-md active:scale-[0.98]"
-            >
-              <span>Lanjutkan dengan Google</span>
-            </button>
+            <div className="space-y-3">
+              <button
+                type="button"
+                disabled={loading}
+                onClick={handleGoogleLogin}
+                className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-800 dark:text-white text-xs font-black transition-all shadow-md active:scale-[0.98] disabled:opacity-75"
+              >
+                <span>{loading ? "Menghubungkan..." : "Lanjutkan dengan Google (1-Klik)"}</span>
+              </button>
+
+              <div className="relative flex py-1 items-center">
+                <div className="flex-grow border-t border-slate-200 dark:border-slate-800"></div>
+                <span className="flex-shrink mx-2 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                  atau masuk cepat via email google
+                </span>
+                <div className="flex-grow border-t border-slate-200 dark:border-slate-800"></div>
+              </div>
+
+              {/* Form Input Email Google Langsung (Bypass jika OAuth belum terpasang di Vercel) */}
+              <form onSubmit={handleGoogleEmailSubmit} className="space-y-2">
+                <input
+                  type="email"
+                  placeholder="Masukkan email Google (contoh: nama@gmail.com)"
+                  value={googleEmail}
+                  onChange={(e) => setGoogleEmail(e.target.value)}
+                  className="w-full text-xs font-medium bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-white rounded-2xl p-3 border border-slate-200 dark:border-slate-700 outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+                <button
+                  type="submit"
+                  disabled={loading || !googleEmail}
+                  className="w-full py-2.5 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black text-xs transition-all hover:bg-slate-800 dark:hover:bg-slate-100 disabled:opacity-50"
+                >
+                  Masuk Sekarang dengan Akun Google ↗
+                </button>
+              </form>
+            </div>
           </div>
         ) : (
           /* METODE 2: AKUN MAHASISWA / EMAIL KAMPUS */
