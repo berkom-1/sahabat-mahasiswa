@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useSession, signOut as nextAuthSignOut } from "next-auth/react";
 import { supabase } from "@/lib/supabase";
 import type { User } from "@supabase/supabase-js";
+import { GraduationCap, Link2, X } from "lucide-react";
 
 import Navbar from "@/components/Navbar";
 import BottomNav, { TabKey } from "@/components/BottomNav";
@@ -24,6 +25,7 @@ export default function Home() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showTikTokModal, setShowTikTokModal] = useState(false);
+  const [dismissDualBanner, setDismissDualBanner] = useState(false);
 
   // Sync Supabase Auth session
   useEffect(() => {
@@ -102,6 +104,26 @@ export default function Home() {
     setSupabaseUser(null);
   };
 
+  // Check Dual Account Status
+  let authMeta: any = {};
+  if (typeof window !== "undefined") {
+    try {
+      authMeta = JSON.parse(localStorage.getItem("sm_auth_metadata") || "{}");
+    } catch (_) {}
+  }
+
+  const isGoogleLogin = !!session?.user || !!activeUser?.email?.includes("@gmail.com");
+  const isCampusLogin =
+    !isGoogleLogin &&
+    (!!activeUser?.email?.includes(".ac.id") ||
+      !!activeUser?.email?.includes("kampus.uc.id") ||
+      !!activeUser?.email?.includes(".edu"));
+
+  const showGoogleAddCampusBanner =
+    activeUser && isGoogleLogin && !authMeta.student_email && !dismissDualBanner;
+  const showCampusAddGoogleBanner =
+    activeUser && isCampusLogin && !authMeta.google_linked && !dismissDualBanner;
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-200 flex flex-col font-sans">
       {/* Navbar */}
@@ -114,6 +136,67 @@ export default function Home() {
         onOpenTikTokConfig={() => setShowTikTokModal(true)}
         onLogout={handleLogout}
       />
+
+      {/* Dual Account Smart Banner */}
+      {showGoogleAddCampusBanner && (
+        <div className="bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-700 text-white px-4 py-2.5 text-xs shadow-md border-b border-indigo-500/30">
+          <div className="max-w-5xl mx-auto flex items-center justify-between gap-3 flex-wrap">
+            <div className="flex items-center gap-2">
+              <span className="text-base">🎓</span>
+              <span>
+                Masuk via Google terhubung! <strong>Tambahkan email kampusmu (@kampus.uc.id)</strong> untuk membuka status Mahasiswa Terverifikasi.
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setShowProfileModal(true)}
+                className="px-3 py-1 bg-white text-indigo-700 font-black rounded-lg hover:bg-indigo-50 transition shadow-sm"
+              >
+                + Tambah Email Kampus
+              </button>
+              <button
+                type="button"
+                onClick={() => setDismissDualBanner(true)}
+                className="p-1 hover:bg-white/20 rounded-md transition text-white/80 hover:text-white"
+                title="Tutup"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showCampusAddGoogleBanner && (
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-4 py-2.5 text-xs shadow-md border-b border-blue-500/30">
+          <div className="max-w-5xl mx-auto flex items-center justify-between gap-3 flex-wrap">
+            <div className="flex items-center gap-2">
+              <span className="text-base">🔵</span>
+              <span>
+                Akun Mahasiswa aktif! <strong>Tautkan akun Google pribadimu</strong> untuk opsi masuk cepat 1-klik di perangkat lain.
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setShowProfileModal(true)}
+                className="px-3 py-1 bg-white text-blue-700 font-black rounded-lg hover:bg-blue-50 transition shadow-sm"
+              >
+                Tautkan Google
+              </button>
+              <button
+                type="button"
+                onClick={() => setDismissDualBanner(true)}
+                className="p-1 hover:bg-white/20 rounded-md transition text-white/80 hover:text-white"
+                title="Tutup"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Main Content Area */}
       <main className="flex-1 max-w-5xl w-full mx-auto px-4 pt-5">

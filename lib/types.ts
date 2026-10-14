@@ -109,8 +109,17 @@ export interface UserProfile {
   kampus: string;
   fakultas?: string;
   jurusan: string;
+  semester?: number;
+  alamat?: string;
   avatar_url?: string;
   telp?: string;
+  // Dual-Account Linking Fields
+  auth_provider?: "google" | "campus_email" | "email";
+  google_email?: string | null;
+  google_linked?: boolean;
+  student_email?: string | null;
+  student_verified?: boolean;
+  // TikTok API Fields
   tiktok_client_key?: string;
   tiktok_access_token?: string;
 }
