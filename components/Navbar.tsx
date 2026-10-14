@@ -27,8 +27,12 @@ export default function Navbar({
       <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
         {/* Logo & Brand */}
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
-            <span className="text-xl font-bold">🎓</span>
+          <div className="w-10 h-10 rounded-2xl overflow-hidden shadow-md shadow-indigo-500/20 border border-indigo-100 dark:border-indigo-900/50 flex items-center justify-center bg-indigo-50">
+            <img
+              src="/icon.png"
+              alt="Sahabat Mahasiswa Logo"
+              className="w-full h-full object-cover"
+            />
           </div>
           <div>
             <div className="flex items-center gap-2">
