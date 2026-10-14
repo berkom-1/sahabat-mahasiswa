@@ -2,7 +2,12 @@
 
 import React, { useState, useEffect } from "react";
 import { Kosan } from "@/lib/types";
-import { DEFAULT_KOSAN, calculateDistance, LOKASI_PRESETS, detectClosestAreaName } from "@/lib/data";
+import {
+  DEFAULT_KOSAN,
+  calculateDistance,
+  getCoordinatesForLocation,
+  UNIVERSITAS_LIST,
+} from "@/lib/data";
 import {
   MapPin,
   Navigation,
@@ -15,12 +20,30 @@ import {
   AlertCircle,
   ArrowUpDown,
   Search,
+  School,
+  Settings,
 } from "lucide-react";
 
 export default function KosanTab() {
-  const [userLocation, setUserLocation] = useState<{ name: string; lat: number; lng: number } | null>(null);
+  // State profil kampus pengguna dari Pengaturan / Profil
+  const [userProfileCampus, setUserProfileCampus] = useState<string>("Universitas Siliwangi (UNSIL)");
+  const [activeLocationMode, setActiveLocationMode] = useState<"campus" | "gps" | "custom">("campus");
+
+  // State koordinat titik acuan aktif
+  const [currentLocation, setCurrentLocation] = useState<{
+    name: string;
+    lat: number;
+    lng: number;
+    area: string;
+  }>({
+    name: "Universitas Siliwangi (UNSIL)",
+    lat: -7.3512,
+    lng: 108.2234,
+    area: "Tasikmalaya",
+  });
+
+  const [customCampusInput, setCustomCampusInput] = useState<string>("");
   const [gpsLoading, setGpsLoading] = useState(false);
-  const [gpsStatus, setGpsStatus] = useState<string>("Memuat lokasi...");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTipe, setSelectedTipe] = useState<string>("all");
   const [maxHarga, setMaxHarga] = useState<number>(2500000);
@@ -29,82 +52,86 @@ export default function KosanTab() {
   // PENGATURAN RADIUS JARAK (Default 10 KM, opsi: 10, 20, 30, atau all)
   const [maxRadius, setMaxRadius] = useState<number | "all">(10);
 
-  // Set default initial location: Cipedes (Tasikmalaya) atau dari localStorage
+  // 1. Ambil kampus yang telah di-setting di Pengaturan / Profil pengguna
   useEffect(() => {
     try {
-      const savedLoc = localStorage.getItem("sm_last_location");
-      if (savedLoc) {
-        const parsed = JSON.parse(savedLoc);
-        setUserLocation(parsed);
-        setGpsStatus(`📍 Titik acuan: ${parsed.name}`);
-        return;
+      const cachedProfile = localStorage.getItem("sm_user_profile_cache");
+      if (cachedProfile) {
+        const parsed = JSON.parse(cachedProfile);
+        if (parsed.kampus && parsed.kampus.trim()) {
+          setUserProfileCampus(parsed.kampus.trim());
+          const coords = getCoordinatesForLocation(parsed.kampus);
+          setCurrentLocation(coords);
+          return;
+        }
       }
     } catch (_) {}
 
-    // Default ke Cipedes (Tasikmalaya) sesuai kebutuhan pengguna
-    const defaultPreset = LOKASI_PRESETS[0]; // Cipedes
-    setUserLocation(defaultPreset);
-    setGpsStatus(`📍 Titik acuan: ${defaultPreset.name}`);
+    // Default jika belum ada pengaturan: UNSIL
+    const defaultCoords = getCoordinatesForLocation("Universitas Siliwangi (UNSIL)");
+    setCurrentLocation(defaultCoords);
   }, []);
 
-  // Geolocation handler (GPS Real-time)
-  const handleGetLocation = () => {
+  // Handler: Gunakan Lokasi Kampus yang sudah disetting di Pengaturan
+  const handleUseProfileCampus = () => {
+    setActiveLocationMode("campus");
+    const coords = getCoordinatesForLocation(userProfileCampus);
+    setCurrentLocation(coords);
+    setCustomCampusInput("");
+  };
+
+  // Handler: Input nama kampus manual (contohnya: UNSIL, ITB, UI, Cipedes, Sukamanah)
+  const handleSelectCustomCampus = (nama: string) => {
+    setCustomCampusInput(nama);
+    if (!nama.trim()) return;
+
+    setActiveLocationMode("custom");
+    const coords = getCoordinatesForLocation(nama);
+    setCurrentLocation(coords);
+  };
+
+  // Handler: Geolocation GPS Real-time perangkat
+  const handleGetLiveGPS = () => {
     if (typeof window === "undefined" || !navigator.geolocation) {
-      setGpsStatus("Browser tidak mendukung sensor GPS.");
+      alert("Perangkat Anda tidak mendukung sensor GPS.");
       return;
     }
     setGpsLoading(true);
-    setGpsStatus("Mendeteksi satelit GPS perangkat Anda...");
 
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const lat = pos.coords.latitude;
         const lng = pos.coords.longitude;
-        const areaName = detectClosestAreaName(lat, lng);
-        const locObj = { name: areaName, lat, lng };
-
-        setUserLocation(locObj);
+        setCurrentLocation({
+          name: "Lokasi GPS Saya Saat Ini",
+          lat,
+          lng,
+          area: "GPS Real-time",
+        });
+        setActiveLocationMode("gps");
         setGpsLoading(false);
-        setGpsStatus(`📍 GPS Akurat: ${areaName}`);
-        try {
-          localStorage.setItem("sm_last_location", JSON.stringify(locObj));
-        } catch (_) {}
       },
       (err) => {
         setGpsLoading(false);
-        setGpsStatus("GPS tidak aktif / diblokir. Menggunakan acuan wilayah terdekat.");
         console.warn("GPS Error:", err.message);
+        alert("Gagal mendeteksi GPS. Tetap menggunakan lokasi kampus acuan.");
       },
-      { timeout: 12000, enableHighAccuracy: true }
+      { timeout: 10000, enableHighAccuracy: true }
     );
   };
 
-  const handleSelectPreset = (preset: { name: string; lat: number; lng: number }) => {
-    setUserLocation(preset);
-    setGpsStatus(`📍 Titik acuan: ${preset.name}`);
-    try {
-      localStorage.setItem("sm_last_location", JSON.stringify(preset));
-    } catch (_) {}
-  };
-
-  // Hitung jarak Haversine untuk seluruh data kosan
+  // Hitung jarak Haversine ke titik acuan aktif
   const kosanWithDistance = DEFAULT_KOSAN.map((k) => {
-    const jarak = userLocation
-      ? calculateDistance(userLocation.lat, userLocation.lng, k.lat, k.lng)
-      : undefined;
+    const jarak = calculateDistance(currentLocation.lat, currentLocation.lng, k.lat, k.lng);
     return { ...k, jarak };
   });
 
-  // Filter: Tipe, Budget, Pencarian Text, dan STRICT RADIUS FILTER (Default <= 10 km)
+  // Filter: Tipe, Budget, Pencarian Text, dan RADIUS JARAK (Default <= 10 km)
   const filteredKosan = kosanWithDistance
     .filter((k) => {
-      // Filter tipe kamar (putra/putri/campur)
       if (selectedTipe !== "all" && k.tipe !== selectedTipe) return false;
-
-      // Filter harga maksimal
       if (k.harga > maxHarga) return false;
 
-      // Filter teks pencarian (nama atau area)
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
         const matchNama = k.nama.toLowerCase().includes(q);
@@ -113,11 +140,9 @@ export default function KosanTab() {
         if (!matchNama && !matchArea && !matchFasilitas) return false;
       }
 
-      // FILTER RADIUS JARAK (10KM, 20KM, 30KM, atau SEMUA)
+      // STRICT RADIUS FILTER
       if (maxRadius !== "all" && k.jarak !== undefined) {
-        if (k.jarak > maxRadius) {
-          return false;
-        }
+        if (k.jarak > maxRadius) return false;
       }
 
       return true;
@@ -139,63 +164,134 @@ export default function KosanTab() {
 
   return (
     <div className="space-y-6 pb-24">
-      {/* 1. HERO BANNER GPS & TITIK PUSAT ACUAN */}
+      {/* 1. HERO BANNER: PILIHAN LOKASI KAMPUS PENGATURAN / INPUT KAMPUS */}
       <div className="rounded-3xl bg-gradient-to-br from-indigo-600 via-indigo-700 to-violet-900 p-6 sm:p-7 text-white shadow-xl shadow-indigo-500/20 relative overflow-hidden">
         <div className="absolute -top-12 -right-12 w-56 h-56 rounded-full bg-white/10 blur-3xl pointer-events-none" />
-        <div className="relative z-10 max-w-2xl">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-xs font-semibold mb-3 border border-white/20">
-            <Sparkles className="w-3.5 h-3.5 text-amber-300" /> Radius Terdekat Akurat (Haversine Formula)
+        <div className="relative z-10 max-w-2xl space-y-4">
+          <div>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-xs font-semibold mb-2.5 border border-white/20">
+              <Sparkles className="w-3.5 h-3.5 text-amber-300" /> Radius Kosan Terdekat Berdasarkan Kampus
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight">
+              Cari Kos Dekat Kampus Anda
+            </h1>
+            <p className="text-indigo-100 text-xs sm:text-sm mt-1">
+              Menampilkan kosan terdekat (maksimal {maxRadius === "all" ? "Semua Jarak" : `${maxRadius} KM`}) dari titik kampus Anda.
+            </p>
           </div>
 
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight">
-            Cari Kosan Terdekat di Sekitarmu
-          </h1>
-          <p className="text-indigo-100 text-xs sm:text-sm mt-1.5 leading-relaxed">
-            Filter otomatis kosan dalam radius <strong>maksimal {maxRadius === "all" ? "Semua Jarak" : `${maxRadius} KM`}</strong> dari titik posisimu saat ini.
-          </p>
-
-          {/* Quick Location Pills & GPS Detection */}
-          <div className="mt-5 space-y-3">
-            <div className="flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                onClick={handleGetLocation}
-                disabled={gpsLoading}
-                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white text-indigo-700 font-extrabold text-xs shadow-md hover:bg-indigo-50 transition-all active:scale-95 disabled:opacity-75"
-              >
-                <Navigation className={`w-3.5 h-3.5 ${gpsLoading ? "animate-spin" : ""}`} />
-                {gpsLoading ? "Mencari Sinyal GPS..." : "Deteksi GPS Otomatis"}
-              </button>
-
-              {/* Area Presets (Cipedes, Sukamanah, UNSIL, dll.) */}
-              {LOKASI_PRESETS.map((preset) => {
-                const isActive =
-                  userLocation?.lat === preset.lat && userLocation?.lng === preset.lng;
-                return (
-                  <button
-                    key={preset.name}
-                    type="button"
-                    onClick={() => handleSelectPreset(preset)}
-                    className={`px-3 py-2 rounded-xl text-xs font-bold backdrop-blur-md transition-all ${
-                      isActive
-                        ? "bg-amber-400 text-slate-950 shadow-md ring-2 ring-white/80 scale-105"
-                        : "bg-white/10 text-indigo-100 hover:bg-white/20 border border-white/10"
-                    }`}
-                  >
-                    📍 {preset.name}
-                  </button>
-                );
-              })}
+          {/* OPSI PILIHAN LOKASI */}
+          <div className="space-y-2.5 pt-1">
+            <div className="text-xs font-bold text-indigo-200 flex items-center gap-1.5">
+              <span>Pilih Titik Lokasi Acuan:</span>
             </div>
 
-            {/* Status Lokasi Terpilih */}
-            <div className="p-2.5 rounded-xl bg-black/25 backdrop-blur-md border border-white/15 flex items-center justify-between gap-2 text-xs text-indigo-100">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              {/* TOMBOL 1: PILIHAN KAMPUS YANG SUDAH DI-SETTING DI PENGATURAN */}
+              <button
+                type="button"
+                onClick={handleUseProfileCampus}
+                className={`p-3 rounded-2xl text-left border transition-all relative flex items-center gap-3 ${
+                  activeLocationMode === "campus"
+                    ? "bg-white text-indigo-950 border-white shadow-lg ring-2 ring-amber-400"
+                    : "bg-white/10 text-white border-white/15 hover:bg-white/20"
+                }`}
+              >
+                <div
+                  className={`w-9 h-9 rounded-xl flex items-center justify-center text-lg shrink-0 ${
+                    activeLocationMode === "campus"
+                      ? "bg-indigo-600 text-white"
+                      : "bg-white/15 text-white"
+                  }`}
+                >
+                  <School className="w-5 h-5" />
+                </div>
+                <div className="truncate flex-1">
+                  <div className="text-[10px] uppercase font-black tracking-wider text-amber-500 dark:text-amber-400">
+                    Pengaturan Profil Kamu
+                  </div>
+                  <div className="text-xs font-extrabold truncate">
+                    {userProfileCampus}
+                  </div>
+                  <div className="text-[10px] opacity-75 truncate">
+                    Gunakan lokasi kampus kamu
+                  </div>
+                </div>
+                {activeLocationMode === "campus" && (
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 ring-4 ring-emerald-500/30 shrink-0" />
+                )}
+              </button>
+
+              {/* TOMBOL 2: DETEKSI GPS REAL-TIME */}
+              <button
+                type="button"
+                onClick={handleGetLiveGPS}
+                disabled={gpsLoading}
+                className={`p-3 rounded-2xl text-left border transition-all relative flex items-center gap-3 ${
+                  activeLocationMode === "gps"
+                    ? "bg-white text-indigo-950 border-white shadow-lg ring-2 ring-amber-400"
+                    : "bg-white/10 text-white border-white/15 hover:bg-white/20"
+                }`}
+              >
+                <div
+                  className={`w-9 h-9 rounded-xl flex items-center justify-center text-lg shrink-0 ${
+                    activeLocationMode === "gps"
+                      ? "bg-indigo-600 text-white"
+                      : "bg-white/15 text-white"
+                  }`}
+                >
+                  <Navigation className={`w-4 h-4 ${gpsLoading ? "animate-spin" : ""}`} />
+                </div>
+                <div className="truncate flex-1">
+                  <div className="text-[10px] uppercase font-black tracking-wider text-indigo-200">
+                    Sensor Perangkat
+                  </div>
+                  <div className="text-xs font-extrabold truncate">
+                    {gpsLoading ? "Mendeteksi GPS..." : "Lokasi GPS Saya Saat Ini"}
+                  </div>
+                  <div className="text-[10px] opacity-75 truncate">
+                    Hitung dari posisimu sekarang
+                  </div>
+                </div>
+                {activeLocationMode === "gps" && (
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 ring-4 ring-emerald-500/30 shrink-0" />
+                )}
+              </button>
+            </div>
+
+            {/* INPUT CARI NAMA KAMPUS MANUAL (CONTOH: UNSIL, ITB, UI, CIPEDES, SUKAMANAH) */}
+            <div className="pt-1">
+              <div className="relative">
+                <School className="w-4 h-4 text-white/60 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  list="kampus-suggestions"
+                  value={customCampusInput}
+                  onChange={(e) => handleSelectCustomCampus(e.target.value)}
+                  placeholder="Ketik atau ganti nama kampus lain (contoh: UNSIL, ITB, UI, Cipedes, Sukamanah)..."
+                  className="w-full pl-10 pr-4 py-2.5 bg-black/25 backdrop-blur-md rounded-2xl text-xs font-semibold text-white placeholder-white/60 border border-white/20 outline-none focus:ring-2 focus:ring-amber-400"
+                />
+                <datalist id="kampus-suggestions">
+                  <option value="Universitas Siliwangi (UNSIL)" />
+                  <option value="Cipedes (Tasikmalaya)" />
+                  <option value="Sukamanah (Tasikmalaya)" />
+                  {UNIVERSITAS_LIST.map((u, i) => (
+                    <option key={i} value={u} />
+                  ))}
+                </datalist>
+              </div>
+            </div>
+
+            {/* STATUS TITIK ACUAN AKTIF */}
+            <div className="p-2.5 rounded-xl bg-black/20 backdrop-blur-md border border-white/10 flex items-center justify-between text-xs text-indigo-100">
               <div className="flex items-center gap-2 truncate">
                 <MapPin className="w-4 h-4 text-amber-300 shrink-0" />
-                <span className="font-semibold truncate">{gpsStatus}</span>
+                <span className="font-semibold truncate">
+                  Titik Acuan Aktif: <strong>{currentLocation.name}</strong>
+                </span>
               </div>
-              <span className="text-[11px] font-mono opacity-80 shrink-0">
-                {userLocation ? `${userLocation.lat.toFixed(3)}, ${userLocation.lng.toFixed(3)}` : "-"}
+              <span className="text-[10px] font-mono opacity-80 shrink-0">
+                {currentLocation.lat.toFixed(3)}, {currentLocation.lng.toFixed(3)}
               </span>
             </div>
           </div>
@@ -204,14 +300,14 @@ export default function KosanTab() {
 
       {/* 2. PENGATURAN JARAK RADIUS (10KM, 20KM, 30KM, SEMUA) & SEARCH */}
       <div className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-sm space-y-4">
-        {/* Search Input */}
+        {/* Search Input Kosan */}
         <div className="relative">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Cari nama kos, jalan, atau fasilitas (misal: Cipedes, Sukamanah, AC, WiFi)..."
+            placeholder="Cari nama kos, fasilitas (WiFi, AC, Kamar Mandi Dalam)..."
             className="w-full pl-10 pr-4 py-2.5 bg-slate-100 dark:bg-slate-800 rounded-2xl text-xs font-medium text-slate-800 dark:text-slate-200 outline-none focus:ring-2 focus:ring-indigo-500 border border-transparent dark:border-slate-700"
           />
         </div>
@@ -257,7 +353,7 @@ export default function KosanTab() {
                 onChange={(e) => setSortBy(e.target.value as "distance" | "price")}
                 className="text-xs font-bold bg-transparent text-slate-800 dark:text-slate-200 outline-none cursor-pointer"
               >
-                <option value="distance">Terdekat (GPS)</option>
+                <option value="distance">Terdekat</option>
                 <option value="price">Termurah</option>
               </select>
             </div>
@@ -303,9 +399,9 @@ export default function KosanTab() {
             </button>
           ))}
 
-          {/* Indicator Info Total Temuan */}
+          {/* Total Temuan Info */}
           <div className="ml-auto text-xs font-bold text-indigo-600 dark:text-indigo-400">
-            Ditemukan: {filteredKosan.length} Kosan
+            Ditemukan: {filteredKosan.length} Kosan Terdekat
           </div>
         </div>
       </div>
@@ -342,14 +438,14 @@ export default function KosanTab() {
                   </span>
                 </div>
 
-                {/* Jarak GPS Badge */}
+                {/* Jarak GPS / Kampus Badge */}
                 {kos.jarak !== undefined && (
                   <div
                     className={`absolute bottom-3 right-3 backdrop-blur-md text-white text-xs font-extrabold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-lg ${
                       kos.jarak <= 1.5
-                        ? "bg-emerald-600/90 ring-1 ring-emerald-300"
+                        ? "bg-emerald-600/95 ring-1 ring-emerald-300"
                         : kos.jarak <= 5.0
-                        ? "bg-indigo-600/90"
+                        ? "bg-indigo-600/95"
                         : "bg-slate-900/85"
                     }`}
                   >
@@ -391,11 +487,11 @@ export default function KosanTab() {
               </div>
             </div>
 
-            {/* WA Button */}
+            {/* WA Action */}
             <div className="p-4 pt-0">
               <a
                 href={`https://wa.me/${kos.telp}?text=${encodeURIComponent(
-                  `Halo pengelola ${kos.nama}, saya melihat info kosan ini di aplikasi Sahabat Mahasiswa (posisi terdekat: ${kos.jarak ?? 0} km). Apakah saat ini masih ada kamar yang tersedia?`
+                  `Halo pengelola ${kos.nama}, saya melihat info kosan ini di aplikasi Sahabat Mahasiswa (jarak: ${kos.jarak ?? 0} km dari ${currentLocation.name}). Apakah saat ini masih ada kamar yang tersedia?`
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -409,7 +505,7 @@ export default function KosanTab() {
         ))}
       </div>
 
-      {/* 4. EMPTY STATE DENGAN QUICK ACTION PERBESAR RADIUS */}
+      {/* 4. EMPTY STATE */}
       {filteredKosan.length === 0 && (
         <div className="text-center py-12 px-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 max-w-lg mx-auto">
           <div className="w-14 h-14 rounded-2xl bg-amber-500/10 text-amber-500 mx-auto flex items-center justify-center text-2xl">
@@ -417,10 +513,10 @@ export default function KosanTab() {
           </div>
           <div>
             <h4 className="font-black text-base text-slate-800 dark:text-white">
-              Tidak Ada Kosan dalam Radius {maxRadius === "all" ? "": `${maxRadius} KM`}
+              Tidak Ada Kosan dalam Jarak {maxRadius === "all" ? "": `${maxRadius} KM`}
             </h4>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-              Kosan terdekat dari <strong>{userLocation?.name || "lokasimu"}</strong> belum ditemukan dalam jarak maksimal {maxRadius} KM. Coba perbesar jangkauan radius di bawah ini:
+              Kosan dalam radius {maxRadius} KM dari <strong>{currentLocation.name}</strong> belum ditemukan. Coba perbesar jarak radius pencarian:
             </p>
           </div>
 

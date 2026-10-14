@@ -641,3 +641,36 @@ export function detectClosestAreaName(lat: number, lng: number): string {
   }
   return `Area GPS (${lat.toFixed(3)}, ${lng.toFixed(3)})`;
 }
+
+export const KAMPUS_COORDINATES: Record<string, { lat: number; lng: number; area: string }> = {
+  "unsil": { lat: -7.3512, lng: 108.2234, area: "Tasikmalaya" },
+  "siliwangi": { lat: -7.3512, lng: 108.2234, area: "Tasikmalaya" },
+  "cipedes": { lat: -7.3200, lng: 108.2150, area: "Cipedes, Tasikmalaya" },
+  "sukamanah": { lat: -7.3110, lng: 108.2230, area: "Sukamanah, Tasikmalaya" },
+  "ui": { lat: -6.3653, lng: 106.8315, area: "Depok" },
+  "indonesia": { lat: -6.3653, lng: 106.8315, area: "Depok" },
+  "itb": { lat: -6.8915, lng: 107.6107, area: "Bandung" },
+  "ugm": { lat: -7.7713, lng: 110.3777, area: "Yogyakarta" },
+  "gadjah mada": { lat: -7.7713, lng: 110.3777, area: "Yogyakarta" },
+  "unpad": { lat: -6.9272, lng: 107.7745, area: "Jatinangor" },
+  "padjadjaran": { lat: -6.9272, lng: 107.7745, area: "Jatinangor" },
+  "upi": { lat: -6.8604, lng: 107.5901, area: "Bandung" },
+  "ipb": { lat: -6.5594, lng: 106.7262, area: "Bogor" },
+  "undip": { lat: -7.0504, lng: 110.4398, area: "Semarang" },
+  "its": { lat: -7.2824, lng: 112.7949, area: "Surabaya" },
+  "unair": { lat: -7.2683, lng: 112.7583, area: "Surabaya" },
+  "brawijaya": { lat: -7.9525, lng: 112.6144, area: "Malang" },
+  "ub": { lat: -7.9525, lng: 112.6144, area: "Malang" },
+  "telkom": { lat: -6.9740, lng: 107.6303, area: "Bandung" },
+};
+
+export function getCoordinatesForLocation(query: string): { lat: number; lng: number; area: string; name: string } {
+  const q = query.trim().toLowerCase();
+  for (const [key, val] of Object.entries(KAMPUS_COORDINATES)) {
+    if (q.includes(key)) {
+      return { ...val, name: query };
+    }
+  }
+  // Default acuan: UNSIL Tasikmalaya
+  return { lat: -7.3512, lng: 108.2234, area: "Tasikmalaya", name: query || "Universitas Siliwangi (UNSIL)" };
+}
