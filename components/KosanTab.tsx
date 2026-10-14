@@ -22,6 +22,8 @@ import {
   Search,
   School,
   Settings,
+  Star,
+  Database,
 } from "lucide-react";
 
 export default function KosanTab() {
@@ -423,8 +425,8 @@ export default function KosanTab() {
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
 
-                {/* Tipe Badge */}
-                <div className="absolute top-3 left-3 flex gap-1.5">
+                {/* Tipe Badge & Sumber */}
+                <div className="absolute top-3 left-3 flex items-center gap-1.5 flex-wrap max-w-[70%]">
                   <span
                     className={`text-[10px] uppercase font-black tracking-wider px-2.5 py-1 rounded-full text-white shadow-md ${
                       kos.tipe === "putri"
@@ -436,6 +438,19 @@ export default function KosanTab() {
                   >
                     Kos {kos.tipe}
                   </span>
+
+                  {kos.sumber === "mamikos_kaggle" && (
+                    <span className="text-[9px] font-black tracking-wide px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-emerald-300 shadow-sm flex items-center gap-1 border border-emerald-400/30">
+                      <Database className="w-2.5 h-2.5 text-emerald-400" />
+                      <span>Mamikos Kaggle</span>
+                    </span>
+                  )}
+                </div>
+
+                {/* Rating Badge Top Right */}
+                <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-md text-amber-300 text-[11px] font-black px-2 py-0.5 rounded-full flex items-center gap-1 shadow-md border border-amber-400/30">
+                  <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                  <span>{kos.rating || 4.8}</span>
                 </div>
 
                 {/* Jarak GPS / Kampus Badge */}
@@ -458,10 +473,18 @@ export default function KosanTab() {
               {/* Body Details */}
               <div className="p-4 space-y-2">
                 <div className="flex items-baseline justify-between">
-                  <span className="text-lg font-black text-indigo-600 dark:text-indigo-400">
-                    {formatRupiah(kos.harga)}
-                  </span>
-                  <span className="text-xs text-slate-500 font-medium">/ bulan</span>
+                  <div>
+                    <span className="text-lg font-black text-indigo-600 dark:text-indigo-400">
+                      {formatRupiah(kos.harga)}
+                    </span>
+                    <span className="text-xs text-slate-500 font-medium"> / bulan</span>
+                  </div>
+
+                  {kos.sisa_kamar && (
+                    <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-900">
+                      Sisa {kos.sisa_kamar} kamar
+                    </span>
+                  )}
                 </div>
 
                 <h3 className="font-black text-slate-900 dark:text-white text-base leading-snug group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">

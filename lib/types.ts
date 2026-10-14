@@ -10,6 +10,9 @@ export interface Kosan {
   telp: string;
   fasilitas: string[];
   foto_url?: string;
+  sumber?: "mamikos_kaggle" | "kurasi" | string;
+  rating?: number;
+  sisa_kamar?: number;
 }
 
 export interface Outlet {
@@ -94,12 +97,24 @@ export interface Tugas {
 export interface LowonganKerja {
   id: number | string;
   posisi: string;
-  tipe: "Part-time" | "Freelance" | "Magang";
+  perusahaan?: string;
+  tipe: "Part-time" | "Freelance" | "Magang" | "Full-time" | string;
   gaji: number;
   jam: number;
   lokasi: string;
-  hrd: string;
+  hrd?: string;
   syarat: string;
+  sumber?: "kurasi" | "adzuna" | "kaggle" | string;
+  url_lamar?: string;
+  tanggal?: string;
+}
+
+export interface AdzunaConfig {
+  appId: string;
+  appKey: string;
+  country: string;
+  active: boolean;
+  updatedAt?: string;
 }
 
 export interface UserProfile {
