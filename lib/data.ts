@@ -365,13 +365,89 @@ export const DEFAULT_VOUCHERS: Voucher[] = [
 ];
 
 export const DEFAULT_KOSAN: Kosan[] = [
+  // --- AREA CIPEDES (TASIKMALAYA) ---
   {
-    id: 1,
+    id: 101,
+    nama: "Kosan Putri Cipedes Asri",
+    area: "Jl. RE Martadinata No. 72, Cipedes, Tasikmalaya",
+    harga: 650000,
+    tipe: "putri",
+    lat: -7.3195,
+    lng: 108.2140,
+    telp: "6281298761001",
+    fasilitas: ["WiFi Cepat", "Kamar Mandi Dalam", "Kasur & Lemari", "Dapur Bersama", "CCTV 24 Jam"],
+    foto_url: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    id: 102,
+    nama: "Pondok Mahasiswa Cipedes Tengah",
+    area: "Jl. Cipedes Tengah No. 18, Kec. Cipedes, Tasikmalaya",
+    harga: 550000,
+    tipe: "campur",
+    lat: -7.3220,
+    lng: 108.2165,
+    telp: "6282198761002",
+    fasilitas: ["Kasur Springbed", "WiFi 50 Mbps", "Parkir Motor Luas", "Bebas Jam Malam Sopan"],
+    foto_url: "https://images.unsplash.com/photo-1598928506311-c55ded91a20c?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    id: 103,
+    nama: "Kost Eksklusif Nagarasari Cipedes",
+    area: "Jl. Cigeureung, Nagarasari, Cipedes, Tasikmalaya",
+    harga: 950000,
+    tipe: "putra",
+    lat: -7.3160,
+    lng: 108.2110,
+    telp: "6283198761003",
+    fasilitas: ["AC Dingin", "Kamar Mandi Dalam", "Water Heater", "Meja Belajar", "WiFi"],
+    foto_url: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=600&q=80",
+  },
+
+  // --- AREA SUKAMANAH (TASIKMALAYA) ---
+  {
+    id: 201,
+    nama: "Kosan Barokah Sukamanah Indah",
+    area: "Jl. Sukamanah I No. 45, Cipedes/Indihiang, Tasikmalaya",
+    harga: 600000,
+    tipe: "campur",
+    lat: -7.3120,
+    lng: 108.2215,
+    telp: "6285298762001",
+    fasilitas: ["WiFi Kencang", "Kamar Mandi Dalam", "Air PDAM Lancar", "Parkir Luas"],
+    foto_url: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    id: 202,
+    nama: "Graha Mahasiswi Sukamanah",
+    area: "Jl. Raya Sukamanah No. 42, Sukamanah, Tasikmalaya",
+    harga: 700000,
+    tipe: "putri",
+    lat: -7.3090,
+    lng: 108.2250,
+    telp: "6287798762002",
+    fasilitas: ["Khusus Putri", "Keamanan 24 Jam", "Dapur Bersama", "WiFi", "Kulkas Bersama"],
+    foto_url: "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    id: 203,
+    nama: "Wisma Kost Putra Sukamanah Permai",
+    area: "Komplek Sukamanah Permai Kav. 8, Tasikmalaya",
+    harga: 500000,
+    tipe: "putra",
+    lat: -7.3145,
+    lng: 108.2230,
+    telp: "6289698762003",
+    fasilitas: ["Kamar Mandi Luar Bersih", "Kasur & Lemari", "Ruang Santai", "WiFi"],
+    foto_url: "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=600&q=80",
+  },
+
+  // --- AREA KAMPUS UNSIL / KAHURIPAN (TASIKMALAYA) ---
+  {
+    id: 301,
     nama: "Kosan Griya Mahasiswa Asri",
-    area: "Dekat Kampus UNSIL / Belakang Rektorat",
+    area: "Dekat Gerbang Utama Kampus UNSIL / Belakang Rektorat",
     harga: 650000,
     tipe: "campur",
-    jarak: 0.3,
     lat: -7.3512,
     lng: 108.2234,
     telp: "6281234567890",
@@ -379,25 +455,23 @@ export const DEFAULT_KOSAN: Kosan[] = [
     foto_url: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=600&q=80",
   },
   {
-    id: 2,
+    id: 302,
     nama: "Kost Putri Melati Sejahtera",
-    area: "Kahuripan, Tawang (Jalan Kaki 5 Menit)",
+    area: "Kahuripan, Tawang (Jalan Kaki 5 Menit ke UNSIL)",
     harga: 550000,
     tipe: "putri",
-    jarak: 0.5,
     lat: -7.3489,
-    lng: 108.221,
+    lng: 108.2210,
     telp: "6282134567891",
     fasilitas: ["Khusus Putri", "Keamanan 24 Jam", "Dapur Bersama", "WiFi", "Bebas Jam Malam Sopan"],
     foto_url: "https://images.unsplash.com/photo-1598928506311-c55ded91a20c?auto=format&fit=crop&w=600&q=80",
   },
   {
-    id: 3,
+    id: 303,
     nama: "Wisma Pondok Putra Mandiri",
-    area: "Siliwangi No. 45 (Dekat Pusat Kuliner)",
+    area: "Jl. Siliwangi No. 45 (Dekat Kuliner Kampus)",
     harga: 750000,
     tipe: "putra",
-    jarak: 0.8,
     lat: -7.3551,
     lng: 108.2289,
     telp: "6283134567892",
@@ -405,16 +479,65 @@ export const DEFAULT_KOSAN: Kosan[] = [
     foto_url: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=600&q=80",
   },
   {
-    id: 4,
+    id: 304,
     nama: "Kosan Elit Harmoni Residence",
-    area: "Pusat Kota Tasikmalaya",
+    area: "Jl. HZ Mustofa, Pusat Kota Tasikmalaya",
     harga: 1250000,
     tipe: "campur",
-    jarak: 1.8,
-    lat: -7.332,
+    lat: -7.3320,
     lng: 108.2178,
     telp: "6285234567893",
     fasilitas: ["Full Furnished", "AC Dingin", "Water Heater", "Balkon Pribadi", "Smart Door Lock"],
+    foto_url: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=600&q=80",
+  },
+
+  // --- KOTA LAIN (UI, ITB, UNPAD, UGM) ---
+  {
+    id: 401,
+    nama: "Margonda Residence UI",
+    area: "Jl. Margonda Raya No. 100, Depok (Dekat Kampus UI)",
+    harga: 1300000,
+    tipe: "campur",
+    lat: -6.3688,
+    lng: 106.8330,
+    telp: "6281234567894",
+    fasilitas: ["AC Dingin", "Kolam Renang", "Kamar Mandi Dalam", "WiFi", "Keamanan 24 Jam"],
+    foto_url: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    id: 402,
+    nama: "Pondok Dago Cisitu ITB",
+    area: "Jl. Cisitu Lama, Dago, Bandung (Dekat ITB Ganesha)",
+    harga: 900000,
+    tipe: "putra",
+    lat: -6.8860,
+    lng: 107.6120,
+    telp: "6281234567895",
+    fasilitas: ["Udara Sejuk Dago", "WiFi Cepat", "Kamar Mandi Dalam", "Meja Belajar Kayu"],
+    foto_url: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    id: 403,
+    nama: "Griya Hegar Jatinangor Unpad",
+    area: "Jl. Raya Jatinangor, Sumedang (Dekat Unpad/ITB Jatinangor)",
+    harga: 800000,
+    tipe: "campur",
+    lat: -6.9290,
+    lng: 107.7710,
+    telp: "6281234567896",
+    fasilitas: ["Parkir Mobil/Motor", "Kamar Mandi Dalam", "WiFi 100 Mbps", "Dapur"],
+    foto_url: "https://images.unsplash.com/photo-1598928506311-c55ded91a20c?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    id: 404,
+    nama: "Wisma Pogung Mahasiswa UGM",
+    area: "Pogung Kidul, Sinduadi, Sleman (Dekat Vokasi UGM)",
+    harga: 850000,
+    tipe: "campur",
+    lat: -7.7620,
+    lng: 110.3750,
+    telp: "6281234567897",
+    fasilitas: ["Lingkungan Nyaman", "WiFi ID", "Kamar Mandi Dalam", "Akses 24 Jam"],
     foto_url: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=600&q=80",
   },
 ];
@@ -472,15 +595,15 @@ export const DEFAULT_LOWONGAN: LowonganKerja[] = [
   },
 ];
 
-export const KAMPUS_PRESETS: { name: string; lat: number; lng: number }[] = [
-  { name: "UNSIL (Tasikmalaya)", lat: -7.3512, lng: 108.2234 },
-  { name: "ITB (Bandung)", lat: -6.8915, lng: 107.6107 },
-  { name: "UI (Depok)", lat: -6.3653, lng: 106.8315 },
-  { name: "UGM (Yogyakarta)", lat: -7.7713, lng: 110.3777 },
-  { name: "UNPAD (Jatinangor)", lat: -6.9272, lng: 107.7745 },
-  { name: "UPI (Bandung)", lat: -6.8604, lng: 107.5901 },
-  { name: "ITS (Surabaya)", lat: -7.2824, lng: 112.7949 },
-  { name: "UNDIP (Semarang)", lat: -7.0504, lng: 110.4398 },
+export const LOKASI_PRESETS: { name: string; area: string; lat: number; lng: number }[] = [
+  { name: "Cipedes (Tasikmalaya)", area: "Cipedes", lat: -7.3200, lng: 108.2150 },
+  { name: "Sukamanah (Tasikmalaya)", area: "Sukamanah", lat: -7.3110, lng: 108.2230 },
+  { name: "UNSIL Siliwangi", area: "Kahuripan", lat: -7.3512, lng: 108.2234 },
+  { name: "Pusat Kota Tasik", area: "Cihideung", lat: -7.3320, lng: 108.2178 },
+  { name: "UI Depok", area: "Margonda", lat: -6.3653, lng: 106.8315 },
+  { name: "ITB Bandung", area: "Dago", lat: -6.8915, lng: 107.6107 },
+  { name: "UNPAD Jatinangor", area: "Jatinangor", lat: -6.9272, lng: 107.7745 },
+  { name: "UGM Jogja", area: "Sleman", lat: -7.7713, lng: 110.3777 },
 ];
 
 export function calculateDistance(
@@ -501,4 +624,20 @@ export function calculateDistance(
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   const d = R * c;
   return parseFloat(d.toFixed(1));
+}
+
+export function detectClosestAreaName(lat: number, lng: number): string {
+  let closest = LOKASI_PRESETS[0];
+  let minD = calculateDistance(lat, lng, closest.lat, closest.lng);
+  for (const p of LOKASI_PRESETS) {
+    const d = calculateDistance(lat, lng, p.lat, p.lng);
+    if (d < minD) {
+      minD = d;
+      closest = p;
+    }
+  }
+  if (minD <= 5) {
+    return closest.name;
+  }
+  return `Area GPS (${lat.toFixed(3)}, ${lng.toFixed(3)})`;
 }
