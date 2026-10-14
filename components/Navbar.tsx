@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Sparkles, Moon, Sun, User as UserIcon, LogIn, LogOut } from "lucide-react";
+import { Sparkles, Moon, Sun, User as UserIcon, LogIn, LogOut, KeyRound } from "lucide-react";
 
 interface NavbarProps {
   user: { name?: string | null; email?: string | null; image?: string | null } | null;
@@ -9,6 +9,7 @@ interface NavbarProps {
   onToggleTheme: () => void;
   onOpenAuth: () => void;
   onOpenProfile: () => void;
+  onOpenTikTokConfig?: () => void;
   onLogout: () => void;
 }
 
@@ -18,6 +19,7 @@ export default function Navbar({
   onToggleTheme,
   onOpenAuth,
   onOpenProfile,
+  onOpenTikTokConfig,
   onLogout,
 }: NavbarProps) {
   return (
@@ -25,26 +27,38 @@ export default function Navbar({
       <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
         {/* Logo & Brand */}
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
             <span className="text-xl font-bold">🎓</span>
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-extrabold text-base sm:text-lg tracking-tight bg-gradient-to-r from-indigo-600 to-violet-600 dark:from-indigo-400 dark:to-violet-300 bg-clip-text text-transparent">
+              <span className="font-black text-base sm:text-lg tracking-tight bg-gradient-to-r from-indigo-600 to-violet-600 dark:from-indigo-400 dark:to-violet-300 bg-clip-text text-transparent">
                 Sahabat Mahasiswa
               </span>
-              <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-300 border border-indigo-500/20">
+              <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-300 border border-indigo-500/20">
                 <Sparkles className="w-2.5 h-2.5" /> Portal Kampus
               </span>
             </div>
             <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight">
-              Kosan &bull; Makan Murah &bull; Dompet &bull; Tugas &bull; Magang
+              Kosan &bull; Voucher TikTok &bull; Dompet &bull; Tugas &bull; Magang
             </p>
           </div>
         </div>
 
         {/* Right Actions */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          {/* TikTok API Shortcut Button */}
+          {onOpenTikTokConfig && (
+            <button
+              onClick={onOpenTikTokConfig}
+              title="Pengaturan Kunci API TikTok GO Dining"
+              className="p-2 rounded-xl text-[#FE2C55] hover:bg-[#FE2C55]/10 dark:hover:bg-[#FE2C55]/20 transition-colors flex items-center gap-1"
+            >
+              <span className="text-sm">🎵</span>
+              <span className="text-xs font-black hidden lg:inline">API TikTok</span>
+            </button>
+          )}
+
           {/* Theme Switcher */}
           <button
             onClick={onToggleTheme}
@@ -56,7 +70,7 @@ export default function Navbar({
 
           {/* User Button */}
           {user ? (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               <button
                 onClick={onOpenProfile}
                 className="flex items-center gap-2 py-1.5 px-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
@@ -66,10 +80,10 @@ export default function Navbar({
                   <img
                     src={user.image}
                     alt={user.name || "User Avatar"}
-                    className="w-7 h-7 rounded-full object-cover border border-indigo-500"
+                    className="w-7 h-7 rounded-xl object-cover border border-indigo-500"
                   />
                 ) : (
-                  <div className="w-7 h-7 rounded-full bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-xs">
+                  <div className="w-7 h-7 rounded-xl bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-xs">
                     {(user.name || user.email || "M")[0].toUpperCase()}
                   </div>
                 )}

@@ -14,6 +14,7 @@ import TugasTab from "@/components/TugasTab";
 import KerjaTab from "@/components/KerjaTab";
 import AuthModal from "@/components/AuthModal";
 import ProfileModal from "@/components/ProfileModal";
+import TikTokConfigModal from "@/components/TikTokConfigModal";
 
 export default function Home() {
   const { data: session } = useSession();
@@ -22,6 +23,7 @@ export default function Home() {
   const [theme, setTheme] = useState<"dark" | "light">("light");
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showTikTokModal, setShowTikTokModal] = useState(false);
 
   // Sync Supabase Auth session
   useEffect(() => {
@@ -109,6 +111,7 @@ export default function Home() {
         onToggleTheme={handleToggleTheme}
         onOpenAuth={() => setShowAuthModal(true)}
         onOpenProfile={() => setShowProfileModal(true)}
+        onOpenTikTokConfig={() => setShowTikTokModal(true)}
         onLogout={handleLogout}
       />
 
@@ -137,6 +140,13 @@ export default function Home() {
         onClose={() => setShowProfileModal(false)}
         user={activeUser}
         onLogout={handleLogout}
+      />
+
+      {/* TikTok Config Modal */}
+      <TikTokConfigModal
+        isOpen={showTikTokModal}
+        onClose={() => setShowTikTokModal(false)}
+        userId={activeUser?.id}
       />
     </div>
   );
