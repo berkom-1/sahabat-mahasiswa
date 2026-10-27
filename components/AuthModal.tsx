@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { apiClient } from "@/lib/api-client";
 import { signIn } from "next-auth/react";
-import { X, Mail, Lock, Sparkles, AlertCircle, CheckCircle2, GraduationCap, ShieldCheck } from "lucide-react";
+import { X, AlertCircle, GraduationCap, ShieldCheck } from "lucide-react";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -17,10 +17,8 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [nama, setNama] = useState("");
-  const [optionalGoogle, setOptionalGoogle] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [showGoogleFallback, setShowGoogleFallback] = useState(false);
   const [googleEmail, setGoogleEmail] = useState("");
 
   if (!isOpen) return null;
@@ -45,38 +43,40 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
       const isCampus = isCampusEmail(email);
 
       if (mode === "login") {
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        if (error) throw error;
+        const res = await apiClient.login(email, password);
 
-        // Simpan status login lokal
+        // Simpan status login lokal & sync dengan NextAuth session
         localStorage.setItem(
           "sm_auth_metadata",
           JSON.stringify({
             provider: isCampus ? "campus_email" : "email",
-            student_email: isCampus ? email : null,
-            student_verified: isCampus,
-            google_linked: false,
+            student_email: isCampus ? email : res.user?.student_email || null,
+            student_verified: isCampus || Boolean(res.user?.student_verified),
+            google_linked: Boolean(res.user?.google_linked),
           })
         );
+
+        if (res.user) {
+          localStorage.setItem("sm_mysql_user", JSON.stringify(res.user));
+        }
+
+        await signIn("credentials", {
+          email: res.user?.email || email,
+          password,
+          name: res.user?.name || email.split("@")[0],
+          redirect: false,
+        });
       } else {
-        const { data, error } = await supabase.auth.signUp({
+        const res = await apiClient.register({
           email,
           password,
-          options: {
-            data: {
-              nama: nama || "Mahasiswa",
-              student_email: isCampus ? email : null,
-              student_verified: isCampus,
-              kampus: isCampus ? "Kampus Terverifikasi" : "Mahasiswa Indonesia",
-            },
-          },
+          nama: nama || "Mahasiswa",
+          kampus: isCampus ? "Universitas Siliwangi (UNSIL)" : "Mahasiswa Indonesia",
+          student_email: isCampus ? email : null,
+          student_verified: isCampus,
         });
-        if (error) throw error;
 
-        // Simpan status registrasi lokal
+        // Simpan status registrasi lokal & sync dengan NextAuth session
         localStorage.setItem(
           "sm_auth_metadata",
           JSON.stringify({
@@ -86,10 +86,22 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
             google_linked: false,
           })
         );
+
+        if (res.user) {
+          localStorage.setItem("sm_mysql_user", JSON.stringify(res.user));
+        }
+
+        await signIn("credentials", {
+          email: res.user?.email || email,
+          password,
+          name: res.user?.name || nama || email.split("@")[0],
+          redirect: false,
+        });
       }
 
       onSuccess();
       onClose();
+      window.location.reload();
     } catch (err: unknown) {
       const e = err as Error;
       setErrorMsg(e?.message || "Terjadi kesalahan autentikasi.");
@@ -115,13 +127,12 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
     try {
       const res = await signIn("google", { redirect: false, callbackUrl: "/" });
       if (res?.error) {
-        setShowGoogleFallback(true);
-        setErrorMsg("Kunci Google OAuth belum dikonfigurasi di Vercel. Silakan gunakan masuk cepat dengan email Google di bawah.");
+        setErrorMsg("Kunci Google OAuth belum dikonfigurasi di environment. Silakan gunakan masuk cepat dengan email Google di bawah.");
       } else if (res?.url) {
         window.location.href = res.url;
       }
     } catch {
-      setShowGoogleFallback(true);
+      setErrorMsg("Gagal menghubungkan ke layanan Google OAuth.");
     } finally {
       setLoading(false);
     }
@@ -176,7 +187,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
 
         {/* Modal Header */}
         <div className="text-center mb-5">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 text-white mx-auto flex items-center justify-center text-2xl mb-2 shadow-md shadow-indigo-600/25">
+          <div className="w-12 h-12 rounded-2xl bg-linear-to-tr from-indigo-600 to-violet-500 text-white mx-auto flex items-center justify-center text-2xl mb-2 shadow-md shadow-indigo-600/25">
             🎓
           </div>
           <h3 className="font-black text-xl text-slate-900 dark:text-white">
@@ -282,11 +293,11 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
               </button>
 
               <div className="relative flex py-1 items-center">
-                <div className="flex-grow border-t border-slate-200 dark:border-slate-800"></div>
-                <span className="flex-shrink mx-2 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                <div className="grow border-t border-slate-200 dark:border-slate-800"></div>
+                <span className="shrink mx-2 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
                   atau masuk cepat via email google
                 </span>
-                <div className="flex-grow border-t border-slate-200 dark:border-slate-800"></div>
+                <div className="grow border-t border-slate-200 dark:border-slate-800"></div>
               </div>
 
               {/* Form Input Email Google Langsung (Bypass jika OAuth belum terpasang di Vercel) */}

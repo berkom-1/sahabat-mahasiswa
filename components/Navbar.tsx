@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import { Sparkles, Moon, Sun, User as UserIcon, LogIn, LogOut, KeyRound } from "lucide-react";
+import Image from "next/image";
+import { Sparkles, Moon, Sun, LogIn, LogOut } from "lucide-react";
 
 interface NavbarProps {
   user: { name?: string | null; email?: string | null; image?: string | null } | null;
@@ -28,15 +29,18 @@ export default function Navbar({
         {/* Logo & Brand */}
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-2xl overflow-hidden shadow-md shadow-indigo-500/20 border border-indigo-100 dark:border-indigo-900/50 flex items-center justify-center bg-indigo-50">
-            <img
+            <Image
               src="/icon.png"
               alt="Sahabat Mahasiswa Logo"
+              width={40}
+              height={40}
               className="w-full h-full object-cover"
+              priority
             />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-black text-base sm:text-lg tracking-tight bg-gradient-to-r from-indigo-600 to-violet-600 dark:from-indigo-400 dark:to-violet-300 bg-clip-text text-transparent">
+              <span className="font-black text-base sm:text-lg tracking-tight bg-linear-to-r from-indigo-600 to-violet-600 dark:from-indigo-400 dark:to-violet-300 bg-clip-text text-transparent">
                 Sahabat Mahasiswa
               </span>
               <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-300 border border-indigo-500/20">
@@ -91,7 +95,7 @@ export default function Navbar({
                     {(user.name || user.email || "M")[0].toUpperCase()}
                   </div>
                 )}
-                <span className="text-xs font-semibold text-slate-700 dark:text-slate-200 hidden md:inline max-w-[120px] truncate">
+                <span className="text-xs font-semibold text-slate-700 dark:text-slate-200 hidden md:inline max-w-30 truncate">
                   {user.name || user.email?.split("@")[0]}
                 </span>
               </button>

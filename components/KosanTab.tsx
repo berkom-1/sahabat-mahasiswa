@@ -9,6 +9,7 @@ import {
   UNIVERSITAS_LIST,
 } from "@/lib/data";
 import { bukaUrlAman } from "@/lib/launcher";
+import { apiClient } from "@/lib/api-client";
 import {
   MapPin,
   Navigation,
@@ -22,16 +23,26 @@ import {
   ArrowUpDown,
   Search,
   School,
-  Settings,
   Star,
   Database,
   Map,
-  ExternalLink,
 } from "lucide-react";
 
 export default function KosanTab() {
+  const [kosanList, setKosanList] = useState<Kosan[]>(DEFAULT_KOSAN);
   // State profil kampus pengguna dari Pengaturan / Profil
-  const [userProfileCampus, setUserProfileCampus] = useState<string>("Universitas Siliwangi (UNSIL)");
+  const [userProfileCampus, setUserProfileCampus] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const cachedProfile = localStorage.getItem("sm_user_profile_cache");
+        if (cachedProfile) {
+          const parsed = JSON.parse(cachedProfile);
+          if (parsed.kampus && parsed.kampus.trim()) return parsed.kampus.trim();
+        }
+      } catch {}
+    }
+    return "Universitas Siliwangi (UNSIL)";
+  });
   const [activeLocationMode, setActiveLocationMode] = useState<"campus" | "gps" | "custom">("campus");
 
   // State koordinat titik acuan aktif
@@ -40,11 +51,19 @@ export default function KosanTab() {
     lat: number;
     lng: number;
     area: string;
-  }>({
-    name: "Universitas Siliwangi (UNSIL)",
-    lat: -7.3512,
-    lng: 108.2234,
-    area: "Tasikmalaya",
+  }>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const cachedProfile = localStorage.getItem("sm_user_profile_cache");
+        if (cachedProfile) {
+          const parsed = JSON.parse(cachedProfile);
+          if (parsed.kampus && parsed.kampus.trim()) {
+            return getCoordinatesForLocation(parsed.kampus);
+          }
+        }
+      } catch {}
+    }
+    return getCoordinatesForLocation("Universitas Siliwangi (UNSIL)");
   });
 
   const [customCampusInput, setCustomCampusInput] = useState<string>("");
@@ -57,24 +76,23 @@ export default function KosanTab() {
   // PENGATURAN RADIUS JARAK (Default 10 KM, opsi: 10, 20, 30, atau all)
   const [maxRadius, setMaxRadius] = useState<number | "all">(10);
 
-  // 1. Ambil kampus yang telah di-setting di Pengaturan / Profil pengguna
+  // 1. Dengarkan pembaruan profil pengguna dari Pengaturan
   useEffect(() => {
-    try {
-      const cachedProfile = localStorage.getItem("sm_user_profile_cache");
-      if (cachedProfile) {
-        const parsed = JSON.parse(cachedProfile);
-        if (parsed.kampus && parsed.kampus.trim()) {
-          setUserProfileCampus(parsed.kampus.trim());
-          const coords = getCoordinatesForLocation(parsed.kampus);
-          setCurrentLocation(coords);
-          return;
+    const handleProfileUpdate = () => {
+      try {
+        const cachedProfile = localStorage.getItem("sm_user_profile_cache");
+        if (cachedProfile) {
+          const parsed = JSON.parse(cachedProfile);
+          if (parsed.kampus && parsed.kampus.trim()) {
+            setUserProfileCampus(parsed.kampus.trim());
+            setCurrentLocation(getCoordinatesForLocation(parsed.kampus));
+          }
         }
-      }
-    } catch (_) {}
+      } catch {}
+    };
 
-    // Default jika belum ada pengaturan: UNSIL
-    const defaultCoords = getCoordinatesForLocation("Universitas Siliwangi (UNSIL)");
-    setCurrentLocation(defaultCoords);
+    window.addEventListener("sm_profile_updated", handleProfileUpdate);
+    return () => window.removeEventListener("sm_profile_updated", handleProfileUpdate);
   }, []);
 
   // Handler: Gunakan Lokasi Kampus yang sudah disetting di Pengaturan
@@ -125,8 +143,30 @@ export default function KosanTab() {
     );
   };
 
+  // Load kosan dari MySQL
+  useEffect(() => {
+    let isMounted = true;
+    async function fetchKosan() {
+      try {
+        const data = await apiClient.getKosan({
+          lat: currentLocation.lat,
+          lng: currentLocation.lng,
+        });
+        if (isMounted && data && data.length > 0) {
+          setKosanList(data);
+        }
+      } catch (e) {
+        console.warn("Gagal load kosan dari MySQL:", e);
+      }
+    }
+    fetchKosan();
+    return () => {
+      isMounted = false;
+    };
+  }, [currentLocation.lat, currentLocation.lng]);
+
   // Hitung jarak Haversine ke titik acuan aktif
-  const kosanWithDistance = DEFAULT_KOSAN.map((k) => {
+  const kosanWithDistance = kosanList.map((k) => {
     const jarak = calculateDistance(currentLocation.lat, currentLocation.lng, k.lat, k.lng);
     return { ...k, jarak };
   });
@@ -170,7 +210,7 @@ export default function KosanTab() {
   return (
     <div className="space-y-6 pb-24">
       {/* 1. HERO BANNER: PILIHAN LOKASI KAMPUS PENGATURAN / INPUT KAMPUS */}
-      <div className="rounded-3xl bg-gradient-to-br from-indigo-600 via-indigo-700 to-violet-900 p-6 sm:p-7 text-white shadow-xl shadow-indigo-500/20 relative overflow-hidden">
+      <div className="rounded-3xl bg-linear-to-br from-indigo-600 via-indigo-700 to-violet-900 p-6 sm:p-7 text-white shadow-xl shadow-indigo-500/20 relative overflow-hidden">
         <div className="absolute -top-12 -right-12 w-56 h-56 rounded-full bg-white/10 blur-3xl pointer-events-none" />
         <div className="relative z-10 max-w-2xl space-y-4">
           <div>

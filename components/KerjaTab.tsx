@@ -14,8 +14,6 @@ import {
   Search,
   RefreshCw,
   Building2,
-  Calendar,
-  Layers,
   Database,
 } from "lucide-react";
 import AdzunaConfigModal from "./AdzunaConfigModal";
@@ -44,7 +42,7 @@ export default function KerjaTab() {
           appId = cfg.appId || "";
           appKey = cfg.appKey || "";
         }
-      } catch (_) {}
+      } catch {}
 
       const whatParam = searchKeyword.trim() || "magang";
       const whereParam = searchLocation.trim() || "Indonesia";
@@ -82,7 +80,9 @@ export default function KerjaTab() {
   }, [searchKeyword, searchLocation]);
 
   useEffect(() => {
-    fetchJobs();
+    queueMicrotask(() => {
+      fetchJobs();
+    });
 
     const handleUpdate = () => {
       fetchJobs();
@@ -118,7 +118,7 @@ export default function KerjaTab() {
   return (
     <div className="space-y-6 pb-24">
       {/* Banner Utama */}
-      <div className="rounded-3xl bg-gradient-to-br from-blue-600 via-indigo-700 to-slate-900 p-6 text-white shadow-xl shadow-blue-500/20 relative overflow-hidden">
+      <div className="rounded-3xl bg-linear-to-br from-blue-600 via-indigo-700 to-slate-900 p-6 text-white shadow-xl shadow-blue-500/20 relative overflow-hidden">
         <div className="absolute top-0 right-0 -mr-8 -mt-8 w-44 h-44 rounded-full bg-white/10 blur-2xl pointer-events-none" />
         <div className="relative z-10 max-w-xl">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-xs font-semibold mb-3">

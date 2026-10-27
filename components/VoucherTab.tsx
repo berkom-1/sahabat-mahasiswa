@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Search, Flame, Tag, ExternalLink, MapPin, Store, KeyRound, Sparkles } from "lucide-react";
+import { Search, MapPin, Store } from "lucide-react";
 import { Voucher } from "@/lib/types";
 import { DEFAULT_VOUCHERS } from "@/lib/data";
 import { bukaAplikasiPlatform } from "@/lib/launcher";
@@ -21,25 +21,33 @@ export default function VoucherTab() {
   const [showTikTokConfig, setShowTikTokConfig] = useState(false);
 
   // TikTok API status
-  const [hasTikTokKey, setHasTikTokKey] = useState(false);
+  const [hasTikTokKey, setHasTikTokKey] = useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("sm_tiktok_dining_config");
+        if (saved) return !!JSON.parse(saved).clientKey;
+      } catch {}
+    }
+    return false;
+  });
   const [toastMsg, setToastMsg] = useState<string | null>(null);
 
   const checkTikTokConfig = () => {
     try {
       const saved = localStorage.getItem("sm_tiktok_dining_config");
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        setHasTikTokKey(!!parsed.clientKey);
-      } else {
-        setHasTikTokKey(false);
-      }
-    } catch (_) {
+      setHasTikTokKey(saved ? !!JSON.parse(saved).clientKey : false);
+    } catch {
       setHasTikTokKey(false);
     }
   };
 
   useEffect(() => {
-    checkTikTokConfig();
+    window.addEventListener("storage", checkTikTokConfig);
+    window.addEventListener("sm_profile_updated", checkTikTokConfig);
+    return () => {
+      window.removeEventListener("storage", checkTikTokConfig);
+      window.removeEventListener("sm_profile_updated", checkTikTokConfig);
+    };
   }, []);
 
   const showToast = (msg: string) => {
@@ -125,7 +133,7 @@ export default function VoucherTab() {
       )}
 
       {/* Header Banner & API Key Status */}
-      <div className="p-5 rounded-3xl bg-gradient-to-r from-[#FE2C55]/15 via-rose-500/10 to-indigo-600/10 border border-[#FE2C55]/20 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="p-5 rounded-3xl bg-linear-to-r from-[#FE2C55]/15 via-rose-500/10 to-indigo-600/10 border border-[#FE2C55]/20 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="text-xl">🍽️</span>
@@ -264,7 +272,7 @@ export default function VoucherTab() {
                   <span className="text-amber-500 font-bold flex items-center gap-1">
                     ⭐ {v.rating || "4.8"} ({v.terjual || "1.5rb"} terjual)
                   </span>
-                  <span className="flex items-center gap-1 text-slate-500 dark:text-slate-400 truncate max-w-[170px]">
+                  <span className="flex items-center gap-1 text-slate-500 dark:text-slate-400 truncate max-w-42.5">
                     <MapPin className="w-3 h-3 text-rose-500 shrink-0" />
                     <span>{v.mapQuery ? "📍 Outlet Terdekat" : "🌐 Berlaku Online"}</span>
                   </span>

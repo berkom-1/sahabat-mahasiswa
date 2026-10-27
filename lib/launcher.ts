@@ -1,5 +1,13 @@
-import { Voucher, Outlet } from "./types";
+import { Voucher } from "./types";
 import { OUTLETS } from "./data";
+
+declare global {
+  interface Window {
+    electronAPI?: {
+      openExternal: (url: string) => void;
+    };
+  }
+}
 
 export interface LaunchConfig {
   namaApp: string;
@@ -13,8 +21,8 @@ export function bukaUrlAman(url: string) {
   if (!url) return;
 
   // 1. Windows Electron (.exe) Support
-  if (typeof window !== "undefined" && (window as any).electronAPI?.openExternal) {
-    (window as any).electronAPI.openExternal(url);
+  if (typeof window !== "undefined" && window.electronAPI?.openExternal) {
+    window.electronAPI.openExternal(url);
     return;
   }
 
@@ -23,7 +31,7 @@ export function bukaUrlAman(url: string) {
     try {
       const win = window.open(url, "_blank");
       if (!win) window.location.href = url;
-    } catch (_) {
+    } catch {
       window.location.href = url;
     }
     return;
@@ -41,7 +49,7 @@ export function bukaUrlAman(url: string) {
       a.click();
       setTimeout(() => a.remove(), 250);
     }
-  } catch (_) {
+  } catch {
     window.location.href = url;
   }
 }
@@ -52,7 +60,7 @@ export function luncurkanAppAtauWeb(cfg: LaunchConfig) {
   if (typeof window === "undefined") return;
 
   // Windows Electron Desktop
-  if ((window as any).electronAPI?.openExternal) {
+  if (window.electronAPI?.openExternal) {
     if (onToast) onToast(`🌐 Membuka website resmi ${namaApp}...`);
     bukaUrlAman(webUrl);
     return;

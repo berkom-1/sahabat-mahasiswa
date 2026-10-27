@@ -2,9 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useSession, signOut as nextAuthSignOut } from "next-auth/react";
-import { supabase } from "@/lib/supabase";
-import type { User } from "@supabase/supabase-js";
-import { GraduationCap, Link2, X } from "lucide-react";
+import { X } from "lucide-react";
 
 import Navbar from "@/components/Navbar";
 import BottomNav, { TabKey } from "@/components/BottomNav";
@@ -17,9 +15,16 @@ import AuthModal from "@/components/AuthModal";
 import ProfileModal from "@/components/ProfileModal";
 import TikTokConfigModal from "@/components/TikTokConfigModal";
 
+interface LocalMySQLUser {
+  id: string;
+  name: string;
+  email: string;
+  avatar_url?: string | null;
+}
+
 export default function Home() {
   const { data: session } = useSession();
-  const [supabaseUser, setSupabaseUser] = useState<User | null>(null);
+  const [localUser, setLocalUser] = useState<LocalMySQLUser | null>(null);
   const [activeTab, setActiveTab] = useState<TabKey>("kosan");
   const [theme, setTheme] = useState<"dark" | "light">("light");
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -27,45 +32,38 @@ export default function Home() {
   const [showTikTokModal, setShowTikTokModal] = useState(false);
   const [dismissDualBanner, setDismissDualBanner] = useState(false);
 
-  // Sync Supabase Auth session
+  // Sync MySQL user from local cache
   useEffect(() => {
-    async function initAuth() {
+    const timer = setTimeout(() => {
       try {
-        const {
-          data: { session: supaSession },
-        } = await supabase.auth.getSession();
-        setSupabaseUser(supaSession?.user ?? null);
-      } catch (e) {
-        console.warn("Error getting initial Supabase session:", e);
+        const savedUser = localStorage.getItem("sm_mysql_user");
+        if (savedUser) {
+          setLocalUser(JSON.parse(savedUser));
+        }
+      } catch {
+        // ignore
       }
-    }
-    initAuth();
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, currentSession) => {
-      setSupabaseUser(currentSession?.user ?? null);
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   // Sync Dark/Light theme class on <html>
   useEffect(() => {
-    const savedTheme = localStorage.getItem("sm_theme") as "dark" | "light" | null;
-    if (savedTheme) {
-      setTheme(savedTheme);
-      if (savedTheme === "dark") {
+    const timer = setTimeout(() => {
+      const savedTheme = localStorage.getItem("sm_theme") as "dark" | "light" | null;
+      if (savedTheme) {
+        setTheme(savedTheme);
+        if (savedTheme === "dark") {
+          document.documentElement.classList.add("dark");
+        } else {
+          document.documentElement.classList.remove("dark");
+        }
+      } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        setTheme("dark");
         document.documentElement.classList.add("dark");
-      } else {
-        document.documentElement.classList.remove("dark");
       }
-    } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      setTheme("dark");
-      document.documentElement.classList.add("dark");
-    }
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   // Sync custom profile avatar
@@ -79,7 +77,7 @@ export default function Home() {
           const parsed = JSON.parse(cached);
           if (parsed.avatar_url) setCustomAvatar(parsed.avatar_url);
         }
-      } catch (_) {}
+      } catch {}
     };
 
     loadCachedAvatar();
@@ -98,37 +96,45 @@ export default function Home() {
     }
   };
 
-  // Active user data (from Google NextAuth or Supabase Auth)
+  // Active user data (from Google NextAuth or MySQL Login)
   const activeUser = session?.user
     ? {
-        id: session.user.email || "nextauth-user",
+        id: (session.user as { id?: string }).id || session.user.email || "user-1",
         name: session.user.name,
         email: session.user.email,
         image: customAvatar || session.user.image,
       }
-    : supabaseUser
+    : localUser
     ? {
-        id: supabaseUser.id,
-        name: supabaseUser.user_metadata?.nama || supabaseUser.email?.split("@")[0],
-        email: supabaseUser.email,
-        image: customAvatar || null,
+        id: localUser.id,
+        name: localUser.name,
+        email: localUser.email,
+        image: customAvatar || localUser.avatar_url || null,
       }
     : null;
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    localStorage.removeItem("sm_mysql_user");
+    localStorage.removeItem("sm_auth_metadata");
+    localStorage.removeItem("sm_user_profile_cache");
     if (session) {
       await nextAuthSignOut({ redirect: false });
     }
-    setSupabaseUser(null);
+    setLocalUser(null);
+    window.location.reload();
   };
 
   // Check Dual Account Status
-  let authMeta: any = {};
+  interface AuthMetadata {
+    student_email?: string | null;
+    google_linked?: boolean;
+    provider?: string;
+  }
+  let authMeta: AuthMetadata = {};
   if (typeof window !== "undefined") {
     try {
       authMeta = JSON.parse(localStorage.getItem("sm_auth_metadata") || "{}");
-    } catch (_) {}
+    } catch {}
   }
 
   const isGoogleLogin = !!session?.user || !!activeUser?.email?.includes("@gmail.com");
@@ -158,7 +164,7 @@ export default function Home() {
 
       {/* Dual Account Smart Banner */}
       {showGoogleAddCampusBanner && (
-        <div className="bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-700 text-white px-4 py-2.5 text-xs shadow-md border-b border-indigo-500/30">
+        <div className="bg-linear-to-r from-indigo-600 via-indigo-700 to-purple-700 text-white px-4 py-2.5 text-xs shadow-md border-b border-indigo-500/30">
           <div className="max-w-5xl mx-auto flex items-center justify-between gap-3 flex-wrap">
             <div className="flex items-center gap-2">
               <span className="text-base">🎓</span>
@@ -188,7 +194,7 @@ export default function Home() {
       )}
 
       {showCampusAddGoogleBanner && (
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-4 py-2.5 text-xs shadow-md border-b border-blue-500/30">
+        <div className="bg-linear-to-r from-blue-600 to-indigo-700 text-white px-4 py-2.5 text-xs shadow-md border-b border-blue-500/30">
           <div className="max-w-5xl mx-auto flex items-center justify-between gap-3 flex-wrap">
             <div className="flex items-center gap-2">
               <span className="text-base">🔵</span>

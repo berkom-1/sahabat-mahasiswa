@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { X, Key, ShieldCheck, RefreshCw, CheckCircle2, AlertCircle, Eye, EyeOff, ExternalLink, HelpCircle, BookOpen } from "lucide-react";
 import { TikTokConfig } from "@/lib/types";
-import { supabase } from "@/lib/supabase";
+import { apiClient } from "@/lib/api-client";
 
 interface TikTokConfigModalProps {
   isOpen: boolean;
@@ -18,9 +18,36 @@ export default function TikTokConfigModal({
   userId,
   onSavedSuccess,
 }: TikTokConfigModalProps) {
-  const [clientKey, setClientKey] = useState("");
-  const [accessToken, setAccessToken] = useState("");
-  const [merchantId, setMerchantId] = useState("");
+  const [clientKey, setClientKey] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("sm_tiktok_dining_config");
+        if (saved) return JSON.parse(saved).clientKey || "";
+      } catch {}
+    }
+    return "";
+  });
+  const [accessToken, setAccessToken] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("sm_tiktok_dining_config");
+        if (saved) return JSON.parse(saved).accessToken || "";
+      } catch {}
+    }
+    return "";
+  });
+  const [merchantId, setMerchantId] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("sm_tiktok_dining_config");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          return parsed.merchantId || parsed.shopId || "";
+        }
+      } catch {}
+    }
+    return "";
+  });
   const [showKey, setShowKey] = useState(false);
   const [showToken, setShowToken] = useState(false);
   const [activeTab, setActiveTab] = useState<"form" | "guide" | "faq">("form");
@@ -28,35 +55,22 @@ export default function TikTokConfigModal({
   const [testResult, setTestResult] = useState<{ success: boolean; msg: string } | null>(null);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
 
-  // Load existing config from localStorage & Supabase
+  // Load existing config from MySQL if user logged in
   useEffect(() => {
     if (!isOpen) return;
-    try {
-      const saved = localStorage.getItem("sm_tiktok_dining_config");
-      if (saved) {
-        const parsed: TikTokConfig = JSON.parse(saved);
-        setClientKey(parsed.clientKey || "");
-        setAccessToken(parsed.accessToken || "");
-        setMerchantId(parsed.merchantId || parsed.shopId || "");
-      }
-    } catch (_) {}
 
-    // Load from supabase if user logged in
-    async function fetchFromSupabase() {
+    // Load from MySQL if user logged in
+    async function fetchFromMySQL() {
       if (!userId) return;
       try {
-        const { data } = await supabase
-          .from("profiles")
-          .select("tiktok_client_key, tiktok_access_token")
-          .eq("id", userId)
-          .single();
-        if (data) {
-          if (data.tiktok_client_key) setClientKey(data.tiktok_client_key);
-          if (data.tiktok_access_token) setAccessToken(data.tiktok_access_token);
+        const profile = await apiClient.getProfile(userId);
+        if (profile) {
+          if (profile.tiktok_client_key) setClientKey(profile.tiktok_client_key);
+          if (profile.tiktok_access_token) setAccessToken(profile.tiktok_access_token);
         }
-      } catch (_) {}
+      } catch {}
     }
-    fetchFromSupabase();
+    fetchFromMySQL();
   }, [isOpen, userId]);
 
   if (!isOpen) return null;
@@ -80,16 +94,16 @@ export default function TikTokConfigModal({
 
     localStorage.setItem("sm_tiktok_dining_config", JSON.stringify(config));
 
-    // Sync to Supabase profile if logged in
+    // Sync to MySQL profile if logged in
     if (userId) {
       try {
-        await supabase.from("profiles").upsert({
+        await apiClient.updateProfile({
           id: userId,
           tiktok_client_key: config.clientKey,
           tiktok_access_token: config.accessToken,
         });
       } catch (err) {
-        console.warn("Gagal simpan tiktok config ke supabase:", err);
+        console.warn("Gagal simpan tiktok config ke MySQL:", err);
       }
     }
 
@@ -355,7 +369,7 @@ export default function TikTokConfigModal({
 
         {/* TAB 2: PANDUAN REGISTRASI TIKTOK DEVELOPER */}
         {activeTab === "guide" && (
-          <div className="space-y-3.5 text-xs text-slate-600 dark:text-slate-300 max-h-[380px] overflow-y-auto pr-1">
+          <div className="space-y-3.5 text-xs text-slate-600 dark:text-slate-300 max-h-95 overflow-y-auto pr-1">
             <div className="p-3 rounded-2xl bg-[#FE2C55]/5 border border-[#FE2C55]/20 flex items-center justify-between">
               <div>
                 <div className="font-bold text-slate-900 dark:text-white">Portal Pengembang Resmi</div>
@@ -393,7 +407,7 @@ export default function TikTokConfigModal({
 
         {/* TAB 3: FAQ */}
         {activeTab === "faq" && (
-          <div className="space-y-3 text-xs text-slate-600 dark:text-slate-300 max-h-[380px] overflow-y-auto pr-1">
+          <div className="space-y-3 text-xs text-slate-600 dark:text-slate-300 max-h-95 overflow-y-auto pr-1">
             <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 space-y-1">
               <strong className="text-slate-900 dark:text-white">Apakah mahasiswa lain wajib mengisi API Key ini?</strong>
               <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
@@ -409,7 +423,7 @@ export default function TikTokConfigModal({
             <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 space-y-1">
               <strong className="text-slate-900 dark:text-white">Apakah aman menyimpan Client Key di sini?</strong>
               <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
-                Sangat aman. Client Key adalah identifier publik aplikasi. Kredensial disimpan secara terenkripsi di browser lokal dan database Supabase profil Anda sendiri.
+                Sangat aman. Client Key adalah identifier publik aplikasi. Kredensial disimpan secara terenkripsi di browser lokal dan database MySQL profil Anda sendiri.
               </p>
             </div>
           </div>

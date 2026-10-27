@@ -2,14 +2,12 @@
 
 import React, { useState, useEffect } from "react";
 import { Tugas } from "@/lib/types";
-import { supabase } from "@/lib/supabase";
+import { apiClient } from "@/lib/api-client";
 import {
   CheckSquare,
   Clock,
   Plus,
   Trash2,
-  AlertTriangle,
-  Flame,
   CheckCircle2,
   Calendar,
 } from "lucide-react";
@@ -21,22 +19,22 @@ interface TugasTabProps {
 const INITIAL_TUGAS: Tugas[] = [
   {
     id: "task-1",
-    nama_tugas: "Laporan Praktikum Basis Data (Supabase & SQL)",
-    deadline: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+    nama_tugas: "Laporan Praktikum Basis Data (MySQL & SQL)",
+    deadline: "2026-10-30",
     bobot: 3, // Berat
     selesai: false,
   },
   {
     id: "task-2",
     nama_tugas: "Resume Jurnal Etika Profesi Bab 4",
-    deadline: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+    deadline: "2026-11-02",
     bobot: 1, // Ringan
     selesai: false,
   },
   {
     id: "task-3",
     nama_tugas: "Kuis Online Algoritma & Pemrograman",
-    deadline: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+    deadline: "2026-10-28",
     bobot: 2, // Sedang
     selesai: false,
   },
@@ -49,29 +47,24 @@ export default function TugasTab({ userId }: TugasTabProps) {
 
   // Form State
   const [namaTugas, setNamaTugas] = useState("");
-  const [deadline, setDeadline] = useState(
-    new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split("T")[0]
-  );
+  const [deadline, setDeadline] = useState<string>(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    return d.toISOString().split("T")[0];
+  });
   const [bobot, setBobot] = useState<number>(2);
 
-  // Load Tasks
+  // Load Tasks from MySQL
   useEffect(() => {
     async function loadTasks() {
-      if (userId) {
-        try {
-          const { data, error } = await supabase
-            .from("tugas")
-            .select("*")
-            .eq("user_id", userId)
-            .order("deadline", { ascending: true });
-
-          if (!error && data && data.length > 0) {
-            setTugasList(data as Tugas[]);
-            return;
-          }
-        } catch (err) {
-          console.warn("Gagal fetch Supabase tugas:", err);
+      try {
+        const data = await apiClient.getTugas(userId || undefined);
+        if (data && data.length > 0) {
+          setTugasList(data);
+          return;
         }
+      } catch (err) {
+        console.warn("Gagal fetch MySQL tugas:", err);
       }
 
       // Fallback LocalStorage
@@ -94,26 +87,40 @@ export default function TugasTab({ userId }: TugasTabProps) {
     localStorage.setItem("sahabat_mahasiswa_tugas", JSON.stringify(newList));
   };
 
-  // Toggle Finish
+  // Toggle Finish in MySQL
   const handleToggleSelesai = async (id: string, currentSelesai: boolean) => {
     const nextVal = !currentSelesai;
-    if (userId) {
-      try {
-        await supabase.from("tugas").update({ selesai: nextVal }).eq("id", id);
-      } catch (err) {
-        console.warn("Gagal update tugas di Supabase:", err);
-      }
+    try {
+      await apiClient.updateTugas(id, { selesai: nextVal });
+    } catch (err) {
+      console.warn("Gagal update tugas di MySQL:", err);
     }
     updateTugas(tugasList.map((t) => (t.id === id ? { ...t, selesai: nextVal } : t)));
   };
 
-  // Add Task
+  // Add Task to MySQL
   const handleAddTugas = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!namaTugas.trim()) return;
 
+    let createdId = "task-" + Date.now();
+    try {
+      const created = await apiClient.addTugas({
+        user_id: userId || undefined,
+        nama_tugas: namaTugas.trim(),
+        deadline,
+        bobot,
+        selesai: false,
+      });
+      if (created?.id) {
+        createdId = created.id;
+      }
+    } catch (err) {
+      console.warn("Gagal insert tugas ke MySQL:", err);
+    }
+
     const newTask: Tugas = {
-      id: "task-" + Date.now(),
+      id: createdId,
       user_id: userId || undefined,
       nama_tugas: namaTugas.trim(),
       deadline,
@@ -121,36 +128,17 @@ export default function TugasTab({ userId }: TugasTabProps) {
       selesai: false,
     };
 
-    if (userId) {
-      try {
-        const { error } = await supabase.from("tugas").insert([
-          {
-            user_id: userId,
-            nama_tugas: newTask.nama_tugas,
-            deadline: newTask.deadline,
-            bobot: newTask.bobot,
-            selesai: false,
-          },
-        ]);
-        if (error) console.warn("Supabase insert tugas error:", error);
-      } catch (err) {
-        console.warn("Gagal insert tugas ke Supabase:", err);
-      }
-    }
-
     updateTugas([newTask, ...tugasList]);
     setNamaTugas("");
     setShowAddModal(false);
   };
 
-  // Delete Task
+  // Delete Task from MySQL
   const handleDeleteTugas = async (id: string) => {
-    if (userId) {
-      try {
-        await supabase.from("tugas").delete().eq("id", id);
-      } catch (err) {
-        console.warn("Gagal hapus tugas Supabase:", err);
-      }
+    try {
+      await apiClient.deleteTugas(id);
+    } catch (err) {
+      console.warn("Gagal hapus tugas di MySQL:", err);
     }
     updateTugas(tugasList.filter((t) => t.id !== id));
   };
@@ -178,7 +166,7 @@ export default function TugasTab({ userId }: TugasTabProps) {
   return (
     <div className="space-y-6 pb-24">
       {/* Banner */}
-      <div className="rounded-3xl bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-700 p-6 text-white shadow-xl shadow-purple-500/20 relative overflow-hidden">
+      <div className="rounded-3xl bg-linear-to-br from-purple-600 via-indigo-600 to-blue-700 p-6 text-white shadow-xl shadow-purple-500/20 relative overflow-hidden">
         <div className="absolute top-0 right-0 -mr-8 -mt-8 w-44 h-44 rounded-full bg-white/10 blur-2xl pointer-events-none" />
         <div className="relative z-10 max-w-xl">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-xs font-semibold mb-3">

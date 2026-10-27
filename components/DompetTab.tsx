@@ -2,14 +2,13 @@
 
 import React, { useState, useEffect } from "react";
 import { Transaksi } from "@/lib/types";
-import { supabase } from "@/lib/supabase";
+import { apiClient } from "@/lib/api-client";
 import {
   Wallet,
   TrendingDown,
   TrendingUp,
   Plus,
   Calendar,
-  AlertCircle,
   Copy,
   Check,
   Trash2,
@@ -39,7 +38,7 @@ const INITIAL_TRANSAKSI: Transaksi[] = [
     kategori: "Uang Saku / Kiriman Ortu",
     nominal: 1500000,
     catatan: "Kiriman bulanan orang tua",
-    tanggal: new Date().toISOString().split("T")[0],
+    tanggal: "2026-10-01",
   },
   {
     id: "tx-2",
@@ -47,7 +46,7 @@ const INITIAL_TRANSAKSI: Transaksi[] = [
     kategori: "Makan & Minum",
     nominal: 25000,
     catatan: "Makan siang kantin kampus",
-    tanggal: new Date().toISOString().split("T")[0],
+    tanggal: "2026-10-15",
   },
   {
     id: "tx-3",
@@ -55,13 +54,12 @@ const INITIAL_TRANSAKSI: Transaksi[] = [
     kategori: "Bahan Kuliah & Fotokopi",
     nominal: 15000,
     catatan: "Print modul laporan praktikum",
-    tanggal: new Date().toISOString().split("T")[0],
+    tanggal: "2026-10-20",
   },
 ];
 
 export default function DompetTab({ userId }: DompetTabProps) {
   const [transaksiList, setTransaksiList] = useState<Transaksi[]>([]);
-  const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [copiedSummary, setCopiedSummary] = useState(false);
 
@@ -71,26 +69,17 @@ export default function DompetTab({ userId }: DompetTabProps) {
   const [nominal, setNominal] = useState("");
   const [catatan, setCatatan] = useState("");
 
-  // Load transactions
+  // Load transactions from MySQL
   useEffect(() => {
     async function loadData() {
-      setLoading(true);
-      if (userId) {
-        try {
-          const { data, error } = await supabase
-            .from("transaksi")
-            .select("*")
-            .eq("user_id", userId)
-            .order("tanggal", { ascending: false });
-
-          if (!error && data && data.length > 0) {
-            setTransaksiList(data as Transaksi[]);
-            setLoading(false);
-            return;
-          }
-        } catch (e) {
-          console.warn("Gagal fetch Supabase transaksi:", e);
+      try {
+        const data = await apiClient.getTransaksi(userId || undefined);
+        if (data && data.length > 0) {
+          setTransaksiList(data);
+          return;
         }
+      } catch (e) {
+        console.warn("Gagal fetch MySQL transaksi:", e);
       }
 
       // Fallback LocalStorage
@@ -104,7 +93,6 @@ export default function DompetTab({ userId }: DompetTabProps) {
       } else {
         setTransaksiList(INITIAL_TRANSAKSI);
       }
-      setLoading(false);
     }
     loadData();
   }, [userId]);
@@ -134,39 +122,40 @@ export default function DompetTab({ userId }: DompetTabProps) {
   // Smart Daily Limit
   const dailyLimit = sisaSaldo > 0 ? Math.floor(sisaSaldo / daysRemaining) : 0;
 
-  // Handle Add Transaction
+  // Handle Add Transaction to MySQL
   const handleAddTransaksi = async (e: React.FormEvent) => {
     e.preventDefault();
     const nominalNumber = parseFloat(nominal);
     if (!nominalNumber || nominalNumber <= 0) return;
 
+    let createdId = "tx-" + Date.now();
+    const txDate = new Date().toISOString().split("T")[0];
+
+    try {
+      const created = await apiClient.addTransaksi({
+        user_id: userId || undefined,
+        jenis,
+        kategori,
+        nominal: nominalNumber,
+        catatan: catatan.trim() || undefined,
+        tanggal: txDate,
+      });
+      if (created?.id) {
+        createdId = created.id;
+      }
+    } catch (err) {
+      console.warn("Gagal simpan ke MySQL:", err);
+    }
+
     const newTx: Transaksi = {
-      id: "tx-" + Date.now(),
+      id: createdId,
       user_id: userId || undefined,
       jenis,
       kategori,
       nominal: nominalNumber,
       catatan: catatan.trim() || undefined,
-      tanggal: new Date().toISOString().split("T")[0],
+      tanggal: txDate,
     };
-
-    if (userId) {
-      try {
-        const { error } = await supabase.from("transaksi").insert([
-          {
-            user_id: userId,
-            jenis: newTx.jenis,
-            kategori: newTx.kategori,
-            nominal: newTx.nominal,
-            catatan: newTx.catatan,
-            tanggal: newTx.tanggal,
-          },
-        ]);
-        if (error) console.warn("Supabase insert error:", error);
-      } catch (err) {
-        console.warn("Gagal simpan ke Supabase:", err);
-      }
-    }
 
     updateList([newTx, ...transaksiList]);
     setNominal("");
@@ -174,14 +163,12 @@ export default function DompetTab({ userId }: DompetTabProps) {
     setShowAddModal(false);
   };
 
-  // Handle Delete
+  // Handle Delete in MySQL
   const handleDelete = async (id: string) => {
-    if (userId) {
-      try {
-        await supabase.from("transaksi").delete().eq("id", id);
-      } catch (err) {
-        console.warn("Gagal hapus transaksi di Supabase:", err);
-      }
+    try {
+      await apiClient.deleteTransaksi(id);
+    } catch (err) {
+      console.warn("Gagal hapus transaksi di MySQL:", err);
     }
     updateList(transaksiList.filter((t) => t.id !== id));
   };
@@ -209,7 +196,7 @@ export default function DompetTab({ userId }: DompetTabProps) {
   return (
     <div className="space-y-6 pb-24">
       {/* Smart Daily Budget Card */}
-      <div className="rounded-3xl bg-gradient-to-br from-emerald-600 via-teal-700 to-cyan-800 p-6 text-white shadow-xl shadow-teal-500/20 relative overflow-hidden">
+      <div className="rounded-3xl bg-linear-to-br from-emerald-600 via-teal-700 to-cyan-800 p-6 text-white shadow-xl shadow-teal-500/20 relative overflow-hidden">
         <div className="absolute top-0 right-0 -mr-8 -mt-8 w-44 h-44 rounded-full bg-white/10 blur-2xl pointer-events-none" />
         <div className="relative z-10">
           <div className="flex items-center justify-between">

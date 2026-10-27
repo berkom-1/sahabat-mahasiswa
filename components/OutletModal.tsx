@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { X, ArrowLeft, Star, MapPin, Clock, Bookmark, Share2, Compass, ShieldCheck, ExternalLink } from "lucide-react";
+import { ArrowLeft, Star, MapPin, Clock, Bookmark, Share2, Compass, ShieldCheck, ExternalLink } from "lucide-react";
 import { Outlet, Voucher } from "@/lib/types";
 import { OUTLETS, DEFAULT_VOUCHERS } from "@/lib/data";
 import { bukaAplikasiPlatform } from "@/lib/launcher";
@@ -64,14 +64,14 @@ export default function OutletModal({
     if (outletVouchers.length > 0) {
       bukaAplikasiPlatform(outletVouchers[0], onToast);
     } else {
-      const mockV: any = {
+      const mockV: Partial<Voucher> = {
         platform: outlet.platform,
         brand: outlet.brand,
         brandKey: outlet.brandKey,
         tiktokUsername: outlet.tiktokUsername,
         linkBeli: `https://www.tiktok.com/@${outlet.tiktokUsername}`,
       };
-      bukaAplikasiPlatform(mockV, onToast);
+      bukaAplikasiPlatform(mockV as Voucher, onToast);
     }
   };
 
@@ -138,7 +138,7 @@ export default function OutletModal({
                   <span>{outlet.disimpan} disimpan</span>
                 </div>
                 <p className="text-xs font-medium text-slate-600 dark:text-slate-300 mt-1 italic line-clamp-1">
-                  "{outlet.tagline}"
+                  &ldquo;{outlet.tagline}&rdquo;
                 </p>
                 <div className="flex items-center gap-1.5 mt-2 text-[11px] text-slate-400">
                   <Clock className="w-3 h-3 text-emerald-500" />
@@ -173,7 +173,7 @@ export default function OutletModal({
           </div>
 
           {/* Official Promo Banner */}
-          <div className="p-3.5 rounded-2xl bg-gradient-to-r from-[#FE2C55]/15 via-rose-500/10 to-transparent border border-[#FE2C55]/30 flex flex-col gap-1.5">
+          <div className="p-3.5 rounded-2xl bg-linear-to-r from-[#FE2C55]/15 via-rose-500/10 to-transparent border border-[#FE2C55]/30 flex flex-col gap-1.5">
             <div className="flex justify-between items-center">
               <span className="text-xs font-black text-slate-900 dark:text-white">
                 Jelajahi TikTok GO · Diskon s/d 50%

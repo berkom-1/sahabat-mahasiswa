@@ -1,12 +1,9 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { supabase } from "@/lib/supabase";
-import { signIn } from "next-auth/react";
+import { apiClient } from "@/lib/api-client";
 import {
   X,
-  User as UserIcon,
-  Mail,
   School,
   Building,
   BookOpen,
@@ -25,7 +22,6 @@ import {
   Upload,
   Image as ImageIcon,
   Trash2,
-  RefreshCw,
 } from "lucide-react";
 import { PRESET_AVATARS, UNIVERSITAS_LIST } from "@/lib/data";
 import TikTokConfigModal from "./TikTokConfigModal";
@@ -52,7 +48,6 @@ export default function ProfileModal({
   const [kampus, setKampus] = useState("");
   const [fakultas, setFakultas] = useState("");
   const [jurusan, setJurusan] = useState("");
-  const [semester, setSemester] = useState<number>(1);
   const [telp, setTelp] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string>("");
   const [showUrlInput, setShowUrlInput] = useState(false);
@@ -87,69 +82,67 @@ export default function ProfileModal({
     if (!isOpen) return;
 
     // Load initial values from cache first if available
-    try {
-      const cached = localStorage.getItem("sm_user_profile_cache");
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (parsed.nama) setNama(parsed.nama);
-        if (parsed.kampus) setKampus(parsed.kampus);
-        if (parsed.fakultas) setFakultas(parsed.fakultas);
-        if (parsed.jurusan) setJurusan(parsed.jurusan);
-        if (parsed.telp) setTelp(parsed.telp);
-        if (parsed.avatar_url) setAvatarUrl(parsed.avatar_url);
-      } else {
+    queueMicrotask(() => {
+      try {
+        const cached = localStorage.getItem("sm_user_profile_cache");
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed.nama) setNama(parsed.nama);
+          if (parsed.kampus) setKampus(parsed.kampus);
+          if (parsed.fakultas) setFakultas(parsed.fakultas);
+          if (parsed.jurusan) setJurusan(parsed.jurusan);
+          if (parsed.telp) setTelp(parsed.telp);
+          if (parsed.avatar_url) setAvatarUrl(parsed.avatar_url);
+        } else {
+          setNama(user?.name || "");
+          setAvatarUrl(user?.image || PRESET_AVATARS[0]);
+        }
+      } catch {
         setNama(user?.name || "");
         setAvatarUrl(user?.image || PRESET_AVATARS[0]);
       }
-    } catch (_) {
-      setNama(user?.name || "");
-      setAvatarUrl(user?.image || PRESET_AVATARS[0]);
-    }
 
-    // Check TikTok config
-    try {
-      const tiktokSaved = localStorage.getItem("sm_tiktok_dining_config");
-      setHasTikTokKey(!!tiktokSaved && !!JSON.parse(tiktokSaved).clientKey);
-    } catch (_) {
-      setHasTikTokKey(false);
-    }
-
-    // Load dual-account state from localStorage
-    try {
-      const authMeta = localStorage.getItem("sm_auth_metadata");
-      if (authMeta) {
-        const meta = JSON.parse(authMeta);
-        if (meta.student_email) {
-          setStudentEmail(meta.student_email);
-          setIsStudentVerified(true);
-        }
-        if (meta.google_linked) {
-          setIsGoogleLinked(true);
-          setGoogleEmail(meta.google_email || (isPrimaryGoogle ? user?.email : null));
-        }
+      // Check TikTok config
+      try {
+        const tiktokSaved = localStorage.getItem("sm_tiktok_dining_config");
+        setHasTikTokKey(!!tiktokSaved && !!JSON.parse(tiktokSaved).clientKey);
+      } catch {
+        setHasTikTokKey(false);
       }
-    } catch (_) {}
 
-    if (isPrimaryGoogle) {
-      setIsGoogleLinked(true);
-      setGoogleEmail(user?.email || null);
-    } else if (isPrimaryCampus) {
-      setStudentEmail(user?.email || null);
-      setIsStudentVerified(true);
-    }
+      // Load dual-account state from localStorage
+      try {
+        const authMeta = localStorage.getItem("sm_auth_metadata");
+        if (authMeta) {
+          const meta = JSON.parse(authMeta);
+          if (meta.student_email) {
+            setStudentEmail(meta.student_email);
+            setIsStudentVerified(true);
+          }
+          if (meta.google_linked) {
+            setIsGoogleLinked(true);
+            setGoogleEmail(meta.google_email || (isPrimaryGoogle ? user?.email : null));
+          }
+        }
+      } catch {}
 
-    // Fetch Profile from Supabase
+      if (isPrimaryGoogle) {
+        setIsGoogleLinked(true);
+        setGoogleEmail(user?.email || null);
+      } else if (isPrimaryCampus) {
+        setStudentEmail(user?.email || null);
+        setIsStudentVerified(true);
+      }
+    });
+
+    // Fetch Profile from MySQL
     const fetchProfile = async () => {
       if (!user?.email && !user?.id) return;
 
       try {
-        const { data, error } = await supabase
-          .from("profiles")
-          .select("*")
-          .or(`id.eq.${user.id},email.eq.${user.email}`)
-          .maybeSingle();
+        const data = await apiClient.getProfile(user?.id, user?.email || undefined);
 
-        if (data && !error) {
+        if (data) {
           if (data.nama) setNama(data.nama);
           if (data.kampus) setKampus(data.kampus);
           if (data.fakultas) setFakultas(data.fakultas);
@@ -166,7 +159,7 @@ export default function ProfileModal({
           }
         }
       } catch (e) {
-        console.warn("Tidak dapat mengambil data profil Supabase:", e);
+        console.warn("Tidak dapat mengambil data profil MySQL:", e);
       }
     };
 
@@ -253,16 +246,17 @@ export default function ProfileModal({
           student_verified: true,
         })
       );
-    } catch (_) {}
+    } catch {}
 
-    if (user?.id) {
-      await supabase
-        .from("profiles")
-        .update({
-          student_email: val,
-          student_verified: true,
-        })
-        .eq("id", user.id);
+    try {
+      await apiClient.updateProfile({
+        id: user?.id,
+        email: user?.email || undefined,
+        student_email: val,
+        student_verified: true,
+      });
+    } catch (e) {
+      console.warn("Gagal simpan student_email ke MySQL:", e);
     }
 
     setStatusFeedback(
@@ -291,16 +285,17 @@ export default function ProfileModal({
             google_email: val,
           })
         );
-      } catch (_) {}
+      } catch {}
 
-      if (user?.id) {
-        await supabase
-          .from("profiles")
-          .update({
-            google_email: val,
-            google_linked: true,
-          })
-          .eq("id", user.id);
+      try {
+        await apiClient.updateProfile({
+          id: user?.id,
+          email: user?.email || undefined,
+          google_email: val,
+          google_linked: true,
+        });
+      } catch (e) {
+        console.warn("Gagal update Google email di MySQL:", e);
       }
 
       setStatusFeedback("🔵 Akun Google berhasil ditautkan!");
@@ -316,7 +311,7 @@ export default function ProfileModal({
     setSaved(false);
 
     try {
-      const payload: any = {
+      const payload: Record<string, unknown> = {
         nama,
         kampus: kampus || "Universitas Siliwangi (UNSIL)",
         fakultas,
@@ -328,13 +323,11 @@ export default function ProfileModal({
       if (studentEmail) payload.student_email = studentEmail;
       if (googleEmail) payload.google_email = googleEmail;
 
-      if (user?.id) {
-        await supabase.from("profiles").upsert({
-          id: user.id,
-          email: user.email || "",
-          ...payload,
-        });
-      }
+      await apiClient.updateProfile({
+        id: user?.id,
+        email: user?.email || undefined,
+        ...payload,
+      });
 
       localStorage.setItem(
         "sm_user_profile_cache",
@@ -519,7 +512,7 @@ export default function ProfileModal({
           </div>
 
           {/* 2. SEKSI TAUTAN AKUN & IDENTITAS MAHASISWA (DUAL-ACCOUNT) */}
-          <div className="p-4 rounded-2xl bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-slate-50 dark:to-slate-800/60 border border-indigo-500/20 space-y-3">
+          <div className="p-4 rounded-2xl bg-linear-to-br from-indigo-500/10 via-purple-500/5 to-slate-50 dark:to-slate-800/60 border border-indigo-500/20 space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Link2 className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
@@ -558,7 +551,7 @@ export default function ProfileModal({
                   </div>
                   <div>
                     <div className="text-xs font-bold text-slate-800 dark:text-white">Akun Google</div>
-                    <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono truncate max-w-[200px]">
+                    <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono truncate max-w-50">
                       {isPrimaryGoogle
                         ? user?.email
                         : googleEmail || "Belum ditautkan (opsional)"}
@@ -615,7 +608,7 @@ export default function ProfileModal({
                         <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
                       )}
                     </div>
-                    <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono truncate max-w-[210px]">
+                    <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono truncate max-w-52.5">
                       {isPrimaryCampus
                         ? user?.email
                         : studentEmail || "Belum ditambahkan (opsional)"}
@@ -783,7 +776,7 @@ export default function ProfileModal({
 
           {/* 5. SEKSI INTEGRASI API TIKTOK GO DINING */}
           <div className="pt-1">
-            <div className="p-3.5 rounded-2xl bg-gradient-to-r from-[#FE2C55]/10 via-[#25F4EE]/5 to-transparent border border-[#FE2C55]/20 flex items-center justify-between">
+            <div className="p-3.5 rounded-2xl bg-linear-to-r from-[#FE2C55]/10 via-[#25F4EE]/5 to-transparent border border-[#FE2C55]/20 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-[#FE2C55] text-white flex items-center justify-center text-lg font-bold shadow-md shadow-[#FE2C55]/30">
                   🎵

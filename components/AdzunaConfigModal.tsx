@@ -27,8 +27,24 @@ export default function AdzunaConfigModal({
   onClose,
   onSavedSuccess,
 }: AdzunaConfigModalProps) {
-  const [appId, setAppId] = useState("");
-  const [appKey, setAppKey] = useState("");
+  const [appId, setAppId] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("sm_adzuna_config");
+        if (saved) return JSON.parse(saved).appId || "";
+      } catch {}
+    }
+    return "";
+  });
+  const [appKey, setAppKey] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("sm_adzuna_config");
+        if (saved) return JSON.parse(saved).appKey || "";
+      } catch {}
+    }
+    return "";
+  });
   const [showKey, setShowKey] = useState(false);
   const [activeTab, setActiveTab] = useState<"form" | "guide">("form");
   const [testing, setTesting] = useState(false);
@@ -37,14 +53,16 @@ export default function AdzunaConfigModal({
 
   useEffect(() => {
     if (!isOpen) return;
-    try {
-      const saved = localStorage.getItem("sm_adzuna_config");
-      if (saved) {
-        const parsed: AdzunaConfig = JSON.parse(saved);
-        setAppId(parsed.appId || "");
-        setAppKey(parsed.appKey || "");
-      }
-    } catch (_) {}
+    queueMicrotask(() => {
+      try {
+        const saved = localStorage.getItem("sm_adzuna_config");
+        if (saved) {
+          const parsed: AdzunaConfig = JSON.parse(saved);
+          setAppId(parsed.appId || "");
+          setAppKey(parsed.appKey || "");
+        }
+      } catch {}
+    });
   }, [isOpen]);
 
   if (!isOpen) return null;
@@ -88,7 +106,7 @@ export default function AdzunaConfigModal({
           msg: "Koneksi gagal atau kredensial belum valid. Pastikan App ID & Key sudah benar dari developer.adzuna.com.",
         });
       }
-    } catch (e: any) {
+    } catch {
       setTestResult({
         success: false,
         msg: "Terjadi kendala jaringan saat menghubungi Adzuna API.",
@@ -133,7 +151,7 @@ export default function AdzunaConfigModal({
     <div className="fixed inset-0 z-50 bg-black/65 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-lg shadow-2xl relative my-6 flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-gradient-to-r from-blue-600/10 via-indigo-600/5 to-transparent">
+        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-linear-to-r from-blue-600/10 via-indigo-600/5 to-transparent">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-bold text-base shadow-md shadow-blue-500/20">
               <Briefcase className="w-5 h-5" />

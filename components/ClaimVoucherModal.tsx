@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { X, Copy, Check, ExternalLink, MapPin, Sparkles, ShieldCheck } from "lucide-react";
+import { X, Copy, Check, ExternalLink, MapPin, ShieldCheck } from "lucide-react";
 import { Voucher, Outlet } from "@/lib/types";
 import { OUTLETS } from "@/lib/data";
 import { bukaAplikasiPlatform } from "@/lib/launcher";
@@ -29,6 +29,18 @@ function generateBarcodeLines(serial: string) {
   return bars;
 }
 
+// Generator Serial Voucher Deterministik (Purity-safe untuk React render)
+function getDeterministicSerial(brand: string, id: string | number) {
+  let hash = 0;
+  const str = `${brand}-${id}`;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash << 5) - hash + str.charCodeAt(i);
+    hash |= 0;
+  }
+  const num = Math.abs(hash % 900000) + 100000;
+  return `TTGO-${brand.toUpperCase()}-${num}`;
+}
+
 export default function ClaimVoucherModal({
   isOpen,
   onClose,
@@ -50,7 +62,7 @@ export default function ClaimVoucherModal({
     `${voucher.brand.toUpperCase().replace(/\s+/g, "")}${voucher.diskonPersen || 50}OFF`;
   const serialVoucher =
     voucher.serialVoucher ||
-    `TTGO-${bKey.toUpperCase()}-${Math.floor(100000 + Math.random() * 900000)}`;
+    getDeterministicSerial(bKey, voucher.id);
 
   const barcodeBars = generateBarcodeLines(serialVoucher);
 

@@ -1,6 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { LowonganKerja } from "@/lib/types";
 
+interface AdzunaResultItem {
+  id?: string | number;
+  title?: string;
+  company?: { display_name?: string };
+  contract_time?: string;
+  contract_type?: string;
+  salary_min?: number;
+  salary_max?: number;
+  location?: { display_name?: string };
+  description?: string;
+  redirect_url?: string;
+  created?: string;
+}
+
 // Dataset Kaggle Lowongan Kerja Mahasiswa & Magang Indonesia
 const KAGGLE_INDONESIA_JOBS: LowonganKerja[] = [
   {
@@ -154,7 +168,7 @@ export async function GET(request: NextRequest) {
 
       if (res.ok) {
         const data = await res.json();
-        const liveJobs: LowonganKerja[] = (data.results || []).map((item: any, idx: number) => {
+        const liveJobs: LowonganKerja[] = (data.results || []).map((item: AdzunaResultItem, idx: number) => {
           // Normalisasi tipe kontrak
           let tipe = "Part-time";
           if (what.toLowerCase().includes("magang") || item.title?.toLowerCase().includes("intern")) {
@@ -177,7 +191,7 @@ export async function GET(request: NextRequest) {
             id: `adzuna-${item.id || idx}`,
             posisi: (item.title || "Lowongan Kerja").replace(/<[^>]+>/g, ""),
             perusahaan: item.company?.display_name || "Perusahaan Terverifikasi",
-            tipe: tipe as any,
+            tipe: tipe as "Part-time" | "Magang" | "Freelance",
             gaji: estimasiGaji,
             jam: tipe === "Part-time" ? 20 : 35,
             lokasi: item.location?.display_name || where,
