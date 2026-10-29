@@ -104,13 +104,13 @@ export default function Navbar({
           className="flex items-center gap-3 cursor-pointer group shrink-0"
           title="Sahabat Mahasiswa Universitas Siliwangi - Kembali ke atas"
         >
-          <div className="w-11 h-11 rounded-full overflow-hidden flex items-center justify-center group-hover:scale-105 transition-transform shadow-xs shrink-0 bg-white">
+          <div className="w-11 h-11 flex items-center justify-center group-hover:scale-105 transition-transform shrink-0">
             <Image
               src="/logo.png"
               alt="Sahabat Mahasiswa Universitas Siliwangi Logo"
               width={48}
               height={48}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain drop-shadow-xs"
               priority
               unoptimized
             />

@@ -18,8 +18,12 @@ export const metadata: Metadata = {
   description:
     "Platform all-in-one mahasiswa Indonesia: info kosan terdekat, promo kuliner TikTok diskon hemat, pencatat dompet, dan info lowongan part-time.",
   icons: {
-    icon: "/icon.png",
-    shortcut: "/icon.png",
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon.png", type: "image/png", sizes: "512x512" },
+      { url: "/icon-192.png", type: "image/png", sizes: "192x192" },
+    ],
+    shortcut: "/favicon.ico",
     apple: "/apple-icon.png",
   },
   manifest: "/manifest.json",

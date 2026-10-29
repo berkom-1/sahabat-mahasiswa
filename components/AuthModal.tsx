@@ -262,14 +262,19 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
 
         {/* Modal Header */}
         <div className="text-center mb-5">
-          <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 mx-auto flex items-center justify-center mb-2.5">
-            <GraduationCap className="w-6 h-6" />
+          <div className="w-16 h-16 mx-auto mb-2 flex items-center justify-center">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/logo.png"
+              alt="Sahabat Mahasiswa Universitas Siliwangi"
+              className="w-full h-full object-contain drop-shadow-sm"
+            />
           </div>
           <h3 className="font-bold text-xl text-slate-900 dark:text-white">
             {mode === "login" ? "Masuk Akun Mahasiswa" : "Daftar Akun Baru"}
           </h3>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-xs mx-auto">
-            Mendukung login Akun Kampus (@kampus.ac.id) & Akun Google (Dual-Account).
+            Portal Sahabat Mahasiswa Universitas Siliwangi
           </p>
         </div>
 
