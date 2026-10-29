@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { X, Copy, Check, ExternalLink, MapPin, ShieldCheck, Ticket } from "lucide-react";
+import { X, Copy, Check, ExternalLink, MapPin, ShieldCheck } from "lucide-react";
 import { Voucher, Outlet } from "@/lib/types";
 import { OUTLETS } from "@/lib/data";
 import { bukaAplikasiPlatform } from "@/lib/launcher";

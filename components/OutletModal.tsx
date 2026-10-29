@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { ArrowLeft, Star, MapPin, Clock, Bookmark, Share2, Compass, ShieldCheck, ExternalLink, Music2, Sparkles } from "lucide-react";
+import { ArrowLeft, Star, MapPin, Clock, Bookmark, Share2, Compass, ShieldCheck, ExternalLink, Music2 } from "lucide-react";
 import { Outlet, Voucher } from "@/lib/types";
 import { OUTLETS, DEFAULT_VOUCHERS } from "@/lib/data";
 import { bukaAplikasiPlatform } from "@/lib/launcher";

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { X, Key, ShieldCheck, RefreshCw, CheckCircle2, AlertCircle, Eye, EyeOff, ExternalLink, HelpCircle, BookOpen, Music2, Settings, FlaskConical } from "lucide-react";
+import { X, Key, ShieldCheck, RefreshCw, CheckCircle2, AlertCircle, Eye, EyeOff, ExternalLink, HelpCircle, BookOpen, Music2, Settings } from "lucide-react";
 import { TikTokConfig } from "@/lib/types";
 import { apiClient } from "@/lib/api-client";
 

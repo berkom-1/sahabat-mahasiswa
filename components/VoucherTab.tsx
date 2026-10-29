@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react";
 import {
   Search,
-  MapPin,
   Store,
   UtensilsCrossed,
   Flame,
@@ -38,23 +37,18 @@ export default function VoucherTab() {
   const [selectedOutletBrandKey, setSelectedOutletBrandKey] = useState<string | null>(null);
   const [showTikTokConfig, setShowTikTokConfig] = useState(false);
 
-  // TikTok API status
-  const [hasTikTokKey, setHasTikTokKey] = useState<boolean>(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const saved = localStorage.getItem("sm_tiktok_dining_config");
-        if (saved) return !!JSON.parse(saved).clientKey;
-      } catch {}
-    }
-    return false;
-  });
   const [toastMsg, setToastMsg] = useState<string | null>(null);
 
   // Load favorites
   useEffect(() => {
     try {
       const saved = localStorage.getItem("sm_voucher_favorites");
-      if (saved) setFavorites(JSON.parse(saved));
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        queueMicrotask(() => {
+          setFavorites(parsed);
+        });
+      }
     } catch {}
   }, []);
 
@@ -69,24 +63,6 @@ export default function VoucherTab() {
     } catch {}
     showToast(favorites.includes(id) ? "Dihapus dari voucher favorit" : "Disimpan ke voucher favorit");
   };
-
-  const checkTikTokConfig = () => {
-    try {
-      const saved = localStorage.getItem("sm_tiktok_dining_config");
-      setHasTikTokKey(saved ? !!JSON.parse(saved).clientKey : false);
-    } catch {
-      setHasTikTokKey(false);
-    }
-  };
-
-  useEffect(() => {
-    window.addEventListener("storage", checkTikTokConfig);
-    window.addEventListener("sm_profile_updated", checkTikTokConfig);
-    return () => {
-      window.removeEventListener("storage", checkTikTokConfig);
-      window.removeEventListener("sm_profile_updated", checkTikTokConfig);
-    };
-  }, []);
 
   const showToast = (msg: string) => {
     setToastMsg(msg);
@@ -491,7 +467,7 @@ export default function VoucherTab() {
       <TikTokConfigModal
         isOpen={showTikTokConfig}
         onClose={() => setShowTikTokConfig(false)}
-        onSavedSuccess={checkTikTokConfig}
+        onSavedSuccess={() => showToast("Koneksi TikTok berhasil diperbarui")}
       />
     </div>
   );

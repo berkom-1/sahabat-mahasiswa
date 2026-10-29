@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Kosan } from "@/lib/types";
 import {
   DEFAULT_KOSAN,
@@ -15,21 +15,12 @@ import {
   MapPin,
   Navigation,
   MessageCircle,
-  Filter,
-  Check,
   Sparkles,
   SlidersHorizontal,
-  Compass,
   AlertCircle,
   ArrowUpDown,
-  Search,
   School,
   Star,
-  Database,
-  Map,
-  Settings,
-  X,
-  ExternalLink,
   Heart,
   Home,
   User,
@@ -55,9 +46,7 @@ interface KosanTabProps {
 }
 
 export default function KosanTab({
-  onOpenProfile,
   searchQuery: externalSearchQuery,
-  setSearchQuery: setExternalSearchQuery,
   maxRadius: externalMaxRadius,
   setMaxRadius: setExternalMaxRadius,
   currentLocation: externalCurrentLocation,
@@ -70,11 +59,16 @@ export default function KosanTab({
   const [statusNotification, setStatusNotification] = useState<string | null>(null);
   const [favorites, setFavorites] = useState<string[]>([]);
 
-  // Load favorites from localStorage
+  // Load favorites from localStorage asynchronously to avoid cascading renders
   useEffect(() => {
     try {
       const saved = localStorage.getItem("sm_kos_favorites");
-      if (saved) setFavorites(JSON.parse(saved));
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        queueMicrotask(() => {
+          setFavorites(parsed);
+        });
+      }
     } catch {}
   }, []);
 
@@ -101,20 +95,7 @@ export default function KosanTab({
     }, 3500);
   };
 
-  // State profil kampus pengguna dari Pengaturan / Profil
-  const [userProfileCampus, setUserProfileCampus] = useState<string>(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const cachedProfile = localStorage.getItem("sm_user_profile_cache");
-        if (cachedProfile) {
-          const parsed = JSON.parse(cachedProfile);
-          if (parsed.kampus && parsed.kampus.trim()) return parsed.kampus.trim();
-        }
-      } catch {}
-    }
-    return "Universitas Siliwangi (UNSIL)";
-  });
-  const [activeLocationMode, setActiveLocationMode] = useState<"campus" | "gps" | "custom">("campus");
+  const [, setActiveLocationMode] = useState<"campus" | "gps" | "custom">("campus");
 
   // State koordinat titik acuan aktif (internal fallback)
   const [internalLocation, setInternalLocation] = useState<{
@@ -138,19 +119,21 @@ export default function KosanTab({
   });
 
   const currentLocation = externalCurrentLocation || internalLocation;
-  const updateCurrentLocation = (loc: { name: string; lat: number; lng: number; area: string }) => {
-    if (setExternalCurrentLocation) setExternalCurrentLocation(loc);
-    else setInternalLocation(loc);
-  };
+  const updateCurrentLocation = useCallback(
+    (loc: { name: string; lat: number; lng: number; area: string }) => {
+      if (setExternalCurrentLocation) setExternalCurrentLocation(loc);
+      else setInternalLocation(loc);
+    },
+    [setExternalCurrentLocation]
+  );
 
   const [customCampusInput, setCustomCampusInput] = useState<string>("");
   const [internalGpsLoading, setInternalGpsLoading] = useState(false);
   const gpsLoading = externalGpsLoading !== undefined ? externalGpsLoading : internalGpsLoading;
 
   // Search state
-  const [internalSearchQuery, setInternalSearchQuery] = useState("");
+  const [internalSearchQuery] = useState("");
   const searchQuery = externalSearchQuery !== undefined ? externalSearchQuery : internalSearchQuery;
-  const setSearchQuery = setExternalSearchQuery || setInternalSearchQuery;
 
   // Radius state
   const [internalMaxRadius, setInternalMaxRadius] = useState<number | "all">(10);
@@ -174,7 +157,6 @@ export default function KosanTab({
         if (cachedProfile) {
           const parsed = JSON.parse(cachedProfile);
           if (parsed.kampus && parsed.kampus.trim()) {
-            setUserProfileCampus(parsed.kampus.trim());
             updateCurrentLocation(getCoordinatesForLocation(parsed.kampus));
             showNotification(`Titik acuan diperbarui ke ${parsed.kampus.trim()}`);
           }
@@ -184,16 +166,7 @@ export default function KosanTab({
 
     window.addEventListener("sm_profile_updated", handleProfileUpdate);
     return () => window.removeEventListener("sm_profile_updated", handleProfileUpdate);
-  }, []);
-
-  // Handler: Gunakan Lokasi Kampus yang sudah disetting di Pengaturan
-  const handleUseProfileCampus = () => {
-    setActiveLocationMode("campus");
-    const coords = getCoordinatesForLocation(userProfileCampus);
-    updateCurrentLocation(coords);
-    setCustomCampusInput("");
-    showNotification(`Titik acuan: ${userProfileCampus}`);
-  };
+  }, [updateCurrentLocation]);
 
   // Handler: Input nama kampus manual
   const handleSelectCustomCampus = (nama: string) => {
@@ -684,7 +657,7 @@ export default function KosanTab({
                   {kos.fasilitas.slice(0, 2).map((f, i) => (
                     <span
                       key={i}
-                      className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 whitespace-nowrap truncate max-w-[110px]"
+                      className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 whitespace-nowrap truncate max-w-28"
                     >
                       {f}
                     </span>

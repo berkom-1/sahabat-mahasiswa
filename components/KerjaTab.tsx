@@ -6,22 +6,18 @@ import { DEFAULT_LOWONGAN } from "@/lib/data";
 import { formatWhatsAppUrl } from "@/lib/launcher";
 import {
   Briefcase,
-  Clock,
   MapPin,
   MessageCircle,
   ExternalLink,
-  Sparkles,
-  KeyRound,
   Search,
   RefreshCw,
-  Building2,
   Database,
   Heart,
   Coffee,
   Code,
   Layout,
+  KeyRound,
   Flame,
-  ArrowUpDown,
 } from "lucide-react";
 import AdzunaConfigModal from "./AdzunaConfigModal";
 
@@ -31,7 +27,7 @@ export default function KerjaTab() {
   const [selectedType, setSelectedType] = useState<string>("all");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [searchKeyword, setSearchKeyword] = useState<string>("");
-  const [searchLocation, setSearchLocation] = useState<string>("");
+  const [searchLocation] = useState<string>("");
   const [showConfigModal, setShowConfigModal] = useState(false);
   const [isLiveAdzuna, setIsLiveAdzuna] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
@@ -40,7 +36,12 @@ export default function KerjaTab() {
   useEffect(() => {
     try {
       const saved = localStorage.getItem("sm_job_favorites");
-      if (saved) setFavorites(JSON.parse(saved));
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        queueMicrotask(() => {
+          setFavorites(parsed);
+        });
+      }
     } catch {}
   }, []);
 

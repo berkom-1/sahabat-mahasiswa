@@ -5,14 +5,11 @@ import { Tugas } from "@/lib/types";
 import { apiClient } from "@/lib/api-client";
 import {
   CheckSquare,
-  Clock,
   Plus,
   Trash2,
   CheckCircle2,
   Calendar,
   X,
-  AlertCircle,
-  Sparkles,
   Flame,
   Check,
 } from "lucide-react";

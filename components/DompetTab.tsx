@@ -14,15 +14,6 @@ import {
   Trash2,
   PieChart,
   X,
-  ArrowUpDown,
-  Utensils,
-  Home,
-  BookOpen,
-  Car,
-  Coffee,
-  Sparkles,
-  DollarSign,
-  Tag,
 } from "lucide-react";
 
 interface DompetTabProps {

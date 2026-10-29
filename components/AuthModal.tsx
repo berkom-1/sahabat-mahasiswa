@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { apiClient } from "@/lib/api-client";
 import { signIn } from "next-auth/react";
-import { X, AlertCircle, GraduationCap, ShieldCheck, Sparkles, CheckCircle2 } from "lucide-react";
+import { X, AlertCircle, GraduationCap, ShieldCheck, Sparkles } from "lucide-react";
 
 interface AuthModalProps {
   isOpen: boolean;
