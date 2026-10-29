@@ -296,13 +296,13 @@ export default function KosanTab({
           k.nama.toLowerCase().includes("hemat") ||
           k.nama.toLowerCase().includes("barokah");
         if (!isHemat) return false;
-      } else if (selectedCategory === "paviliun") {
-        const isPaviliun =
-          k.nama.toLowerCase().includes("paviliun") ||
+      } else if (selectedCategory === "kontrakan" || selectedCategory === "paviliun") {
+        const isKontrakan =
           k.nama.toLowerCase().includes("kontrakan") ||
+          k.nama.toLowerCase().includes("paviliun") ||
           k.nama.toLowerCase().includes("rumah") ||
           k.fasilitas.some((f) => f.toLowerCase().includes("dapur"));
-        if (!isPaviliun) return false;
+        if (!isKontrakan) return false;
       }
 
       // Top rated filter
@@ -350,7 +350,7 @@ export default function KosanTab({
     { id: "campur", label: "Kos Campur", icon: Users },
     { id: "eksklusif", label: "Kos Eksklusif", icon: Crown },
     { id: "hemat", label: "Kos Hemat", icon: Wallet },
-    { id: "paviliun", label: "Paviliun & Rumah", icon: Building2 },
+    { id: "kontrakan", label: "Kontrakan", icon: Building2 },
   ] as const;
 
   const handleSelectCategory = (id: string) => {
