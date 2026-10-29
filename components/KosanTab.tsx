@@ -34,12 +34,9 @@ import {
   Home,
   User,
   Users,
-  GraduationCap,
-  Bath,
-  Wind,
-  Wifi,
-  Bike,
-  Clock,
+  Crown,
+  Wallet,
+  Building2,
   Bed,
   ShowerHead,
   Zap,
@@ -279,22 +276,33 @@ export default function KosanTab({
       if (selectedTipe !== "all" && k.tipe !== selectedTipe) return false;
       if (k.harga > maxHarga) return false;
 
-      // Category Icon Rail filter
-      if (selectedCategory === "mandi_dalam") {
-        const has = k.fasilitas.some((f) => f.toLowerCase().includes("mandi dalam"));
-        if (!has) return false;
-      } else if (selectedCategory === "ac") {
-        const has = k.fasilitas.some((f) => f.toLowerCase().includes("ac"));
-        if (!has) return false;
-      } else if (selectedCategory === "wifi") {
-        const has = k.fasilitas.some((f) => f.toLowerCase().includes("wifi"));
-        if (!has) return false;
-      } else if (selectedCategory === "parkir") {
-        const has = k.fasilitas.some((f) => f.toLowerCase().includes("parkir"));
-        if (!has) return false;
-      } else if (selectedCategory === "bebas_jam") {
-        const has = k.fasilitas.some((f) => f.toLowerCase().includes("bebas") || f.toLowerCase().includes("24 jam"));
-        if (!has) return false;
+      // Category Icon Rail filter (Focused high-level accommodation types)
+      if (selectedCategory === "putra") {
+        if (k.tipe !== "putra") return false;
+      } else if (selectedCategory === "putri") {
+        if (k.tipe !== "putri") return false;
+      } else if (selectedCategory === "campur") {
+        if (k.tipe !== "campur") return false;
+      } else if (selectedCategory === "eksklusif") {
+        const isEksklusif =
+          k.harga >= 750000 ||
+          k.nama.toLowerCase().includes("eksklusif") ||
+          k.nama.toLowerCase().includes("vip") ||
+          k.fasilitas.some((f) => f.toLowerCase().includes("ac"));
+        if (!isEksklusif) return false;
+      } else if (selectedCategory === "hemat") {
+        const isHemat =
+          k.harga <= 600000 ||
+          k.nama.toLowerCase().includes("hemat") ||
+          k.nama.toLowerCase().includes("barokah");
+        if (!isHemat) return false;
+      } else if (selectedCategory === "paviliun") {
+        const isPaviliun =
+          k.nama.toLowerCase().includes("paviliun") ||
+          k.nama.toLowerCase().includes("kontrakan") ||
+          k.nama.toLowerCase().includes("rumah") ||
+          k.fasilitas.some((f) => f.toLowerCase().includes("dapur"));
+        if (!isPaviliun) return false;
       }
 
       // Top rated filter
@@ -334,18 +342,15 @@ export default function KosanTab({
     }).format(val);
   };
 
-  // Category Icon Rail Definition (Hide.com Hotel/Villa style)
+  // Category Icon Rail Definition (Hide.com Hotel/Apartment/Villa style)
   const categoryRailItems = [
     { id: "all", label: "Semua Kos", icon: Home },
     { id: "putra", label: "Kos Putra", icon: User },
     { id: "putri", label: "Kos Putri", icon: Sparkles },
     { id: "campur", label: "Kos Campur", icon: Users },
-    { id: "unsil", label: "Dekat UNSIL", icon: GraduationCap },
-    { id: "mandi_dalam", label: "Mandi Dalam", icon: Bath },
-    { id: "ac", label: "Ber-AC", icon: Wind },
-    { id: "wifi", label: "WiFi Cepat", icon: Wifi },
-    { id: "parkir", label: "Parkir Motor", icon: Bike },
-    { id: "bebas_jam", label: "Bebas Jam Malam", icon: Clock },
+    { id: "eksklusif", label: "Kos Eksklusif", icon: Crown },
+    { id: "hemat", label: "Kos Hemat", icon: Wallet },
+    { id: "paviliun", label: "Paviliun & Rumah", icon: Building2 },
   ] as const;
 
   const handleSelectCategory = (id: string) => {
@@ -358,8 +363,8 @@ export default function KosanTab({
       setSelectedTipe("putri");
     } else if (id === "campur") {
       setSelectedTipe("campur");
-    } else if (id === "unsil") {
-      handleUseProfileCampus();
+    } else {
+      setSelectedTipe("all");
     }
   };
 
