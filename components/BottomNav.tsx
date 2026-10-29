@@ -36,7 +36,7 @@ export default function BottomNav({ activeTab, onChangeTab }: BottomNavProps) {
                   : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
               }`}
             >
-              <Icon className="w-4 h-4 stroke-[2]" />
+              <Icon className="w-4 h-4 stroke-2" />
               <span className="text-[11px] tracking-tight mt-0.5">
                 {tab.label}
               </span>
