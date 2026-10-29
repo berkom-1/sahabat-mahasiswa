@@ -169,13 +169,13 @@ export default function KerjaTab() {
                 onClick={() => setSelectedCategory(item.id)}
                 className={`flex flex-col items-center gap-1.5 shrink-0 transition-all cursor-pointer relative py-1 group ${
                   isActive
-                    ? "text-rose-500 font-semibold"
+                    ? "text-emerald-800 dark:text-emerald-300 font-bold"
                     : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                 }`}
               >
                 <Icon
                   className={`w-6 h-6 stroke-[1.6] transition-transform group-hover:scale-110 ${
-                    isActive ? "stroke-rose-500" : "stroke-current"
+                    isActive ? "stroke-emerald-700 dark:stroke-emerald-400" : "stroke-current"
                   }`}
                 />
                 <span className="text-xs whitespace-nowrap tracking-tight">
@@ -184,7 +184,7 @@ export default function KerjaTab() {
 
                 {/* Active Indicator Underline */}
                 {isActive && (
-                  <span className="absolute -bottom-3 left-0 right-0 h-0.5 bg-rose-500 rounded-full" />
+                  <span className="absolute -bottom-3 left-0 right-0 h-0.5 bg-emerald-700 dark:bg-emerald-400 rounded-full" />
                 )}
               </button>
             );
@@ -203,7 +203,7 @@ export default function KerjaTab() {
               onClick={() => setSelectedType(t)}
               className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
                 selectedType === t
-                  ? "border border-rose-300 dark:border-rose-900 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400"
+                  ? "border border-emerald-500 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-bold"
                   : "border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
               }`}
             >
@@ -230,14 +230,14 @@ export default function KerjaTab() {
               placeholder="Cari UI/UX, Barista..."
               value={searchKeyword}
               onChange={(e) => setSearchKeyword(e.target.value)}
-              className="pl-8 pr-3 py-1.5 rounded-full border border-slate-200 dark:border-slate-800 text-xs bg-transparent text-slate-900 dark:text-slate-100 placeholder-slate-400 outline-none w-36 sm:w-48 focus:border-rose-400"
+              className="pl-8 pr-3 py-1.5 rounded-full border border-slate-200 dark:border-slate-800 text-xs bg-transparent text-slate-900 dark:text-slate-100 placeholder-slate-400 outline-none w-36 sm:w-48 focus:border-emerald-600"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="p-2 rounded-full bg-rose-500 hover:bg-rose-600 text-white transition-colors cursor-pointer shadow-xs disabled:opacity-50"
+            className="p-2 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white transition-colors cursor-pointer shadow-xs disabled:opacity-50"
             title="Cari"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
@@ -281,7 +281,7 @@ export default function KerjaTab() {
 
                 {/* Top-Left Tag */}
                 <div className="absolute top-3 left-3 flex items-center gap-1.5 flex-wrap">
-                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-rose-500 text-white shadow-xs">
+                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-emerald-800 text-white shadow-xs">
                     {j.tipe}
                   </span>
                   <span className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-white shadow-xs">
@@ -294,11 +294,11 @@ export default function KerjaTab() {
                   type="button"
                   onClick={(e) => toggleFavorite(e, String(j.id))}
                   title={isFav ? "Hapus dari favorit" : "Simpan ke favorit"}
-                  className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-md flex items-center justify-center text-slate-700 dark:text-slate-200 hover:text-rose-500 transition-transform active:scale-90 shadow-xs cursor-pointer"
+                  className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 dark:bg-neutral-900/90 backdrop-blur-md flex items-center justify-center text-slate-700 dark:text-neutral-200 hover:text-emerald-600 transition-transform active:scale-90 shadow-xs cursor-pointer"
                 >
                   <Heart
                     className={`w-4 h-4 transition-colors ${
-                      isFav ? "fill-rose-500 text-rose-500" : "text-slate-700 dark:text-slate-300"
+                      isFav ? "fill-emerald-600 text-emerald-600" : "text-slate-700 dark:text-slate-300"
                     }`}
                   />
                 </button>
@@ -312,13 +312,13 @@ export default function KerjaTab() {
                     {j.perusahaan}
                   </span>
                   <span className="flex items-center gap-1 shrink-0">
-                    <MapPin className="w-3 h-3 text-rose-500" />
+                    <MapPin className="w-3 h-3 text-amber-500" />
                     <span>{j.lokasi}</span>
                   </span>
                 </div>
 
                 {/* Job Title */}
-                <h3 className="font-bold text-sm text-slate-900 dark:text-white leading-snug line-clamp-1 group-hover:text-rose-500 transition-colors">
+                <h3 className="font-bold text-sm text-slate-900 dark:text-white leading-snug line-clamp-1 group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
                   {j.posisi}
                 </h3>
 

@@ -221,22 +221,22 @@ export default function VoucherTab() {
                 onClick={() => setCategoryFilter(item.id)}
                 className={`flex flex-col items-center gap-1.5 shrink-0 transition-all cursor-pointer relative py-1 group ${
                   isActive
-                    ? "text-rose-500 font-semibold"
-                    : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                    ? "text-emerald-800 dark:text-emerald-300 font-bold"
+                    : "text-slate-500 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-300"
                 }`}
               >
                 <Icon
                   className={`w-6 h-6 stroke-[1.6] transition-transform group-hover:scale-110 ${
-                    isActive ? "stroke-rose-500" : "stroke-current"
+                    isActive ? "stroke-emerald-700 dark:stroke-emerald-400" : "stroke-current"
                   }`}
                 />
-                <span className="text-xs whitespace-nowrap tracking-tight">
+                <span className="text-xs whitespace-nowrap tracking-tight font-medium">
                   {item.label}
                 </span>
 
                 {/* Active Indicator Underline */}
                 {isActive && (
-                  <span className="absolute -bottom-3 left-0 right-0 h-0.5 bg-rose-500 rounded-full" />
+                  <span className="absolute -bottom-3 left-0 right-0 h-0.5 bg-emerald-700 dark:bg-emerald-400 rounded-full" />
                 )}
               </button>
             );
@@ -257,8 +257,8 @@ export default function VoucherTab() {
             }}
             className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
               platformFilter === "all" && categoryFilter === "all"
-                ? "border border-rose-300 dark:border-rose-900 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400"
-                : "border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                ? "border border-emerald-500 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-bold"
+                : "border border-slate-200 dark:border-emerald-900/40 text-slate-700 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
             }`}
           >
             All Promo
@@ -270,11 +270,11 @@ export default function VoucherTab() {
             onClick={() => setPlatformFilter(platformFilter === "diskon50" ? "all" : "diskon50")}
             className={`px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all cursor-pointer flex items-center gap-1 ${
               platformFilter === "diskon50"
-                ? "border border-rose-300 dark:border-rose-900 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 font-semibold"
-                : "border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                ? "border border-emerald-500 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-bold"
+                : "border border-slate-200 dark:border-emerald-900/40 text-slate-700 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
             }`}
           >
-            <Tag className="w-3 h-3 text-rose-500" />
+            <Tag className="w-3 h-3 text-amber-500" />
             <span>Diskon &gt; 50%</span>
           </button>
 
@@ -291,8 +291,8 @@ export default function VoucherTab() {
               onClick={() => setPlatformFilter(platformFilter === tab.id ? "all" : tab.id)}
               className={`px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all cursor-pointer ${
                 platformFilter === tab.id
-                  ? "border border-rose-300 dark:border-rose-900 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 font-semibold"
-                : "border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                  ? "border border-emerald-500 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-bold"
+                  : "border border-slate-200 dark:border-emerald-900/40 text-slate-700 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
               }`}
             >
               {tab.label}
@@ -310,7 +310,7 @@ export default function VoucherTab() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Cari Lazatto, Mixue..."
-              className="pl-8 pr-3 py-1.5 rounded-full border border-slate-200 dark:border-slate-800 text-xs bg-transparent text-slate-900 dark:text-slate-100 placeholder-slate-400 outline-none w-36 sm:w-48 focus:border-rose-400"
+              className="pl-8 pr-3 py-1.5 rounded-full border border-slate-200 dark:border-slate-800 text-xs bg-transparent text-slate-900 dark:text-slate-100 placeholder-slate-400 outline-none w-36 sm:w-48 focus:border-emerald-600"
             />
           </div>
 
@@ -361,9 +361,9 @@ export default function VoucherTab() {
                   loading="lazy"
                 />
 
-                {/* Top-Left Coral Discount Tag */}
+                {/* Top-Left Siliwangi Emerald Discount Tag */}
                 <div className="absolute top-3 left-3 flex items-center gap-1.5 flex-wrap">
-                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-rose-500 text-white shadow-xs tabular-nums">
+                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-emerald-800 text-white shadow-xs tabular-nums">
                     -{v.diskonPersen}% Off
                   </span>
                   <span className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-white shadow-xs">
@@ -376,11 +376,11 @@ export default function VoucherTab() {
                   type="button"
                   onClick={(e) => toggleFavorite(e, String(v.id))}
                   title={isFav ? "Hapus dari favorit" : "Simpan ke favorit"}
-                  className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-md flex items-center justify-center text-slate-700 dark:text-slate-200 hover:text-rose-500 transition-transform active:scale-90 shadow-xs cursor-pointer"
+                  className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 dark:bg-neutral-900/90 backdrop-blur-md flex items-center justify-center text-slate-700 dark:text-neutral-200 hover:text-emerald-600 transition-transform active:scale-90 shadow-xs cursor-pointer"
                 >
                   <Heart
                     className={`w-4 h-4 transition-colors ${
-                      isFav ? "fill-rose-500 text-rose-500" : "text-slate-700 dark:text-slate-300"
+                      isFav ? "fill-emerald-600 text-emerald-600" : "text-slate-700 dark:text-slate-300"
                     }`}
                   />
                 </button>
@@ -397,7 +397,7 @@ export default function VoucherTab() {
               <div className="flex-1 flex flex-col justify-between space-y-1.5">
                 {/* Secondary Meta Tags */}
                 <div className="flex items-center gap-1.5 overflow-hidden">
-                  <span className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 whitespace-nowrap">
+                  <span className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 whitespace-nowrap">
                     {v.badgeTerlaris || "Diskon Kampus"}
                   </span>
                   <span className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 whitespace-nowrap truncate">
@@ -410,7 +410,7 @@ export default function VoucherTab() {
                   <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                     {v.brand}
                   </div>
-                  <h3 className="font-bold text-sm text-slate-900 dark:text-white leading-snug line-clamp-1 group-hover:text-rose-500 transition-colors">
+                  <h3 className="font-bold text-sm text-slate-900 dark:text-white leading-snug line-clamp-1 group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
                     {v.namaVoucher}
                   </h3>
                   <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">
@@ -444,7 +444,7 @@ export default function VoucherTab() {
                       type="button"
                       onClick={(e) => handleBuyDirect(e, v)}
                       title={`Buka di ${v.platform}`}
-                      className="px-3 py-1.5 rounded-full bg-rose-500 hover:bg-rose-600 text-white text-xs font-semibold transition-colors flex items-center gap-1 shadow-xs cursor-pointer"
+                      className="px-3.5 py-1.5 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold transition-colors flex items-center gap-1 shadow-xs cursor-pointer"
                     >
                       <span>Klaim</span>
                       <ExternalLink className="w-3 h-3" />

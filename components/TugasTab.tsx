@@ -202,7 +202,7 @@ export default function TugasTab({ userId }: TugasTabProps) {
               {activeCount} Tugas
             </div>
           </div>
-          <div className="w-10 h-10 rounded-full bg-rose-50 dark:bg-rose-950/40 text-rose-500 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 flex items-center justify-center">
             <CheckSquare className="w-5 h-5" />
           </div>
         </div>
@@ -247,8 +247,8 @@ export default function TugasTab({ userId }: TugasTabProps) {
             onClick={() => setActiveFilter("aktif")}
             className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
               activeFilter === "aktif"
-                ? "border border-rose-300 dark:border-rose-900 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400"
-                : "border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                ? "border border-emerald-500 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-bold"
+                : "border border-slate-200 dark:border-emerald-900/40 text-slate-700 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
             }`}
           >
             Aktif ({activeCount})
@@ -259,14 +259,14 @@ export default function TugasTab({ userId }: TugasTabProps) {
             onClick={() => setActiveFilter("selesai")}
             className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
               activeFilter === "selesai"
-                ? "border border-rose-300 dark:border-rose-900 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400"
-                : "border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                ? "border border-emerald-500 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-bold"
+                : "border border-slate-200 dark:border-emerald-900/40 text-slate-700 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
             }`}
           >
             Selesai ({completedCount})
           </button>
 
-          <div className="h-4 w-px bg-slate-200 dark:bg-slate-800 mx-1" />
+          <div className="h-4 w-px bg-slate-200 dark:bg-emerald-900/40 mx-1" />
 
           {/* Bobot Filter Pills */}
           {[
@@ -281,8 +281,8 @@ export default function TugasTab({ userId }: TugasTabProps) {
               onClick={() => setWeightFilter(w.val as number | "all")}
               className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all cursor-pointer ${
                 weightFilter === w.val
-                  ? "border border-rose-300 dark:border-rose-900 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 font-semibold"
-                  : "border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                  ? "border border-emerald-500 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-bold"
+                  : "border border-slate-200 dark:border-emerald-900/40 text-slate-700 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
               }`}
             >
               {w.label}
@@ -294,7 +294,7 @@ export default function TugasTab({ userId }: TugasTabProps) {
         <button
           type="button"
           onClick={() => setShowAddModal(true)}
-          className="px-4 py-1.5 rounded-full bg-rose-500 hover:bg-rose-600 text-white text-xs font-semibold shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer shrink-0"
+          className="px-4 py-1.5 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer shrink-0"
         >
           <Plus className="w-3.5 h-3.5" />
           <span>Tambah Tugas</span>
@@ -417,7 +417,7 @@ export default function TugasTab({ userId }: TugasTabProps) {
           <div className="relative bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-md p-6 z-10 space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
               <h3 className="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
-                <Plus className="w-4 h-4 text-rose-500" />
+                <Plus className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
                 <span>Tambah Tugas Baru</span>
               </h3>
               <button
@@ -440,7 +440,7 @@ export default function TugasTab({ userId }: TugasTabProps) {
                   value={namaTugas}
                   onChange={(e) => setNamaTugas(e.target.value)}
                   placeholder="Contoh: Makalah Pancasila Bab 2..."
-                  className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs outline-none focus:border-rose-500"
+                  className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs outline-none focus:border-emerald-600"
                 />
               </div>
 
@@ -453,7 +453,7 @@ export default function TugasTab({ userId }: TugasTabProps) {
                   required
                   value={deadline}
                   onChange={(e) => setDeadline(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs outline-none focus:border-rose-500 cursor-pointer"
+                  className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs outline-none focus:border-emerald-600 cursor-pointer"
                 />
               </div>
 
@@ -473,7 +473,7 @@ export default function TugasTab({ userId }: TugasTabProps) {
                       onClick={() => setBobot(b.val)}
                       className={`py-2 px-3 rounded-full text-xs font-semibold transition-all cursor-pointer ${
                         bobot === b.val
-                          ? "bg-rose-500 text-white shadow-xs"
+                          ? "bg-emerald-700 text-white shadow-xs"
                           : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
                       }`}
                     >
@@ -493,7 +493,7 @@ export default function TugasTab({ userId }: TugasTabProps) {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-full bg-rose-500 hover:bg-rose-600 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+                  className="px-5 py-2 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
                 >
                   Simpan Tugas
                 </button>

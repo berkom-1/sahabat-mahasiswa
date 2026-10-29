@@ -3,8 +3,11 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #fbfbfb;
-  --foreground: #0f172a;
+  --background: #fcfdfd;
+  --foreground: #0d1a14;
+  --siliwangi-green: #0d5c3a;
+  --siliwangi-dark: #073b24;
+  --siliwangi-gold: #d97706;
 }
 
 @theme inline {
@@ -15,8 +18,8 @@
 }
 
 .dark {
-  --background: #0b0f17;
-  --foreground: #f8fafc;
+  --background: #07120e;
+  --foreground: #f1f8f4;
 }
 
 body {

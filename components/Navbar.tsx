@@ -94,42 +94,44 @@ export default function Navbar({
   ];
 
   return (
-    <header className="sticky top-0 z-30 w-full backdrop-blur-md transition-colors duration-200 border-b border-slate-200/80 dark:border-slate-800 bg-white/95 dark:bg-[#0b0f17]/95">
+    <header className="sticky top-0 z-30 w-full backdrop-blur-md transition-colors duration-200 border-b border-emerald-950/10 dark:border-emerald-900/30 bg-white/95 dark:bg-[#07120e]/95">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
-        {/* 1. Left: Brand & Logo */}
+        {/* 1. Left: Brand & Siliwangi Mascot Logo */}
         <div
           onClick={() => {
             window.scrollTo({ top: 0, behavior: "smooth" });
           }}
           className="flex items-center gap-3 cursor-pointer group shrink-0"
-          title="Sahabat Mahasiswa - Kembali ke atas"
+          title="Sahabat Mahasiswa Universitas Siliwangi - Kembali ke atas"
         >
-          <div className="w-10 h-10 rounded-2xl overflow-hidden border border-slate-200/80 dark:border-slate-800 flex items-center justify-center bg-white dark:bg-slate-900 group-hover:scale-105 transition-transform shadow-xs">
+          <div className="w-11 h-11 rounded-full overflow-hidden flex items-center justify-center group-hover:scale-105 transition-transform shadow-xs shrink-0 bg-white">
             <Image
-              src="/icon.png"
-              alt="Sahabat Mahasiswa Logo"
-              width={40}
-              height={40}
+              src="/logo.png"
+              alt="Sahabat Mahasiswa Universitas Siliwangi Logo"
+              width={48}
+              height={48}
               className="w-full h-full object-cover"
               priority
+              unoptimized
             />
           </div>
           <div className="block">
-            <h1 className="font-bold text-sm sm:text-lg tracking-tight text-slate-900 dark:text-white flex items-center gap-1.5">
+            <h1 className="font-bold text-sm sm:text-lg tracking-tight text-slate-900 dark:text-white flex items-center gap-1.5 leading-snug">
               Sahabat Mahasiswa
             </h1>
-            <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-normal leading-tight hidden sm:block">
-              Kosan &bull; Diskon &bull; Dompet &bull; Tugas &bull; Magang
+            <p className="text-[11px] sm:text-xs font-semibold text-emerald-700 dark:text-emerald-400 flex items-center gap-1 leading-tight">
+              <span>Universitas Siliwangi</span>
+              <span className="text-slate-600 dark:text-emerald-300 font-medium hidden md:inline">&bull; Portal Kampus</span>
             </p>
           </div>
         </div>
 
-        {/* 2. Center: Segmented Floating Search Pill (Hide.com / AirBnB Style) */}
+        {/* 2. Center: Segmented Floating Search Pill (Hide.com / AirBnB Style with Siliwangi Accents) */}
         <div className="hidden lg:flex items-center">
-          <div className="flex items-center bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-700/80 rounded-full shadow-xs hover:shadow-md transition-all py-1.5 pl-4 pr-1.5 gap-2 text-xs">
+          <div className="flex items-center bg-white dark:bg-emerald-950/30 border border-slate-200/90 dark:border-emerald-900/50 rounded-full shadow-xs hover:shadow-md transition-all py-1.5 pl-4 pr-1.5 gap-2 text-xs">
             {/* Segment 1: Search Query Input */}
             <div className="flex items-center gap-2 w-48">
-              <Search className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+              <Search className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
               <input
                 type="text"
                 value={searchQuery}
@@ -141,14 +143,14 @@ export default function Navbar({
                 <button
                   type="button"
                   onClick={() => onSearchChange?.("")}
-                  className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5"
+                  className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5 cursor-pointer"
                 >
                   <X className="w-3 h-3" />
                 </button>
               )}
             </div>
 
-            <div className="h-5 w-px bg-slate-200 dark:bg-slate-700" />
+            <div className="h-5 w-px bg-slate-200 dark:bg-emerald-900/60" />
 
             {/* Segment 2: Radius Selector Dropdown */}
             <div className="relative" ref={radiusMenuRef}>
@@ -158,9 +160,9 @@ export default function Navbar({
                   setShowRadiusMenu(!showRadiusMenu);
                   setShowCampusMenu(false);
                 }}
-                className="flex items-center gap-1.5 px-2 py-1 rounded-full text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors font-medium whitespace-nowrap cursor-pointer"
+                className="flex items-center gap-1.5 px-2 py-1 rounded-full text-slate-700 dark:text-slate-200 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 transition-colors font-medium whitespace-nowrap cursor-pointer"
               >
-                <Compass className="w-3.5 h-3.5 text-slate-400" />
+                <Compass className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                 <span>
                   {radius === "all" ? "Semua Radius" : `Radius ${radius} KM`}
                 </span>
@@ -168,8 +170,8 @@ export default function Navbar({
               </button>
 
               {showRadiusMenu && (
-                <div className="absolute top-full mt-2 left-0 w-44 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl p-1.5 z-50">
-                  <div className="px-3 py-1.5 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                <div className="absolute top-full mt-2 left-0 w-44 bg-white dark:bg-[#071510] border border-slate-200 dark:border-emerald-900/50 rounded-2xl shadow-xl p-1.5 z-50">
+                  <div className="px-3 py-1.5 text-[11px] font-semibold text-emerald-800 dark:text-emerald-400 uppercase tracking-wider">
                     Jarak Maksimal
                   </div>
                   {radiusOptions.map((opt) => (
@@ -180,21 +182,21 @@ export default function Navbar({
                         onRadiusChange?.(opt.val as number | "all");
                         setShowRadiusMenu(false);
                       }}
-                      className={`w-full text-left px-3 py-2 rounded-xl text-xs font-medium transition-colors flex items-center justify-between ${
+                      className={`w-full text-left px-3 py-2 rounded-xl text-xs font-medium transition-colors flex items-center justify-between cursor-pointer ${
                         radius === opt.val
-                          ? "bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 font-semibold"
-                          : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                          ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-semibold"
+                          : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-emerald-950/30"
                       }`}
                     >
                       <span>{opt.label}</span>
-                      {radius === opt.val && <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />}
+                      {radius === opt.val && <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />}
                     </button>
                   ))}
                 </div>
               )}
             </div>
 
-            <div className="h-5 w-px bg-slate-200 dark:bg-slate-700" />
+            <div className="h-5 w-px bg-slate-200 dark:bg-emerald-900/60" />
 
             {/* Segment 3: Campus Reference Selector Dropdown */}
             <div className="relative" ref={campusMenuRef}>
@@ -204,10 +206,10 @@ export default function Navbar({
                   setShowCampusMenu(!showCampusMenu);
                   setShowRadiusMenu(false);
                 }}
-                className="flex items-center gap-1.5 px-2 py-1 rounded-full text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors font-medium max-w-[150px] truncate cursor-pointer"
+                className="flex items-center gap-1.5 px-2 py-1 rounded-full text-slate-700 dark:text-slate-200 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 transition-colors font-medium max-w-[150px] truncate cursor-pointer"
                 title={campusName}
               >
-                <School className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                <School className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                 <span className="truncate">
                   {campusName.includes("(")
                     ? campusName.split("(")[1].replace(")", "")
@@ -217,8 +219,8 @@ export default function Navbar({
               </button>
 
               {showCampusMenu && (
-                <div className="absolute top-full mt-2 right-0 w-64 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl p-1.5 z-50">
-                  <div className="px-3 py-1.5 text-[11px] font-semibold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+                <div className="absolute top-full mt-2 right-0 w-64 bg-white dark:bg-[#071510] border border-slate-200 dark:border-emerald-900/50 rounded-2xl shadow-xl p-1.5 z-50">
+                  <div className="px-3 py-1.5 text-[11px] font-semibold text-emerald-800 dark:text-emerald-400 uppercase tracking-wider flex items-center justify-between">
                     <span>Titik Lokasi Acuan</span>
                     {onOpenProfile && (
                       <span
@@ -226,7 +228,7 @@ export default function Navbar({
                           setShowCampusMenu(false);
                           onOpenProfile();
                         }}
-                        className="text-rose-500 hover:underline cursor-pointer lowercase"
+                        className="text-amber-600 dark:text-amber-400 hover:underline cursor-pointer lowercase"
                       >
                         atur profil
                       </span>
@@ -242,14 +244,14 @@ export default function Navbar({
                         setShowCampusMenu(false);
                       }}
                       disabled={gpsLoading}
-                      className="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-colors flex items-center gap-2 mb-1 cursor-pointer"
+                      className="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 transition-colors flex items-center gap-2 mb-1 cursor-pointer"
                     >
                       <Navigation className={`w-3.5 h-3.5 ${gpsLoading ? "animate-spin" : ""}`} />
                       <span>{gpsLoading ? "Mendeteksi..." : "Gunakan GPS Saya Saat Ini"}</span>
                     </button>
                   )}
 
-                  <div className="h-px bg-slate-100 dark:bg-slate-800 my-1" />
+                  <div className="h-px bg-slate-100 dark:bg-emerald-900/40 my-1" />
 
                   {campusOptions.map((camp) => (
                     <button
@@ -259,27 +261,27 @@ export default function Navbar({
                         onCampusChange?.(camp);
                         setShowCampusMenu(false);
                       }}
-                      className={`w-full text-left px-3 py-2 rounded-xl text-xs transition-colors truncate flex items-center justify-between ${
+                      className={`w-full text-left px-3 py-2 rounded-xl text-xs transition-colors truncate flex items-center justify-between cursor-pointer ${
                         campusName === camp
-                          ? "bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 font-semibold"
-                          : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                          ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-semibold"
+                          : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-emerald-950/30"
                       }`}
                     >
                       <span className="truncate">{camp}</span>
-                      {campusName === camp && <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0 ml-1" />}
+                      {campusName === camp && <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 shrink-0 ml-1" />}
                     </button>
                   ))}
                 </div>
               )}
             </div>
 
-            {/* Segment 4: Coral Circle Search Trigger Button */}
+            {/* Segment 4: Siliwangi Emerald Circle Search Button */}
             <button
               type="button"
               onClick={() => {
                 window.scrollTo({ top: 320, behavior: "smooth" });
               }}
-              className="w-8 h-8 rounded-full bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center transition-all shadow-xs active:scale-95 cursor-pointer shrink-0"
+              className="w-8 h-8 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white flex items-center justify-center transition-all shadow-xs active:scale-95 cursor-pointer shrink-0"
               title="Cari Kosan"
             >
               <Search className="w-3.5 h-3.5" />
@@ -287,33 +289,33 @@ export default function Navbar({
           </div>
         </div>
 
-        {/* Mobile Search Pill (collapses on < lg) */}
-        <div className="flex lg:hidden flex-1 max-w-xs">
+        {/* Mobile Search Pill (collapses on < lg, hidden on < sm to avoid edge squeeze) */}
+        <div className="hidden sm:flex lg:hidden flex-1 max-w-xs">
           <button
             type="button"
             onClick={() => setShowMobileSearch(!showMobileSearch)}
-            className="w-full flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-700/80 rounded-full px-3 py-2 text-xs shadow-xs text-slate-700 dark:text-slate-300"
+            className="w-full flex items-center justify-between bg-white dark:bg-emerald-950/30 border border-slate-200/90 dark:border-emerald-900/50 rounded-full px-3 py-2 text-xs shadow-xs text-slate-700 dark:text-slate-300 cursor-pointer"
           >
             <div className="flex items-center gap-2 truncate">
-              <Search className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+              <Search className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
               <span className="truncate">{searchQuery || "Cari kos atau kampus..."}</span>
             </div>
-            <span className="text-[11px] font-semibold text-rose-500 shrink-0">
+            <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 shrink-0">
               {radius === "all" ? "Semua" : `${radius}km`}
             </span>
           </button>
         </div>
 
         {/* 3. Right: Actions & User Pill */}
-        <div className="flex items-center gap-2 shrink-0">
-          {/* Portal Kampus Outlined Pill Button (Like 'Sewa Your House' in Hide.com) */}
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          {/* Portal Kampus Outlined Pill Button with Amber Sparkles */}
           <button
             type="button"
             onClick={user ? onOpenProfile : onOpenAuth}
-            className="hidden md:inline-flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2 rounded-full border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-slate-800 dark:text-slate-200 cursor-pointer"
-            title="Buka Portal Mahasiswa & Profil Kampus"
+            className="hidden md:inline-flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2 rounded-full border border-emerald-700/30 dark:border-emerald-600/30 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 transition-colors text-slate-800 dark:text-slate-200 cursor-pointer"
+            title="Buka Portal Mahasiswa & Profil Kampus UNSIL"
           >
-            <Sparkles className="w-3.5 h-3.5 text-rose-500" />
+            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
             <span>Portal Kampus</span>
           </button>
 
@@ -323,9 +325,9 @@ export default function Navbar({
               type="button"
               onClick={onOpenTikTokConfig}
               title="Pengaturan Kunci API TikTok GO Dining"
-              className="p-2 rounded-full text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              className="hidden sm:inline-flex p-2 rounded-full text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
             >
-              <Music2 className="w-4 h-4 text-rose-500" />
+              <Music2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
             </button>
           )}
 
@@ -349,7 +351,7 @@ export default function Navbar({
               <button
                 type="button"
                 onClick={onOpenProfile}
-                className="flex items-center gap-2 py-1.5 pl-2 pr-3 rounded-full border border-slate-200 dark:border-slate-700 hover:shadow-xs hover:border-slate-300 dark:hover:border-slate-600 transition-all cursor-pointer bg-white dark:bg-slate-900"
+                className="flex items-center gap-2 py-1.5 pl-2 pr-3 rounded-full border border-slate-200 dark:border-emerald-900/50 hover:shadow-xs hover:border-emerald-400 dark:hover:border-emerald-600 transition-all cursor-pointer bg-white dark:bg-emerald-950/40"
               >
                 {user.image ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -359,7 +361,7 @@ export default function Navbar({
                     className="w-6 h-6 rounded-full object-cover"
                   />
                 ) : (
-                  <div className="w-6 h-6 rounded-full bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 flex items-center justify-center font-bold text-[11px]">
+                  <div className="w-6 h-6 rounded-full bg-emerald-700 text-white flex items-center justify-center font-bold text-[11px]">
                     {(user.name || user.email || "M")[0].toUpperCase()}
                   </div>
                 )}
@@ -381,10 +383,11 @@ export default function Navbar({
               type="button"
               onClick={onOpenAuth}
               id="btn-masuk-akun"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold bg-slate-900 text-white dark:bg-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 shadow-xs transition-colors cursor-pointer select-none"
+              className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-full text-xs font-bold bg-emerald-800 hover:bg-emerald-900 text-white dark:bg-emerald-400 dark:hover:bg-emerald-300 dark:text-emerald-950 shadow-xs transition-colors cursor-pointer select-none shrink-0"
             >
               <LogIn className="w-3.5 h-3.5" />
-              <span>Masuk Akun</span>
+              <span className="hidden sm:inline">Masuk Akun</span>
+              <span className="sm:hidden">Masuk</span>
             </button>
           )}
         </div>
@@ -392,9 +395,9 @@ export default function Navbar({
 
       {/* Mobile Search Expand Drawer */}
       {showMobileSearch && (
-        <div className="lg:hidden border-t border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-950 p-4 space-y-3">
-          <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-900 rounded-xl px-3 py-2 border border-slate-200 dark:border-slate-800">
-            <Search className="w-4 h-4 text-slate-400" />
+        <div className="lg:hidden border-t border-slate-200/80 dark:border-emerald-900/30 bg-white dark:bg-[#071510] p-4 space-y-3">
+          <div className="flex items-center gap-2 bg-slate-100 dark:bg-emerald-950/40 rounded-xl px-3 py-2 border border-slate-200 dark:border-emerald-900/50">
+            <Search className="w-4 h-4 text-emerald-600" />
             <input
               type="text"
               value={searchQuery}
@@ -405,16 +408,16 @@ export default function Navbar({
           </div>
 
           <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
-            <span className="text-xs font-semibold text-slate-500 shrink-0">Radius:</span>
+            <span className="text-xs font-semibold text-emerald-800 dark:text-emerald-400 shrink-0">Radius:</span>
             {radiusOptions.map((opt) => (
               <button
                 key={opt.label}
                 type="button"
                 onClick={() => onRadiusChange?.(opt.val as number | "all")}
-                className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
+                className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-colors cursor-pointer ${
                   radius === opt.val
-                    ? "bg-rose-500 text-white"
-                    : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300"
+                    ? "bg-emerald-700 text-white"
+                    : "bg-slate-100 dark:bg-emerald-950/50 text-slate-700 dark:text-slate-300"
                 }`}
               >
                 {opt.label}

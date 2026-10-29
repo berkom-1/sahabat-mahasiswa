@@ -32,7 +32,7 @@ export default function BottomNav({ activeTab, onChangeTab }: BottomNavProps) {
               onClick={() => onChangeTab(tab.key)}
               className={`flex-1 flex flex-col items-center justify-center py-2 px-1 rounded-full transition-all cursor-pointer ${
                 isActive
-                  ? "bg-rose-500 text-white font-semibold shadow-xs"
+                  ? "bg-emerald-800 dark:bg-emerald-700 text-white font-semibold shadow-xs"
                   : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
               }`}
             >

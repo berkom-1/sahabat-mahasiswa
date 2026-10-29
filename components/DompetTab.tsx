@@ -231,7 +231,7 @@ export default function DompetTab({ userId }: DompetTabProps) {
           <div>
             <div className="flex items-center justify-between text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
               <span>Sisa Saldo Dompet</span>
-              <Wallet className="w-4 h-4 text-rose-500" />
+              <Wallet className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
             </div>
             <h2 className="text-2xl font-bold text-slate-900 dark:text-white tabular-nums tracking-tight">
               {formatRupiah(sisaSaldo)}
@@ -318,8 +318,8 @@ export default function DompetTab({ userId }: DompetTabProps) {
               onClick={() => setCategoryFilter(cat.id)}
               className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
                 categoryFilter === cat.id
-                  ? "border border-rose-300 dark:border-rose-900 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400"
-                  : "border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                  ? "border border-emerald-500 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-bold"
+                  : "border border-slate-200 dark:border-emerald-900/40 text-slate-700 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
               }`}
             >
               {cat.label}
@@ -341,7 +341,7 @@ export default function DompetTab({ userId }: DompetTabProps) {
           <button
             type="button"
             onClick={() => setShowAddModal(true)}
-            className="px-4 py-1.5 rounded-full bg-rose-500 hover:bg-rose-600 text-white text-xs font-semibold shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
+            className="px-4 py-1.5 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Catat Transaksi</span>
@@ -353,7 +353,7 @@ export default function DompetTab({ userId }: DompetTabProps) {
       <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 shadow-xs">
         <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
           <h3 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-            <PieChart className="w-4 h-4 text-rose-500" />
+            <PieChart className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
             <span>Riwayat Transaksi Dompet</span>
           </h3>
           <span className="text-xs text-slate-500 tabular-nums">
@@ -428,7 +428,7 @@ export default function DompetTab({ userId }: DompetTabProps) {
           <div className="relative bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-md p-6 z-10 space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
               <h3 className="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
-                <Plus className="w-4 h-4 text-rose-500" />
+                <Plus className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
                 <span>Catat Transaksi Baru</span>
               </h3>
               <button
@@ -479,7 +479,7 @@ export default function DompetTab({ userId }: DompetTabProps) {
                   value={nominal}
                   onChange={(e) => setNominal(e.target.value)}
                   placeholder="Contoh: 25000"
-                  className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-base font-bold outline-none focus:border-rose-500 tabular-nums"
+                  className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-base font-bold outline-none focus:border-emerald-600 tabular-nums"
                 />
               </div>
 
@@ -491,7 +491,7 @@ export default function DompetTab({ userId }: DompetTabProps) {
                 <select
                   value={kategori}
                   onChange={(e) => setKategori(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-medium outline-none focus:border-rose-500 cursor-pointer"
+                  className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-medium outline-none focus:border-emerald-600 cursor-pointer"
                 >
                   {KATEGORI_OPTIONS.map((k) => (
                     <option key={k} value={k}>
@@ -511,7 +511,7 @@ export default function DompetTab({ userId }: DompetTabProps) {
                   value={catatan}
                   onChange={(e) => setCatatan(e.target.value)}
                   placeholder="Contoh: Nasi padang lauk rendang..."
-                  className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs outline-none focus:border-rose-500"
+                  className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs outline-none focus:border-emerald-600"
                 />
               </div>
 
@@ -526,7 +526,7 @@ export default function DompetTab({ userId }: DompetTabProps) {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-full bg-rose-500 hover:bg-rose-600 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+                  className="px-5 py-2 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
                 >
                   Simpan Transaksi
                 </button>
