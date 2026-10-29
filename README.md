@@ -285,17 +285,18 @@ SAHABAT-MAHASISWA/
 │   ├── data.ts                   # Data katalog default dan merchant
 │   ├── db.ts                     # MySQL2 connection pool singleton
 │   ├── launcher.ts               # Handler integrasi desktop & deeplink
-│   ├── supabase.ts               # Adapter kompatibilitas legacy client
 │   └── types.ts                  # Definisi antarmuka TypeScript
+├── docs/                         # Dokumentasi proyek & spesifikasi
+│   └── PRD-SAHABAT-MAHASISWA.md  # Product Requirement Document
 ├── public/                       # Aset publik statis (logo, favicon)
 ├── scripts/
-│   └── migrate.mjs               # Skrip migrasi database otomatis
+│   ├── migrate.mjs               # Skrip migrasi database otomatis
+│   └── test-db.mjs               # Skrip pengujian koneksi database
 ├── .env.example                  # Template variabel lingkungan
 ├── eslint.config.mjs             # Konfigurasi ESLint
 ├── next.config.ts                # Konfigurasi Next.js
 ├── package.json                  # Dependensi dan script NPM
-├── tsconfig.json                 # Konfigurasi TypeScript
-└── PRD-SAHABAT-MAHASISWA.md      # Product Requirement Document
+└── tsconfig.json                 # Konfigurasi TypeScript
 ```
 
 ---
