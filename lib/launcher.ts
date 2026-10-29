@@ -17,13 +17,27 @@ export interface LaunchConfig {
   onToast?: (msg: string) => void;
 }
 
+export function formatWhatsAppUrl(telp: string, pesan: string): string {
+  let cleaned = (telp || "").replace(/\D/g, "");
+  if (cleaned.startsWith("0")) {
+    cleaned = "62" + cleaned.slice(1);
+  } else if (!cleaned.startsWith("62") && cleaned.length > 0) {
+    cleaned = "62" + cleaned;
+  }
+  return `https://wa.me/${cleaned}?text=${encodeURIComponent(pesan)}`;
+}
+
 export function bukaUrlAman(url: string) {
   if (!url) return;
 
   // 1. Windows Electron (.exe) Support
   if (typeof window !== "undefined" && window.electronAPI?.openExternal) {
-    window.electronAPI.openExternal(url);
-    return;
+    try {
+      window.electronAPI.openExternal(url);
+      return;
+    } catch {
+      // fallback to browser
+    }
   }
 
   // 2. Mobile Android / iOS
@@ -39,15 +53,9 @@ export function bukaUrlAman(url: string) {
 
   // 3. Desktop Browser
   try {
-    const win = window.open(url, "_blank");
-    if (!win) {
-      const a = document.createElement("a");
-      a.href = url;
-      a.target = "_blank";
-      a.rel = "noopener noreferrer";
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(() => a.remove(), 250);
+    const win = window.open(url, "_blank", "noopener,noreferrer");
+    if (!win || win.closed || typeof win.closed === "undefined") {
+      window.location.assign(url);
     }
   } catch {
     window.location.href = url;

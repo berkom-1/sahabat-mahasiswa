@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useSession, signOut as nextAuthSignOut } from "next-auth/react";
-import { X } from "lucide-react";
+import { X, GraduationCap, ShieldCheck } from "lucide-react";
 
 import Navbar from "@/components/Navbar";
 import BottomNav, { TabKey } from "@/components/BottomNav";
@@ -164,26 +164,26 @@ export default function Home() {
 
       {/* Dual Account Smart Banner */}
       {showGoogleAddCampusBanner && (
-        <div className="bg-linear-to-r from-indigo-600 via-indigo-700 to-purple-700 text-white px-4 py-2.5 text-xs shadow-md border-b border-indigo-500/30">
+        <div className="bg-slate-900 text-white px-4 py-2.5 text-xs border-b border-slate-800">
           <div className="max-w-5xl mx-auto flex items-center justify-between gap-3 flex-wrap">
             <div className="flex items-center gap-2">
-              <span className="text-base">🎓</span>
+              <GraduationCap className="w-4 h-4 text-amber-400 shrink-0" />
               <span>
-                Masuk via Google terhubung! <strong>Tambahkan email kampusmu (@kampus.uc.id)</strong> untuk membuka status Mahasiswa Terverifikasi.
+                Masuk via Google terhubung. <strong>Tambahkan email kampusmu (@kampus.ac.id)</strong> untuk membuka status Mahasiswa Terverifikasi.
               </span>
             </div>
             <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={() => setShowProfileModal(true)}
-                className="px-3 py-1 bg-white text-indigo-700 font-black rounded-lg hover:bg-indigo-50 transition shadow-sm"
+                className="px-3 py-1 bg-white text-slate-900 font-semibold rounded-lg hover:bg-slate-100 transition-colors text-xs"
               >
                 + Tambah Email Kampus
               </button>
               <button
                 type="button"
                 onClick={() => setDismissDualBanner(true)}
-                className="p-1 hover:bg-white/20 rounded-md transition text-white/80 hover:text-white"
+                className="p-1 hover:bg-white/10 rounded-md transition-colors text-slate-400 hover:text-white"
                 title="Tutup"
               >
                 <X className="w-4 h-4" />
@@ -194,26 +194,26 @@ export default function Home() {
       )}
 
       {showCampusAddGoogleBanner && (
-        <div className="bg-linear-to-r from-blue-600 to-indigo-700 text-white px-4 py-2.5 text-xs shadow-md border-b border-blue-500/30">
+        <div className="bg-slate-900 text-white px-4 py-2.5 text-xs border-b border-slate-800">
           <div className="max-w-5xl mx-auto flex items-center justify-between gap-3 flex-wrap">
             <div className="flex items-center gap-2">
-              <span className="text-base">🔵</span>
+              <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
               <span>
-                Akun Mahasiswa aktif! <strong>Tautkan akun Google pribadimu</strong> untuk opsi masuk cepat 1-klik di perangkat lain.
+                Akun Mahasiswa aktif. <strong>Tautkan akun Google pribadimu</strong> untuk opsi masuk cepat 1-klik di perangkat lain.
               </span>
             </div>
             <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={() => setShowProfileModal(true)}
-                className="px-3 py-1 bg-white text-blue-700 font-black rounded-lg hover:bg-blue-50 transition shadow-sm"
+                className="px-3 py-1 bg-white text-slate-900 font-semibold rounded-lg hover:bg-slate-100 transition-colors text-xs"
               >
                 Tautkan Google
               </button>
               <button
                 type="button"
                 onClick={() => setDismissDualBanner(true)}
-                className="p-1 hover:bg-white/20 rounded-md transition text-white/80 hover:text-white"
+                className="p-1 hover:bg-white/10 rounded-md transition-colors text-slate-400 hover:text-white"
                 title="Tutup"
               >
                 <X className="w-4 h-4" />
@@ -225,7 +225,9 @@ export default function Home() {
 
       {/* Main Content Area */}
       <main className="flex-1 max-w-5xl w-full mx-auto px-4 pt-5">
-        {activeTab === "kosan" && <KosanTab />}
+        {activeTab === "kosan" && (
+          <KosanTab onOpenProfile={() => setShowProfileModal(true)} />
+        )}
         {activeTab === "voucher" && <VoucherTab />}
         {activeTab === "dompet" && <DompetTab userId={activeUser?.id} />}
         {activeTab === "tugas" && <TugasTab userId={activeUser?.id} />}

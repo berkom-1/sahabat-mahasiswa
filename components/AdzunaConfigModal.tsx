@@ -51,6 +51,17 @@ export default function AdzunaConfigModal({
   const [testResult, setTestResult] = useState<{ success: boolean; msg: string } | null>(null);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
 
+  // Close on Escape
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    if (isOpen) {
+      window.addEventListener("keydown", handleKeyDown);
+    }
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
+
   useEffect(() => {
     if (!isOpen) return;
     queueMicrotask(() => {
@@ -98,7 +109,7 @@ export default function AdzunaConfigModal({
       if (data.isLive) {
         setTestResult({
           success: true,
-          msg: `Koneksi Berhasil! Terhubung ke Adzuna Job API (${data.count} lowongan live ditemukan).`,
+          msg: `Koneksi berhasil. Terhubung ke Adzuna Job API (${data.count} lowongan live ditemukan).`,
         });
       } else {
         setTestResult({
@@ -129,7 +140,7 @@ export default function AdzunaConfigModal({
       localStorage.setItem("sm_adzuna_config", JSON.stringify(config));
       window.dispatchEvent(new Event("sm_adzuna_updated"));
 
-      showToast("Kunci API Adzuna berhasil disimpan!");
+      showToast("Kunci API Adzuna berhasil disimpan.");
       if (onSavedSuccess) onSavedSuccess();
       setTimeout(() => onClose(), 1200);
     } catch (err) {
@@ -148,48 +159,57 @@ export default function AdzunaConfigModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/65 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-lg shadow-2xl relative my-6 flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+      <div
+        className="fixed inset-0"
+        onClick={onClose}
+        aria-hidden="true"
+      />
+
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-lg shadow-xl relative my-6 flex flex-col overflow-hidden z-10">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-linear-to-r from-blue-600/10 via-indigo-600/5 to-transparent">
+        <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-bold text-base shadow-md shadow-blue-500/20">
-              <Briefcase className="w-5 h-5" />
+            <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 flex items-center justify-center border border-slate-200 dark:border-slate-700">
+              <Briefcase className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="font-black text-base text-slate-900 dark:text-white leading-tight flex items-center gap-2">
-                Integrasi API Adzuna Lowongan Kerja
+              <h3 className="font-bold text-base text-slate-900 dark:text-white leading-tight">
+                Integrasi API Adzuna
               </h3>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 Sinkronisasi ribuan lowongan magang & part-time real-time
               </p>
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+            className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Tab Selector */}
-        <div className="flex border-b border-slate-100 dark:border-slate-800 px-6 pt-2 gap-4 text-xs font-bold">
+        <div className="flex border-b border-slate-200 dark:border-slate-800 px-6 pt-2 gap-4 text-xs font-semibold">
           <button
+            type="button"
             onClick={() => setActiveTab("form")}
-            className={`pb-2.5 border-b-2 transition ${
+            className={`pb-2.5 border-b-2 transition-colors cursor-pointer ${
               activeTab === "form"
-                ? "border-blue-600 text-blue-600 dark:text-blue-400"
+                ? "border-slate-900 text-slate-900 dark:border-white dark:text-white"
                 : "border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-300"
             }`}
           >
             Pengaturan API Key
           </button>
           <button
+            type="button"
             onClick={() => setActiveTab("guide")}
-            className={`pb-2.5 border-b-2 transition flex items-center gap-1.5 ${
+            className={`pb-2.5 border-b-2 transition-colors flex items-center gap-1.5 cursor-pointer ${
               activeTab === "guide"
-                ? "border-blue-600 text-blue-600 dark:text-blue-400"
+                ? "border-slate-900 text-slate-900 dark:border-white dark:text-white"
                 : "border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-300"
             }`}
           >
@@ -201,8 +221,8 @@ export default function AdzunaConfigModal({
         {/* Content Body */}
         <div className="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
           {toastMsg && (
-            <div className="p-3 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900 text-blue-700 dark:text-blue-300 text-xs font-bold flex items-center gap-2 animate-in fade-in">
-              <Sparkles className="w-4 h-4 shrink-0 text-blue-500" />
+            <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-xs font-medium flex items-center gap-2">
+              <Sparkles className="w-4 h-4 shrink-0 text-amber-500" />
               <span>{toastMsg}</span>
             </div>
           )}
@@ -211,33 +231,33 @@ export default function AdzunaConfigModal({
             <div className="space-y-4">
               {/* Status Banner */}
               <div
-                className={`p-3.5 rounded-2xl border flex items-start gap-3 ${
+                className={`p-3.5 rounded-xl border flex items-start gap-3 ${
                   isConfigured
                     ? "bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-900/60 text-emerald-800 dark:text-emerald-300"
-                    : "bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-900/60 text-amber-800 dark:text-amber-300"
+                    : "bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300"
                 }`}
               >
                 {isConfigured ? (
                   <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-emerald-600 dark:text-emerald-400" />
                 ) : (
-                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
+                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-slate-400" />
                 )}
                 <div className="text-xs leading-relaxed">
-                  <div className="font-black">
+                  <div className="font-semibold">
                     {isConfigured ? "Adzuna API Aktif" : "Mode Dataset Kaggle (Default)"}
                   </div>
-                  <div className="text-[11px] opacity-90 mt-0.5">
+                  <div className="text-xs opacity-90 mt-0.5">
                     {isConfigured
                       ? "Aplikasi menarik lowongan live langsung dari agregator Adzuna Indonesia."
-                      : "Kunci API belum diisi. Aplikasi saat ini menampilkan kumpulan data lowongan mahasiswa dari Dataset Kaggle Indonesia."}
+                      : "Kunci API belum diisi. Menampilkan kumpulan data lowongan mahasiswa dari Dataset Kaggle."}
                   </div>
                 </div>
               </div>
 
               {/* Form Input: App ID */}
               <div>
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 mb-1.5">
-                  <Key className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                <label className="text-xs font-medium text-slate-700 dark:text-slate-300 flex items-center gap-1.5 mb-1.5">
+                  <Key className="w-3.5 h-3.5 text-slate-500" />
                   <span>Adzuna App ID</span>
                 </label>
                 <input
@@ -245,21 +265,21 @@ export default function AdzunaConfigModal({
                   placeholder="Contoh: a1b2c3d4"
                   value={appId}
                   onChange={(e) => setAppId(e.target.value)}
-                  className="w-full text-xs font-mono bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500 border border-transparent dark:border-slate-700"
+                  className="w-full text-xs font-mono bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-slate-100 rounded-xl p-3 outline-none focus:border-slate-400 border border-slate-200 dark:border-slate-700"
                 />
               </div>
 
               {/* Form Input: App Key */}
               <div>
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between mb-1.5">
+                <label className="text-xs font-medium text-slate-700 dark:text-slate-300 flex items-center justify-between mb-1.5">
                   <span className="flex items-center gap-1.5">
-                    <Key className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                    <Key className="w-3.5 h-3.5 text-slate-500" />
                     <span>Adzuna App Key (Secret)</span>
                   </span>
                   <button
                     type="button"
                     onClick={() => setShowKey(!showKey)}
-                    className="text-[11px] text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+                    className="text-xs text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 flex items-center gap-1 cursor-pointer"
                   >
                     {showKey ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
                     <span>{showKey ? "Sembunyikan" : "Perlihatkan"}</span>
@@ -270,7 +290,7 @@ export default function AdzunaConfigModal({
                   placeholder="Contoh: e5f6g7h8i9j0k1l2m3n4..."
                   value={appKey}
                   onChange={(e) => setAppKey(e.target.value)}
-                  className="w-full text-xs font-mono bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500 border border-transparent dark:border-slate-700"
+                  className="w-full text-xs font-mono bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-slate-100 rounded-xl p-3 outline-none focus:border-slate-400 border border-slate-200 dark:border-slate-700"
                 />
               </div>
 
@@ -280,10 +300,10 @@ export default function AdzunaConfigModal({
                   type="button"
                   onClick={handleTestConnection}
                   disabled={testing || !appId || !appKey}
-                  className="w-full py-2.5 px-4 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="w-full py-2 px-4 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
                 >
                   <RefreshCw className={`w-3.5 h-3.5 ${testing ? "animate-spin" : ""}`} />
-                  <span>{testing ? "Menguji Koneksi ke Adzuna..." : "Uji Koneksi API"}</span>
+                  <span>{testing ? "Menguji Koneksi..." : "Uji Koneksi API"}</span>
                 </button>
 
                 {testResult && (
@@ -309,7 +329,7 @@ export default function AdzunaConfigModal({
                 <button
                   type="button"
                   onClick={handleSave}
-                  className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-black shadow-lg shadow-blue-600/25 flex items-center justify-center gap-2 transition active:scale-95"
+                  className="flex-1 py-2.5 bg-slate-900 text-white dark:bg-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer"
                 >
                   <CheckCircle2 className="w-4 h-4" /> Simpan Kunci API
                 </button>
@@ -318,7 +338,7 @@ export default function AdzunaConfigModal({
                   <button
                     type="button"
                     onClick={handleReset}
-                    className="px-4 py-3 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 rounded-xl text-xs font-bold transition"
+                    className="px-4 py-2.5 border border-slate-200 dark:border-slate-700 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-xl text-xs font-medium transition-colors cursor-pointer"
                   >
                     Reset
                   </button>
@@ -328,18 +348,18 @@ export default function AdzunaConfigModal({
           ) : (
             /* Guide Tab */
             <div className="space-y-3.5 text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-              <div className="p-3.5 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900 text-blue-900 dark:text-blue-200 font-medium">
+              <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 font-medium">
                 Adzuna menyediakan akses API pencarian lowongan kerja <strong>100% Gratis</strong> untuk pengembang aplikasi.
               </div>
 
-              <ol className="list-decimal list-inside space-y-2.5 font-medium">
+              <ol className="list-decimal list-inside space-y-2.5 font-normal">
                 <li>
                   Buka portal resmi pengembang Adzuna di:
                   <a
                     href="https://developer.adzuna.com/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-1 inline-flex items-center gap-1 text-blue-600 dark:text-blue-400 font-bold hover:underline ml-1"
+                    className="inline-flex items-center gap-1 font-semibold text-slate-900 dark:text-white underline ml-1"
                   >
                     <span>developer.adzuna.com</span>
                     <ExternalLink className="w-3 h-3" />
@@ -360,7 +380,7 @@ export default function AdzunaConfigModal({
                 <button
                   type="button"
                   onClick={() => setActiveTab("form")}
-                  className="w-full py-2.5 bg-blue-600 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-500/20"
+                  className="w-full py-2 bg-slate-900 text-white dark:bg-white dark:text-slate-900 rounded-xl text-xs font-semibold cursor-pointer"
                 >
                   Kembali ke Formulir Kunci API
                 </button>

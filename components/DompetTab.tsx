@@ -13,6 +13,7 @@ import {
   Check,
   Trash2,
   PieChart,
+  X,
 } from "lucide-react";
 
 interface DompetTabProps {
@@ -68,6 +69,17 @@ export default function DompetTab({ userId }: DompetTabProps) {
   const [kategori, setKategori] = useState(KATEGORI_OPTIONS[0]);
   const [nominal, setNominal] = useState("");
   const [catatan, setCatatan] = useState("");
+
+  // Close modal on escape
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setShowAddModal(false);
+    };
+    if (showAddModal) {
+      window.addEventListener("keydown", handleKeyDown);
+    }
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [showAddModal]);
 
   // Load transactions from MySQL
   useEffect(() => {
@@ -175,11 +187,11 @@ export default function DompetTab({ userId }: DompetTabProps) {
 
   // Copy Summary
   const handleCopySummary = () => {
-    const text = `📊 *Laporan Keuangan Sahabat Mahasiswa*\n💰 Sisa Saldo: ${formatRupiah(
+    const text = `Laporan Keuangan Sahabat Mahasiswa\nSisa Saldo: ${formatRupiah(
       sisaSaldo
-    )}\n📅 Sisa Hari Bulan Ini: ${daysRemaining} hari\n🎯 Batas Belanja Harian Aman: ${formatRupiah(
+    )}\nSisa Hari Bulan Ini: ${daysRemaining} hari\nBatas Belanja Harian Aman: ${formatRupiah(
       dailyLimit
-    )}/hari\n🔻 Total Pengeluaran: ${formatRupiah(totalKeluar)}`;
+    )}/hari\nTotal Pengeluaran: ${formatRupiah(totalKeluar)}`;
     navigator.clipboard.writeText(text);
     setCopiedSummary(true);
     setTimeout(() => setCopiedSummary(false), 2000);
@@ -194,58 +206,52 @@ export default function DompetTab({ userId }: DompetTabProps) {
   };
 
   return (
-    <div className="space-y-6 pb-24">
-      {/* Smart Daily Budget Card */}
-      <div className="rounded-3xl bg-linear-to-br from-emerald-600 via-teal-700 to-cyan-800 p-6 text-white shadow-xl shadow-teal-500/20 relative overflow-hidden">
-        <div className="absolute top-0 right-0 -mr-8 -mt-8 w-44 h-44 rounded-full bg-white/10 blur-2xl pointer-events-none" />
-        <div className="relative z-10">
-          <div className="flex items-center justify-between">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-xs font-semibold">
-              <Wallet className="w-3.5 h-3.5 text-emerald-200" /> Smart Daily Budget
-            </span>
-            <span className="text-xs text-teal-100 flex items-center gap-1">
-              <Calendar className="w-3.5 h-3.5" /> Sisa {daysRemaining} hari bulan ini
-            </span>
+    <div className="space-y-4 pb-20">
+      {/* Smart Daily Budget Card: Grounded Resting Panel */}
+      <div className="rounded-2xl bg-slate-900 text-white border border-slate-800 p-5 sm:p-6 space-y-4">
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800 text-slate-300 text-xs font-medium border border-slate-700">
+            <Wallet className="w-3.5 h-3.5 text-emerald-400" /> Smart Daily Budget Mahasiswa
+          </span>
+          <span className="text-xs text-slate-400 flex items-center gap-1 tabular-nums">
+            <Calendar className="w-3.5 h-3.5 text-slate-500" /> Sisa <span className="text-white font-medium tabular-nums">{daysRemaining} hari</span> bulan ini
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <p className="text-xs text-slate-400 font-medium">Sisa Saldo Dompet</p>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white mt-0.5 tabular-nums">
+              {formatRupiah(sisaSaldo)}
+            </h2>
           </div>
 
-          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="bg-slate-950/60 rounded-xl p-3.5 border border-slate-800">
+            <p className="text-xs text-slate-400 font-medium">Batas Aman Belanja Harian</p>
+            <h3 className="text-xl sm:text-2xl font-bold text-amber-300 mt-0.5 tabular-nums">
+              {formatRupiah(dailyLimit)}
+              <span className="text-xs text-slate-400 font-normal ml-1">/ hari</span>
+            </h3>
+            <p className="text-xs text-slate-500 mt-1">
+              Dihitung otomatis: Sisa Saldo &divide; Sisa Hari
+            </p>
+          </div>
+        </div>
+
+        {/* Quick Stats: In vs Out */}
+        <div className="pt-3 border-t border-slate-800 grid grid-cols-2 gap-3 text-xs">
+          <div className="flex items-center gap-2">
+            <TrendingUp className="w-4 h-4 text-emerald-400 shrink-0" />
             <div>
-              <p className="text-xs text-teal-100 font-medium">Sisa Saldo Dompet</p>
-              <h2 className="text-2xl sm:text-3xl font-black tracking-tight mt-0.5">
-                {formatRupiah(sisaSaldo)}
-              </h2>
-            </div>
-            <div className="bg-white/15 backdrop-blur-md rounded-2xl p-3 border border-white/20">
-              <p className="text-[11px] text-teal-100 font-medium">Batas Aman Belanja Harian</p>
-              <h3 className="text-xl sm:text-2xl font-black text-amber-300 mt-0.5">
-                {formatRupiah(dailyLimit)}
-                <span className="text-xs text-white/80 font-normal"> / hari</span>
-              </h3>
-              <p className="text-[10px] text-teal-100/80 mt-1">
-                Rumus: Sisa Saldo &divide; Sisa Hari Bulan Ini
-              </p>
+              <span className="text-slate-400 block text-xs">Pemasukan</span>
+              <span className="font-semibold text-white tabular-nums text-sm">{formatRupiah(totalMasuk)}</span>
             </div>
           </div>
-
-          {/* Quick Stats: In vs Out */}
-          <div className="mt-5 pt-4 border-t border-white/15 grid grid-cols-2 gap-3 text-xs">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-300">
-                <TrendingUp className="w-4 h-4" />
-              </div>
-              <div>
-                <span className="text-teal-200 text-[10px] block">Pemasukan</span>
-                <span className="font-bold">{formatRupiah(totalMasuk)}</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-xl bg-rose-500/20 flex items-center justify-center text-rose-300">
-                <TrendingDown className="w-4 h-4" />
-              </div>
-              <div>
-                <span className="text-teal-200 text-[10px] block">Pengeluaran</span>
-                <span className="font-bold">{formatRupiah(totalKeluar)}</span>
-              </div>
+          <div className="flex items-center gap-2">
+            <TrendingDown className="w-4 h-4 text-rose-400 shrink-0" />
+            <div>
+              <span className="text-slate-400 block text-xs">Pengeluaran</span>
+              <span className="font-semibold text-white tabular-nums text-sm">{formatRupiah(totalKeluar)}</span>
             </div>
           </div>
         </div>
@@ -254,30 +260,32 @@ export default function DompetTab({ userId }: DompetTabProps) {
       {/* Action Buttons: Add Transaction & Copy Summary */}
       <div className="flex items-center justify-between gap-3">
         <button
+          type="button"
           onClick={() => setShowAddModal(true)}
-          className="flex-1 inline-flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-600/25 active:scale-95 transition-all"
+          className="flex-1 inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 font-semibold text-xs transition-colors cursor-pointer"
         >
           <Plus className="w-4 h-4" />
           <span>Catat Pengeluaran / Pemasukan</span>
         </button>
 
         <button
+          type="button"
           onClick={handleCopySummary}
-          className="inline-flex items-center gap-1.5 py-3 px-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 font-semibold text-xs shadow-sm hover:bg-slate-50 transition-colors"
+          className="inline-flex items-center gap-1.5 py-2.5 px-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 font-medium text-xs hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
         >
-          {copiedSummary ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
+          {copiedSummary ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4 text-slate-500" />}
           <span>{copiedSummary ? "Tersalin" : "Salin Laporan"}</span>
         </button>
       </div>
 
       {/* Transaction History List */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm space-y-4">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="font-extrabold text-slate-900 dark:text-white text-base flex items-center gap-2">
-            <PieChart className="w-4 h-4 text-indigo-600" />
+          <h3 className="font-bold text-slate-900 dark:text-white text-base flex items-center gap-2">
+            <PieChart className="w-4 h-4 text-slate-500" />
             <span>Riwayat Transaksi Mahasiswa</span>
           </h3>
-          <span className="text-xs text-slate-400">{transaksiList.length} transaksi</span>
+          <span className="text-xs text-slate-500 dark:text-slate-400 tabular-nums">{transaksiList.length} transaksi</span>
         </div>
 
         <div className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -287,42 +295,37 @@ export default function DompetTab({ userId }: DompetTabProps) {
               className="py-3 flex items-center justify-between gap-3 group hover:bg-slate-50 dark:hover:bg-slate-800/40 px-2 rounded-xl transition-colors"
             >
               <div className="flex items-center gap-3">
-                <div
-                  className={`w-9 h-9 rounded-2xl flex items-center justify-center ${
-                    tx.jenis === "masuk"
-                      ? "bg-emerald-100 dark:bg-emerald-950/50 text-emerald-600"
-                      : "bg-rose-100 dark:bg-rose-950/50 text-rose-600"
-                  }`}
-                >
+                <div className="shrink-0">
                   {tx.jenis === "masuk" ? (
-                    <TrendingUp className="w-5 h-5" />
+                    <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                   ) : (
-                    <TrendingDown className="w-5 h-5" />
+                    <TrendingDown className="w-4 h-4 text-rose-600 dark:text-rose-400" />
                   )}
                 </div>
                 <div>
-                  <h4 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">
+                  <h4 className="font-semibold text-sm text-slate-900 dark:text-white">
                     {tx.kategori}
                   </h4>
-                  <p className="text-[11px] text-slate-400">
-                    {tx.catatan || "Tidak ada catatan"} &bull; {tx.tanggal}
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    {tx.catatan || "Tidak ada catatan"} &bull; <span className="tabular-nums">{tx.tanggal}</span>
                   </p>
                 </div>
               </div>
 
               <div className="flex items-center gap-3">
                 <span
-                  className={`font-black text-xs sm:text-sm ${
+                  className={`font-semibold text-sm tabular-nums ${
                     tx.jenis === "masuk"
-                      ? "text-emerald-600 dark:text-emerald-400"
-                      : "text-rose-600 dark:text-rose-400"
+                      ? "text-emerald-700 dark:text-emerald-400"
+                      : "text-rose-700 dark:text-rose-400"
                   }`}
                 >
                   {tx.jenis === "masuk" ? "+" : "-"} {formatRupiah(tx.nominal)}
                 </span>
                 <button
+                  type="button"
                   onClick={() => handleDelete(tx.id)}
-                  className="opacity-0 group-hover:opacity-100 p-1.5 text-slate-400 hover:text-rose-500 rounded-lg transition-all"
+                  className="opacity-0 group-hover:opacity-100 p-1.5 text-slate-400 hover:text-rose-600 rounded-lg transition-all cursor-pointer"
                   title="Hapus"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -333,7 +336,7 @@ export default function DompetTab({ userId }: DompetTabProps) {
 
           {transaksiList.length === 0 && (
             <p className="text-center text-xs text-slate-400 py-6">
-              Belum ada transaksi tercatat. Mulai catat keuangan Anda hari ini!
+              Belum ada transaksi tercatat. Mulai catat keuangan Anda hari ini.
             </p>
           )}
         </div>
@@ -342,21 +345,36 @@ export default function DompetTab({ userId }: DompetTabProps) {
       {/* Modal Tambah Transaksi */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4">
-            <h3 className="font-extrabold text-lg text-slate-900 dark:text-white">
-              Catat Transaksi Baru
-            </h3>
+          <div
+            className="fixed inset-0"
+            onClick={() => setShowAddModal(false)}
+            aria-hidden="true"
+          />
+
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 w-full max-w-md shadow-xl relative z-10 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-bold text-lg text-slate-900 dark:text-white">
+                Catat Transaksi Baru
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowAddModal(false)}
+                className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
 
             <form onSubmit={handleAddTransaksi} className="space-y-4">
               {/* Jenis Toggle */}
-              <div className="grid grid-cols-2 gap-2 bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl">
+              <div className="grid grid-cols-2 gap-1.5 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
                 <button
                   type="button"
                   onClick={() => setJenis("keluar")}
-                  className={`py-2 rounded-xl text-xs font-bold transition-all ${
+                  className={`py-2 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
                     jenis === "keluar"
-                      ? "bg-rose-600 text-white shadow-sm"
-                      : "text-slate-600 dark:text-slate-300"
+                      ? "bg-white dark:bg-slate-700 text-rose-700 dark:text-rose-300 shadow-xs"
+                      : "text-slate-600 dark:text-slate-400 hover:text-slate-800"
                   }`}
                 >
                   Pengeluaran
@@ -364,10 +382,10 @@ export default function DompetTab({ userId }: DompetTabProps) {
                 <button
                   type="button"
                   onClick={() => setJenis("masuk")}
-                  className={`py-2 rounded-xl text-xs font-bold transition-all ${
+                  className={`py-2 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
                     jenis === "masuk"
-                      ? "bg-emerald-600 text-white shadow-sm"
-                      : "text-slate-600 dark:text-slate-300"
+                      ? "bg-white dark:bg-slate-700 text-emerald-700 dark:text-emerald-300 shadow-xs"
+                      : "text-slate-600 dark:text-slate-400 hover:text-slate-800"
                   }`}
                 >
                   Pemasukan
@@ -376,13 +394,13 @@ export default function DompetTab({ userId }: DompetTabProps) {
 
               {/* Kategori Select */}
               <div>
-                <label className="text-xs font-bold text-slate-600 dark:text-slate-300 block mb-1">
+                <label className="text-xs font-medium text-slate-700 dark:text-slate-300 block mb-1">
                   Kategori
                 </label>
                 <select
                   value={kategori}
                   onChange={(e) => setKategori(e.target.value)}
-                  className="w-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-xl p-3 outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full text-xs font-medium bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 rounded-xl p-3 border border-slate-200 dark:border-slate-700 outline-none focus:border-slate-400 cursor-pointer"
                 >
                   {KATEGORI_OPTIONS.map((k) => (
                     <option key={k} value={k}>
@@ -394,7 +412,7 @@ export default function DompetTab({ userId }: DompetTabProps) {
 
               {/* Nominal Input */}
               <div>
-                <label className="text-xs font-bold text-slate-600 dark:text-slate-300 block mb-1">
+                <label className="text-xs font-medium text-slate-700 dark:text-slate-300 block mb-1">
                   Nominal (Rp)
                 </label>
                 <input
@@ -404,13 +422,13 @@ export default function DompetTab({ userId }: DompetTabProps) {
                   onChange={(e) => setNominal(e.target.value)}
                   required
                   min="1"
-                  className="w-full text-sm font-bold bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-xl p-3 outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full text-sm font-semibold bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 rounded-xl p-3 border border-slate-200 dark:border-slate-700 outline-none focus:border-slate-400 tabular-nums"
                 />
               </div>
 
               {/* Catatan Input */}
               <div>
-                <label className="text-xs font-bold text-slate-600 dark:text-slate-300 block mb-1">
+                <label className="text-xs font-medium text-slate-700 dark:text-slate-300 block mb-1">
                   Catatan (Opsional)
                 </label>
                 <input
@@ -418,7 +436,7 @@ export default function DompetTab({ userId }: DompetTabProps) {
                   placeholder="Contoh: Beli makan siang nasi padang"
                   value={catatan}
                   onChange={(e) => setCatatan(e.target.value)}
-                  className="w-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-xl p-3 outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full text-xs font-normal bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 rounded-xl p-3 border border-slate-200 dark:border-slate-700 outline-none focus:border-slate-400"
                 />
               </div>
 
@@ -426,13 +444,13 @@ export default function DompetTab({ userId }: DompetTabProps) {
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-600 dark:text-slate-300"
+                  className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 rounded-xl bg-indigo-600 text-white font-bold text-xs shadow-md shadow-indigo-600/30"
+                  className="flex-1 py-2.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 font-semibold text-xs transition-colors cursor-pointer"
                 >
                   Simpan Transaksi
                 </button>
