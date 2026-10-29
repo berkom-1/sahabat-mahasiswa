@@ -206,7 +206,7 @@ export default function Navbar({
                   setShowCampusMenu(!showCampusMenu);
                   setShowRadiusMenu(false);
                 }}
-                className="flex items-center gap-1.5 px-2 py-1 rounded-full text-slate-700 dark:text-slate-200 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 transition-colors font-medium max-w-[150px] truncate cursor-pointer"
+                className="flex items-center gap-1.5 px-2 py-1 rounded-full text-slate-700 dark:text-slate-200 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 transition-colors font-medium max-w-37.5 truncate cursor-pointer"
                 title={campusName}
               >
                 <School className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
