@@ -1,8 +1,10 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-  --background: #ffffff;
-  --foreground: #111827;
+  --background: #fbfbfb;
+  --foreground: #0f172a;
 }
 
 @theme inline {
@@ -12,11 +14,9 @@
   --font-mono: var(--font-geist-mono), monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #090d16;
-    --foreground: #f3f4f6;
-  }
+.dark {
+  --background: #0b0f17;
+  --foreground: #f8fafc;
 }
 
 body {
@@ -31,3 +31,13 @@ body {
 .tabular-nums {
   font-variant-numeric: tabular-nums;
 }
+
+/* Clean hidden scrollbars for horizontal rails */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+

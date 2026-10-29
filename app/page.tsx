@@ -14,6 +14,7 @@ import KerjaTab from "@/components/KerjaTab";
 import AuthModal from "@/components/AuthModal";
 import ProfileModal from "@/components/ProfileModal";
 import TikTokConfigModal from "@/components/TikTokConfigModal";
+import { getCoordinatesForLocation } from "@/lib/data";
 
 interface LocalMySQLUser {
   id: string;
@@ -31,6 +32,52 @@ export default function Home() {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showTikTokModal, setShowTikTokModal] = useState(false);
   const [dismissDualBanner, setDismissDualBanner] = useState(false);
+
+  // Shared Search & Location State for Hide.com Navbar + Kosan
+  const [searchQuery, setSearchQuery] = useState("");
+  const [radius, setRadius] = useState<number | "all">(10);
+  const [currentLocation, setCurrentLocation] = useState<{
+    name: string;
+    lat: number;
+    lng: number;
+    area: string;
+  }>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const cached = localStorage.getItem("sm_user_profile_cache");
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed.kampus && parsed.kampus.trim()) {
+            return getCoordinatesForLocation(parsed.kampus);
+          }
+        }
+      } catch {}
+    }
+    return getCoordinatesForLocation("Universitas Siliwangi (UNSIL)");
+  });
+  const [gpsLoading, setGpsLoading] = useState(false);
+
+  const handleGetLiveGPS = () => {
+    if (typeof window === "undefined" || !navigator.geolocation) return;
+    setGpsLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        setCurrentLocation({
+          name: "Lokasi GPS Saya Saat Ini",
+          lat,
+          lng,
+          area: "Koordinat GPS Pengguna",
+        });
+        setGpsLoading(false);
+      },
+      () => {
+        setGpsLoading(false);
+      },
+      { timeout: 10000, enableHighAccuracy: true }
+    );
+  };
 
   // Sync MySQL user from local cache
   useEffect(() => {
@@ -150,8 +197,8 @@ export default function Home() {
     activeUser && isCampusLogin && !authMeta.google_linked && !dismissDualBanner;
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-200 flex flex-col font-sans">
-      {/* Navbar */}
+    <div className="min-h-screen bg-[#fbfbfb] dark:bg-[#0b0f17] text-slate-900 dark:text-slate-100 transition-colors duration-200 flex flex-col font-sans overflow-x-clip">
+      {/* Navbar with Hide.com Segmented Floating Search */}
       <Navbar
         user={activeUser}
         theme={theme}
@@ -160,12 +207,25 @@ export default function Home() {
         onOpenProfile={() => setShowProfileModal(true)}
         onOpenTikTokConfig={() => setShowTikTokModal(true)}
         onLogout={handleLogout}
+        searchQuery={searchQuery}
+        onSearchChange={(q) => {
+          setSearchQuery(q);
+          if (activeTab !== "kosan" && activeTab !== "voucher") {
+            setActiveTab("kosan");
+          }
+        }}
+        radius={radius}
+        onRadiusChange={setRadius}
+        campusName={currentLocation.name}
+        onCampusChange={(cName) => setCurrentLocation(getCoordinatesForLocation(cName))}
+        onGetLiveGPS={handleGetLiveGPS}
+        gpsLoading={gpsLoading}
       />
 
       {/* Dual Account Smart Banner */}
       {showGoogleAddCampusBanner && (
-        <div className="bg-slate-900 text-white px-4 py-2.5 text-xs border-b border-slate-800">
-          <div className="max-w-5xl mx-auto flex items-center justify-between gap-3 flex-wrap">
+        <div className="bg-slate-900 text-white px-4 py-2 text-xs border-b border-slate-800">
+          <div className="max-w-7xl mx-auto flex items-center justify-between gap-3 flex-wrap">
             <div className="flex items-center gap-2">
               <GraduationCap className="w-4 h-4 text-amber-400 shrink-0" />
               <span>
@@ -176,14 +236,14 @@ export default function Home() {
               <button
                 type="button"
                 onClick={() => setShowProfileModal(true)}
-                className="px-3 py-1 bg-white text-slate-900 font-semibold rounded-lg hover:bg-slate-100 transition-colors text-xs"
+                className="px-3 py-1 bg-white text-slate-900 font-semibold rounded-full hover:bg-slate-100 transition-colors text-xs cursor-pointer"
               >
                 + Tambah Email Kampus
               </button>
               <button
                 type="button"
                 onClick={() => setDismissDualBanner(true)}
-                className="p-1 hover:bg-white/10 rounded-md transition-colors text-slate-400 hover:text-white"
+                className="p-1 hover:bg-white/10 rounded-full transition-colors text-slate-400 hover:text-white cursor-pointer"
                 title="Tutup"
               >
                 <X className="w-4 h-4" />
@@ -194,8 +254,8 @@ export default function Home() {
       )}
 
       {showCampusAddGoogleBanner && (
-        <div className="bg-slate-900 text-white px-4 py-2.5 text-xs border-b border-slate-800">
-          <div className="max-w-5xl mx-auto flex items-center justify-between gap-3 flex-wrap">
+        <div className="bg-slate-900 text-white px-4 py-2 text-xs border-b border-slate-800">
+          <div className="max-w-7xl mx-auto flex items-center justify-between gap-3 flex-wrap">
             <div className="flex items-center gap-2">
               <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
               <span>
@@ -206,14 +266,14 @@ export default function Home() {
               <button
                 type="button"
                 onClick={() => setShowProfileModal(true)}
-                className="px-3 py-1 bg-white text-slate-900 font-semibold rounded-lg hover:bg-slate-100 transition-colors text-xs"
+                className="px-3 py-1 bg-white text-slate-900 font-semibold rounded-full hover:bg-slate-100 transition-colors text-xs cursor-pointer"
               >
                 Tautkan Google
               </button>
               <button
                 type="button"
                 onClick={() => setDismissDualBanner(true)}
-                className="p-1 hover:bg-white/10 rounded-md transition-colors text-slate-400 hover:text-white"
+                className="p-1 hover:bg-white/10 rounded-full transition-colors text-slate-400 hover:text-white cursor-pointer"
                 title="Tutup"
               >
                 <X className="w-4 h-4" />
@@ -223,10 +283,20 @@ export default function Home() {
         </div>
       )}
 
-      {/* Main Content Area */}
-      <main className="flex-1 max-w-5xl w-full mx-auto px-4 pt-5">
+      {/* Main Content Area (Wide 7xl Container for 4-Column Luxury Layout) */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-28 overflow-x-clip">
         {activeTab === "kosan" && (
-          <KosanTab onOpenProfile={() => setShowProfileModal(true)} />
+          <KosanTab
+            onOpenProfile={() => setShowProfileModal(true)}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            maxRadius={radius}
+            setMaxRadius={setRadius}
+            currentLocation={currentLocation}
+            setCurrentLocation={setCurrentLocation}
+            onGetLiveGPS={handleGetLiveGPS}
+            gpsLoading={gpsLoading}
+          />
         )}
         {activeTab === "voucher" && <VoucherTab />}
         {activeTab === "dompet" && <DompetTab userId={activeUser?.id} />}
@@ -234,7 +304,7 @@ export default function Home() {
         {activeTab === "kerja" && <KerjaTab />}
       </main>
 
-      {/* Floating Bottom Dock Navigation */}
+      {/* Floating Luxury Dock Navigation */}
       <BottomNav activeTab={activeTab} onChangeTab={setActiveTab} />
 
       {/* Auth Modal */}

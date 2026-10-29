@@ -12,6 +12,9 @@ import {
   Calendar,
   X,
   AlertCircle,
+  Sparkles,
+  Flame,
+  Check,
 } from "lucide-react";
 
 interface TugasTabProps {
@@ -45,6 +48,7 @@ const INITIAL_TUGAS: Tugas[] = [
 export default function TugasTab({ userId }: TugasTabProps) {
   const [tugasList, setTugasList] = useState<Tugas[]>([]);
   const [activeFilter, setActiveFilter] = useState<"aktif" | "selesai">("aktif");
+  const [weightFilter, setWeightFilter] = useState<number | "all">("all");
   const [showAddModal, setShowAddModal] = useState(false);
 
   // Form State
@@ -166,10 +170,18 @@ export default function TugasTab({ userId }: TugasTabProps) {
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   };
 
+  const activeCount = tugasList.filter((t) => !t.selesai).length;
+  const urgentCount = tugasList.filter((t) => !t.selesai && getDaysLeft(t.deadline) <= 2 && getDaysLeft(t.deadline) >= 0).length;
+  const completedCount = tugasList.filter((t) => t.selesai).length;
+
   const filteredTasks = tugasList
-    .filter((t) => (activeFilter === "aktif" ? !t.selesai : t.selesai))
+    .filter((t) => {
+      if (activeFilter === "aktif" && t.selesai) return false;
+      if (activeFilter === "selesai" && !t.selesai) return false;
+      if (weightFilter !== "all" && t.bobot !== weightFilter) return false;
+      return true;
+    })
     .sort((a, b) => {
-      // Sort: closest deadline first, then highest weight
       const daysA = getDaysLeft(a.deadline);
       const daysB = getDaysLeft(b.deadline);
       if (daysA !== daysB) return daysA - daysB;
@@ -177,59 +189,120 @@ export default function TugasTab({ userId }: TugasTabProps) {
     });
 
   return (
-    <div className="space-y-4 pb-20">
-      {/* Banner: Grounded Resting Dark Card */}
-      <div className="rounded-2xl bg-slate-900 text-white border border-slate-800 p-5 sm:p-6 space-y-2">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800 text-slate-300 text-xs font-medium border border-slate-700">
-          <CheckSquare className="w-3.5 h-3.5 text-slate-400" /> Deadline & Priority Manager
+    <div className="space-y-6 pb-24">
+      {/* 1. TOP STATS CARDS (Luxury 3-col grid) */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {/* Card 1: Aktif */}
+        <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs flex items-center justify-between">
+          <div>
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+              Tugas Aktif Berjalan
+            </span>
+            <div className="text-2xl font-bold text-slate-900 dark:text-white tabular-nums mt-0.5">
+              {activeCount} Tugas
+            </div>
+          </div>
+          <div className="w-10 h-10 rounded-full bg-rose-50 dark:bg-rose-950/40 text-rose-500 flex items-center justify-center">
+            <CheckSquare className="w-5 h-5" />
+          </div>
         </div>
-        <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
-          Pengingat Tugas Kuliah
-        </h1>
-        <p className="text-sm text-slate-400 max-w-lg leading-relaxed">
-          Kelola tugas kuliah berdasarkan tenggat waktu deadline dan tingkat urgensi mata kuliah.
-        </p>
+
+        {/* Card 2: Deadline Mendesak */}
+        <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs flex items-center justify-between">
+          <div>
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+              Deadline Mendesak (&le; 2 hari)
+            </span>
+            <div className="text-2xl font-bold text-amber-600 dark:text-amber-400 tabular-nums mt-0.5">
+              {urgentCount} Tugas
+            </div>
+          </div>
+          <div className="w-10 h-10 rounded-full bg-amber-50 dark:bg-amber-950/40 text-amber-500 flex items-center justify-center">
+            <Flame className="w-5 h-5" />
+          </div>
+        </div>
+
+        {/* Card 3: Selesai */}
+        <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs flex items-center justify-between">
+          <div>
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+              Telah Diselesaikan
+            </span>
+            <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 tabular-nums mt-0.5">
+              {completedCount} Tugas
+            </div>
+          </div>
+          <div className="w-10 h-10 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-500 flex items-center justify-center">
+            <CheckCircle2 className="w-5 h-5" />
+          </div>
+        </div>
       </div>
 
-      {/* Filter Tabs & Add Button */}
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
+      {/* 2. SUB-FILTER PILLS & TOOLBAR */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+        {/* Status & Priority Filter Pills */}
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
           <button
             type="button"
             onClick={() => setActiveFilter("aktif")}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer tabular-nums ${
+            className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
               activeFilter === "aktif"
-                ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900"
-                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                ? "border border-rose-300 dark:border-rose-900 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400"
+                : "border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
             }`}
           >
-            Aktif (<span className="tabular-nums">{tugasList.filter((t) => !t.selesai).length}</span>)
+            Aktif ({activeCount})
           </button>
+
           <button
             type="button"
             onClick={() => setActiveFilter("selesai")}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer tabular-nums ${
+            className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
               activeFilter === "selesai"
-                ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900"
-                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                ? "border border-rose-300 dark:border-rose-900 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400"
+                : "border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
             }`}
           >
-            Selesai (<span className="tabular-nums">{tugasList.filter((t) => t.selesai).length}</span>)
+            Selesai ({completedCount})
           </button>
+
+          <div className="h-4 w-px bg-slate-200 dark:bg-slate-800 mx-1" />
+
+          {/* Bobot Filter Pills */}
+          {[
+            { val: "all", label: "Semua Bobot" },
+            { val: 3, label: "Bobot Berat" },
+            { val: 2, label: "Sedang" },
+            { val: 1, label: "Ringan" },
+          ].map((w) => (
+            <button
+              key={w.label}
+              type="button"
+              onClick={() => setWeightFilter(w.val as number | "all")}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all cursor-pointer ${
+                weightFilter === w.val
+                  ? "border border-rose-300 dark:border-rose-900 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 font-semibold"
+                  : "border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+              }`}
+            >
+              {w.label}
+            </button>
+          ))}
         </div>
 
+        {/* Add Button */}
         <button
           type="button"
           onClick={() => setShowAddModal(true)}
-          className="inline-flex items-center gap-1.5 py-2 px-3.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 font-semibold text-xs transition-colors cursor-pointer"
+          className="px-4 py-1.5 rounded-full bg-rose-500 hover:bg-rose-600 text-white text-xs font-semibold shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer shrink-0"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-3.5 h-3.5" />
           <span>Tambah Tugas</span>
         </button>
       </div>
 
-      {/* Task List */}
-      <div className="space-y-3">
+      {/* 3. TASK CARDS GRID (Hide.com luxury cards) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredTasks.map((t) => {
           const daysLeft = getDaysLeft(t.deadline);
           const isOverdue = daysLeft < 0;
@@ -239,178 +312,188 @@ export default function TugasTab({ userId }: TugasTabProps) {
           return (
             <div
               key={t.id}
-              className={`p-4 rounded-2xl border transition-colors flex items-center justify-between gap-3 ${
+              className={`p-5 rounded-2xl border transition-all flex flex-col justify-between group shadow-xs ${
                 t.selesai
-                  ? "bg-slate-50 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800 opacity-60"
-                  : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-600"
+                  ? "bg-slate-50/60 dark:bg-slate-900/40 border-slate-200/80 dark:border-slate-800/80 opacity-70"
+                  : "bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800 hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700"
               }`}
             >
-              <div className="flex items-center gap-3.5 flex-1 min-w-0">
-                {/* Custom Checkbox */}
-                <button
-                  type="button"
-                  onClick={() => handleToggleSelesai(t.id, t.selesai)}
-                  className={`w-6 h-6 rounded-md flex items-center justify-center transition-colors cursor-pointer ${
-                    t.selesai
-                      ? "bg-emerald-600 text-white"
-                      : "border border-slate-300 dark:border-slate-600 hover:border-slate-500"
-                  }`}
-                  title={t.selesai ? "Tandai belum selesai" : "Tandai selesai"}
-                >
-                  {t.selesai && <CheckCircle2 className="w-4 h-4" />}
-                </button>
-
-                <div className="min-w-0 flex-1">
-                  <h4
-                    className={`font-semibold text-sm text-slate-900 dark:text-white truncate ${
-                      t.selesai ? "line-through text-slate-400 dark:text-slate-500" : ""
+              <div>
+                {/* Top Badge Row */}
+                <div className="flex items-center justify-between gap-2 mb-2.5">
+                  <span
+                    className={`text-[11px] font-bold px-2 py-0.5 rounded-md ${
+                      isOverdue
+                        ? "bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-400"
+                        : isToday
+                        ? "bg-rose-500 text-white"
+                        : isUrgent
+                        ? "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300"
+                        : "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300"
                     }`}
                   >
-                    {t.nama_tugas}
-                  </h4>
+                    {isOverdue
+                      ? `Terlambat ${Math.abs(daysLeft)} hari`
+                      : isToday
+                      ? "Deadline Hari Ini!"
+                      : `${daysLeft} hari lagi`}
+                  </span>
 
-                  <div className="flex flex-wrap items-center gap-2 mt-1">
-                    {/* Urgency Badge */}
-                    <span
-                      className={`text-xs font-medium px-2 py-0.5 rounded-md flex items-center gap-1 tabular-nums ${
-                        isOverdue
-                          ? "bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-900"
-                          : isToday
-                          ? "bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-900"
-                          : isUrgent
-                          ? "bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-900"
-                          : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
-                      }`}
-                    >
-                      <Clock className="w-3 h-3" />
-                      {isOverdue
-                        ? `Terlewat ${Math.abs(daysLeft)} hari`
-                        : isToday
-                        ? "Hari Ini!"
-                        : `${daysLeft} hari lagi`}
-                    </span>
-
-                    {/* Weight Badge (Sentence Case, Clean Text) */}
-                    <span
-                      className={`text-xs font-medium px-2 py-0.5 rounded-md ${
-                        t.bobot === 3
-                          ? "bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-900"
-                          : t.bobot === 2
-                          ? "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
-                          : "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900"
-                      }`}
-                    >
-                      {t.bobot === 3 ? "Bobot Berat" : t.bobot === 2 ? "Bobot Sedang" : "Bobot Ringan"}
-                    </span>
-
-                    <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1 tabular-nums">
-                      <Calendar className="w-3 h-3 text-slate-400" /> {t.deadline}
-                    </span>
-                  </div>
+                  <span
+                    className={`text-[11px] font-semibold px-2 py-0.5 rounded-md ${
+                      t.bobot === 3
+                        ? "bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900"
+                        : t.bobot === 2
+                        ? "bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-900"
+                        : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
+                    }`}
+                  >
+                    {t.bobot === 3 ? "Bobot Berat" : t.bobot === 2 ? "Bobot Sedang" : "Bobot Ringan"}
+                  </span>
                 </div>
+
+                {/* Task Title */}
+                <h3
+                  className={`font-bold text-sm text-slate-900 dark:text-white leading-snug line-clamp-2 ${
+                    t.selesai ? "line-through text-slate-400 dark:text-slate-500" : ""
+                  }`}
+                >
+                  {t.nama_tugas}
+                </h3>
               </div>
 
-              {/* Delete Button */}
-              <button
-                type="button"
-                onClick={() => handleDeleteTugas(t.id)}
-                className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg transition-colors cursor-pointer"
-                title="Hapus Tugas"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
+              {/* Bottom Meta & Action Row */}
+              <div className="pt-3 mt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-2">
+                <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5 tabular-nums">
+                  <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                  <span>{t.deadline}</span>
+                </span>
+
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => handleToggleSelesai(t.id, t.selesai)}
+                    className={`px-3 py-1 rounded-full text-xs font-semibold transition-all flex items-center gap-1 cursor-pointer ${
+                      t.selesai
+                        ? "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200"
+                        : "bg-emerald-600 hover:bg-emerald-500 text-white shadow-xs"
+                    }`}
+                  >
+                    <Check className="w-3 h-3" />
+                    <span>{t.selesai ? "Batal" : "Selesai"}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteTugas(t.id)}
+                    className="p-1.5 text-slate-400 hover:text-rose-600 rounded-full transition-colors cursor-pointer"
+                    title="Hapus Tugas"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
             </div>
           );
         })}
-
-        {filteredTasks.length === 0 && (
-          <div className="text-center py-10 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
-            <p className="text-slate-500 dark:text-slate-400 text-xs">
-              {activeFilter === "aktif"
-                ? "Tidak ada tugas kuliah yang tertunda."
-                : "Belum ada tugas yang diselesaikan."}
-            </p>
-          </div>
-        )}
       </div>
 
-      {/* Modal Tambah Tugas */}
-      {showAddModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div
-            className="fixed inset-0"
-            onClick={() => setShowAddModal(false)}
-            aria-hidden="true"
-          />
+      {filteredTasks.length === 0 && (
+        <div className="py-16 text-center rounded-3xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 text-slate-400 max-w-md mx-auto shadow-xs">
+          <CheckCircle2 className="w-12 h-12 text-slate-400 mx-auto mb-3" />
+          <div className="font-bold text-slate-900 dark:text-white text-base">
+            Tidak Ada Tugas di Kategori Ini
+          </div>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            Semua tugas terselesaikan atau belum ada tugas yang dicatat.
+          </p>
+        </div>
+      )}
 
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 w-full max-w-md shadow-xl relative z-10 space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="font-bold text-lg text-slate-900 dark:text-white">
-                Tambah Tugas Kuliah
+      {/* MODAL TAMBAH TUGAS */}
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
+          <div className="fixed inset-0" onClick={() => setShowAddModal(false)} />
+          <div className="relative bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-md p-6 z-10 space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+              <h3 className="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
+                <Plus className="w-4 h-4 text-rose-500" />
+                <span>Tambah Tugas Baru</span>
               </h3>
               <button
                 type="button"
                 onClick={() => setShowAddModal(false)}
-                className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg cursor-pointer"
+                className="p-1 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             <form onSubmit={handleAddTugas} className="space-y-4">
               <div>
-                <label className="text-xs font-medium text-slate-700 dark:text-slate-300 block mb-1">
-                  Nama Tugas & Mata Kuliah
+                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 block">
+                  Nama Tugas / Mata Kuliah
                 </label>
                 <input
                   type="text"
-                  placeholder="Contoh: Laporan Praktikum Jaringan Komputer"
+                  required
                   value={namaTugas}
                   onChange={(e) => setNamaTugas(e.target.value)}
-                  required
-                  className="w-full text-xs font-normal bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-white rounded-xl p-3 border border-slate-200 dark:border-slate-700 outline-none focus:border-slate-400"
+                  placeholder="Contoh: Makalah Pancasila Bab 2..."
+                  className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs outline-none focus:border-rose-500"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-medium text-slate-700 dark:text-slate-300 block mb-1">
+                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 block">
                   Tenggat Waktu (Deadline)
                 </label>
                 <input
                   type="date"
+                  required
                   value={deadline}
                   onChange={(e) => setDeadline(e.target.value)}
-                  required
-                  className="w-full text-xs font-normal bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-white rounded-xl p-3 border border-slate-200 dark:border-slate-700 outline-none focus:border-slate-400 tabular-nums cursor-pointer"
+                  className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs outline-none focus:border-rose-500 cursor-pointer"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-medium text-slate-700 dark:text-slate-300 block mb-1">
-                  Tingkat Kesulitan / Bobot
+                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 block">
+                  Tingkat Bobot / Urgensi
                 </label>
-                <select
-                  value={bobot}
-                  onChange={(e) => setBobot(Number(e.target.value))}
-                  className="w-full text-xs font-medium bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 rounded-xl p-3 border border-slate-200 dark:border-slate-700 outline-none focus:border-slate-400 cursor-pointer"
-                >
-                  <option value={1}>Bobot Ringan (Resume, Kuis Kecil)</option>
-                  <option value={2}>Bobot Sedang (Makalah, Tugas Mingguan)</option>
-                  <option value={3}>Bobot Berat (Laporan Praktikum, Proyek Akhir)</option>
-                </select>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { val: 1, label: "Ringan" },
+                    { val: 2, label: "Sedang" },
+                    { val: 3, label: "Berat" },
+                  ].map((b) => (
+                    <button
+                      key={b.val}
+                      type="button"
+                      onClick={() => setBobot(b.val)}
+                      className={`py-2 px-3 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                        bobot === b.val
+                          ? "bg-rose-500 text-white shadow-xs"
+                          : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
+                      }`}
+                    >
+                      {b.label}
+                    </button>
+                  ))}
+                </div>
               </div>
 
-              <div className="flex gap-2 pt-2">
+              <div className="pt-2 flex items-center justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                  className="px-4 py-2 rounded-full border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 font-semibold text-xs transition-colors cursor-pointer"
+                  className="px-5 py-2 rounded-full bg-rose-500 hover:bg-rose-600 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
                 >
                   Simpan Tugas
                 </button>
