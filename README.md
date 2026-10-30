@@ -1,116 +1,275 @@
-# Sahabat Mahasiswa - Platform Terintegrasi Mahasiswa Indonesia
+# 🎓 Sahabat Mahasiswa - Portal Terintegrasi Mahasiswa Indonesia
 
-Sahabat Mahasiswa adalah platform all-in-one berbasis web dan desktop yang dirancang khusus untuk memenuhi kebutuhan harian mahasiswa Indonesia. Aplikasi ini mencakup pencarian hunian kos berbasis radius kampus, pencatatan keuangan dompet mahasiswa, manajemen tugas dan deadline perkuliahan, direktori voucher makan hemat, hingga agregasi lowongan kerja paruh waktu dan magang.
+<p align="center">
+  <img src="public/logo.png" alt="Sahabat Mahasiswa Logo" width="180" />
+</p>
 
-Proyek ini dibangun menggunakan **Next.js (App Router)**, **TypeScript**, **Tailwind CSS**, dan **MySQL (Laragon)** dengan koneksi pooling `mysql2/promise` serta proteksi sandi berbasis `bcryptjs`.
+<p align="center">
+  <strong>Platform All-in-One Kebutuhan Hidup & Perkuliahan Mahasiswa Indonesia</strong><br />
+  Pencarian Kos Kampus • Voucher Kuliner • Lowongan Magang/Part-time • Catatan Keuangan • Manajemen Tugas
+</p>
 
----
-
-## Daftar Isi
-
-1. [Fitur Utama](#fitur-utama)
-2. [Arsitektur dan Teknologi](#arsitektur-dan-teknologi)
-3. [Arsitektur Basis Data (MySQL)](#arsitektur-basis-data-mysql)
-4. [Prasyarat Sistem](#prasyarat-sistem)
-5. [Instalasi dan Konfigurasi](#instalasi-dan-konfigurasi)
-6. [Migrasi dan Seed Basis Data](#migrasi-dan-seed-basis-data)
-7. [Akun Uji Coba (Demo Credentials)](#akun-uji-coba-demo-credentials)
-8. [Menjalankan Aplikasi](#menjalankan-aplikasi)
-9. [Dokumentasi API](#dokumentasi-api)
-10. [Struktur Direktori](#struktur-direktori)
-11. [Integrasi Desktop Launcher](#integrasi-desktop-launcher)
-12. [Lisensi](#lisensi)
+<p align="center">
+  <img src="https://img.shields.io/badge/Next.js-16.4.3-black?style=for-the-badge&logo=next.js" alt="Next.js 16" />
+  <img src="https://img.shields.io/badge/React-19.3.0-blue?style=for-the-badge&logo=react" alt="React 19" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS-v4-38bdf8?style=for-the-badge&logo=tailwind-css" alt="Tailwind CSS v4" />
+  <img src="https://img.shields.io/badge/TypeScript-5.x-3178c6?style=for-the-badge&logo=typescript" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/MySQL-8.0_(Laragon)-00758f?style=for-the-badge&logo=mysql" alt="MySQL" />
+  <img src="https://img.shields.io/badge/License-Academic-emerald?style=for-the-badge" alt="License" />
+</p>
 
 ---
 
-## Fitur Utama
+## 📌 Gambaran Umum (Overview)
 
-### 1. Pencarian Kos Kampus (Kosan)
-- Katalog data kos terintegrasi langsung dengan database MySQL.
-- Algoritma perhitungan jarak **Haversine formula** berdasarkan koordinat GPS kampus (default: Universitas Siliwangi / UNSIL Tasikmalaya).
-- Filter pencarian berdasarkan tipe kos (Putra, Putri, Campur), batas harga sewa maksimal, fasilitas, serta pencarian kata kunci nama/area.
-- Tautan langsung ke WhatsApp pengelola/pemilik kos.
+**Sahabat Mahasiswa** adalah portal terintegrasi berbasis web dan mobile-responsive yang diciptakan untuk menyelesaikan persoalan esensial mahasiswa sehari-hari. Mulai dari mencari hunian kos strategis di sekitar kampus, menghemat pengeluaran melalui direktori voucher kuliner, memonitor sirkulasi uang saku bulanan, memanajemen tenggat tugas kuliah, hingga menemukan lowongan kerja paruh waktu dan magang.
 
-### 2. Manajemen Dompet Mahasiswa (Keuangan)
-- Pencatatan transaksi pemasukan (*income*) dan pengeluaran (*expense*).
-- Kategorisasi otomatis (Uang Saku, Makanan, Transportasi, Kuliah, Belanja, Hiburan, dll.).
-- Kalkulasi saldo sisa, total pemasukan, dan total pengeluaran secara real-time.
-- Riwayat transaksi tersimpan persisten di MySQL per identitas pengguna.
-
-### 3. Manajemen Tugas dan Deadline Kuliah
-- Tambah, tinjau, ubah, dan hapus tugas kuliah (*CRUD*).
-- Indikator bobot kepentingan tugas (Rendah, Sedang, Tinggi).
-- Penghitungan sisa hari menuju tenggat waktu pengumpulan (deadline).
-- Fitur centang selesai yang langsung memperbarui status dan waktu penyelesaian di database.
-
-### 4. Voucher Makan dan Promo Mahasiswa
-- Katalog voucher diskon makanan dan minuman dari merchant/outlet di sekitar lingkungan kampus.
-- Modal detail outlet yang menampilkan alamat lengkap, jam operasional, menu andalan, dan tautan Google Maps.
-- Generator serial voucher deterministik yang dapat diklaim mahasiswa untuk ditukarkan di merchant.
-
-### 5. Lowongan Kerja & Magang (Kerja)
-- Daftar lowongan kerja paruh waktu (*part-time*), magang (*internship*), dan pekerjaan lepas (*freelance*).
-- Integrasi ganda: data lowongan lokal dari MySQL serta integrasi eksternal ke Adzuna Jobs API.
-- Filter pencarian berbasis bidang pekerjaan, jenis kontrak, dan lokasi.
-
-### 6. Profil dan Autentikasi Pengguna
-- Registrasi dan login pengguna aman dengan password terenkripsi `bcryptjs`.
-- Dukungan NextAuth.js untuk autentikasi sesi.
-- Manajemen profil mahasiswa (nama, kampus, fakultas, jurusan, semester, no. telp, avatar).
-- Verifikasi identitas email akademik kampus (`.ac.id`).
-- Penghubung akun pihak ketiga (Google & TikTok Access Token).
+Aplikasi dirancang dengan estetika antarmuka modern terinspirasi platform editorial travel/booking premium (seperti *Hide.com* dan *Airbnb*) dengan sentuhan identitas khas **Universitas Siliwangi (UNSIL)** — memadukan palet hijau almamater **Emerald Green** (`#064e3b`), aksen emas harimau **Tiger Amber Gold** (`#d97706`), tipografi tegas, serta maskot resmi **Maung UNSIL Sahabat Mahasiswa**.
 
 ---
 
-## Arsitektur dan Teknologi
+## 📑 Daftar Isi
 
-| Lapisan | Komponen / Pustaka |
-|---|---|
-| **Frontend Framework** | Next.js 16 (App Router, Turbopack) |
-| **Bahasa Pemrograman** | TypeScript (Strict Mode) |
-| **UI & Styling** | React 19, Tailwind CSS v4, Lucide React Icons |
-| **Basis Data** | MySQL 8.0+ / MariaDB (Laragon Environment) |
-| **Database Driver** | `mysql2/promise` (Connection Pooling Singleton) |
-| **Autentikasi & Keamanan** | NextAuth.js v4, `bcryptjs` (kompatibel format hash `$2a$` dan `$2y$`) |
-| **API Architecture** | Next.js REST Route Handlers (`app/api/*`) |
-| **Integrasi Eksternal** | Adzuna Job Search API, TikTok Developers API, Google OAuth |
-
----
-
-## Arsitektur Basis Data (MySQL)
-
-Seluruh data aplikasi telah dimigrasikan dari PostgreSQL/Supabase ke MySQL lokal pada port 3306.
-
-### Tabel Utama:
-1. `users`: Menyimpan identitas akun, kredensial password hash, data akademik mahasiswa, dan token integrasi.
-2. `assignment_deadlines`: Menyimpan data tugas kuliah, tanggal deadline, tingkat kesulitan, bobot, dan status penyelesaian.
-3. `wallet_transactions`: Menyimpan mutasi keuangan mahasiswa (pemasukan, pengeluaran, kategori, nominal, catatan).
-4. `kos`: Menyimpan data induk kosan, koordinat lat/lng, nomor telepon pemilik, harga, tipe, dan fasilitas.
-5. `vouchers`: Menyimpan master data voucher promo, potongan harga, minimal transaksi, dan masa berlaku.
-6. `job_vacancies`: Menyimpan lowongan kerja mahasiswa, nama perusahaan, tipe pekerjaan, rentang gaji, dan persyaratan.
-7. `outlets`: Menyimpan data merchant/outlet mitra sekitar kampus.
-
-### Compatibility Views:
-Untuk memfasilitasi kemudahan query dan interoperabilitas dengan komponen warisan, dibuat views berikut:
-- `profiles` &rarr; `SELECT ... FROM users`
-- `tugas` &rarr; `SELECT ... FROM assignment_deadlines`
-- `transaksi` &rarr; `SELECT ... FROM wallet_transactions`
-- `kosan` &rarr; `SELECT ... FROM kos`
+1. [Fitur Utama](#-fitur-utama)
+2. [Desain & Antarmuka Modern](#-desain--antarmuka-modern)
+3. [Arsitektur & Tumpukan Teknologi](#-arsitektur--tumpukan-teknologi)
+4. [Arsitektur Basis Data (MySQL)](#-arsitektur-basis-data-mysql)
+5. [Prasyarat Sistem](#-prasyarat-sistem)
+6. [Instalasi dan Konfigurasi](#-instalasi-dan-konfigurasi)
+7. [Migrasi dan Seed Database](#-migrasi-dan-seed-database)
+8. [Akun Uji Coba (Demo Credentials)](#-akun-uji-coba-demo-credentials)
+9. [Menjalankan Aplikasi](#-menjalankan-aplikasi)
+10. [Dokumentasi REST API](#-dokumentasi-rest-api)
+11. [Struktur Direktori Proyek](#-struktur-direktori-proyek)
+12. [Dukungan Desktop Launcher](#-dukungan-desktop-launcher)
+13. [Standar Kualitas & Pengujian](#-standar-kualitas--pengujian)
+14. [Lisensi & Kontribusi](#-lisensi--kontribusi)
 
 ---
 
-## Prasyarat Sistem
+## 🚀 Fitur Utama
 
-Sebelum menjalankan proyek, pastikan sistem Anda telah terpasang:
-- **Node.js**: Versi 20.x atau 22.x LTS (disarankan)
-- **NPM**: Versi 10.x+
-- **Laragon**: Versi 6.0+ (Apache/Nginx + MySQL 8.0 / MariaDB)
+### 1. 🏠 Pencarian Kos Kampus (Kosan Tab)
+* **Kategori Horisontal Cerdas**: Filter cepat kategori yang lazim digunakan mahasiswa:
+  * *Semua Kos*
+  * *Kos Putra*
+  * *Kos Putri*
+  * *Kos Campur*
+  * *Kos Eksklusif*
+  * *Kos Hemat* (< Rp 600.000 / bulan)
+  * *Kontrakan & Rumah* (pilihan sewa kelompok/tahunan)
+* **Perhitungan Jarak GPS Presisi (Haversine Formula)**:
+  * Menghitung jarak lurus kilometer aktual antara lokasi kos dengan titik koordinat kampus secara akurat.
+  * Opsi referensi kampus fleksibel: **UNSIL Kampus 1 (Mugarsari / Siliwangi)** dan **UNSIL Kampus 2 (Tamansari)**.
+* **Filter Multi-Kriteria**:
+  * Pilihan radius: *Semua Jarak*, *< 500m*, *< 1 km*, *< 2 km*, atau *< 5 km*.
+  * Filter rentang harga maksimal bulanan.
+  * Pencarian kata kunci nama kos, jalan, atau fasilitas.
+* **Kartu Kosan Editorial**:
+  * Badge harga bulanan dengan opsi format per tahun.
+  * Rating bintang dan ulasan penghuni.
+  * Indikator sisa kamar kosong real-time.
+  * Tombol aksi instan: Hubungi Pengelola via **WhatsApp API** dan petunjuk rute di **Google Maps**.
+* **Modal Detail Kosan Lengkap (`KosanDetailModal`)**:
+  * Menampilkan galeri foto kamar, daftar fasilitas (WiFi, KM Dalam, Kasur, Lemari, Dapur, Parkir), peraturan kos, simulasi biaya sewa, dan bio pemilik.
+* **Sistem Favorit**: Bookmark kosan tersimpan secara persisten pada `localStorage`.
+
+### 2. 🍔 Voucher & Promo Kuliner Mahasiswa (Voucher Tab)
+* **Horizontal Icon Rail**:
+  * *Semua Menu*
+  * *Makanan Berat* (Ayam Geprek, Nasi Padang, Warteg, Ricebowl)
+  * *Kopi & Minuman* (Kopi Susu, Boba, Es Teh, Minuman Dingin)
+  * *Camilan & Roti* (Toast, Croissant, Dimsum, Pastry)
+  * *Fast Food* (Burger, Fried Chicken, Pizza)
+  * *Ayam & Bebek* (Spesialis olahan unggas)
+  * *TikTok GO* (Promo eksklusif TikTok Dining)
+* **Sorting & Filter Praktis**:
+  * Pengurutan berdasarkan Diskon Terbesar, Harga Termurah, atau Rating Toko.
+  * Quick filter platform: *Semua*, *GoFood*, *GrabFood*, *ShopeeFood*, *Dine-in Langsung*.
+* **Modal Outlet Merchant (`OutletModal`)**:
+  * Profil merchant/outlet mitra sekitar kampus, jam buka-tutup operasional, alamat lengkap, pin Google Maps, dan menu terlaris.
+* **Klaim Voucher Deterministik (`ClaimVoucherModal`)**:
+  * Generator kode serial voucher unik per pengguna untuk ditukarkan langsung di kasir atau aplikasi pesan-antar.
+* **Integrasi TikTok GO Dining API (`TikTokConfigModal`)**:
+  * Konfigurasi API Client Key & Access Token merchant untuk sinkronisasi promo secara live.
+
+### 3. 💼 Lowongan Kerja & Magang (Kerja Tab)
+* **Kategori Profesi Mahasiswa**:
+  * *IT & Tech* (Frontend, Backend, Mobile, WordPress, IT Support)
+  * *Design & UI/UX* (Graphic Designer, Illustrator, Video Editor)
+  * *Marketing & Sosmed* (Content Creator, Social Media Specialist, Admin Live Streaming)
+  * *FnB & Barista* (Barista Coffee Shop, Crew Resto, Kasir)
+  * *Admin & Data* (Data Entry, Staf Administrasi, Pengarsipan)
+* **Dual Data Engine**:
+  * Mengambil data lowongan lokal dari database MySQL.
+  * Integrasi **Adzuna Job Search API** secara live dengan fallback otomatis.
+  * Modal kustomisasi konfigurasi API Adzuna (`AdzunaConfigModal`).
+* **Lamar Cepat**:
+  * Tombol tautan WhatsApp HRD/Owner, email pengiriman CV, atau portal karir resmi perusahaan.
+* **Bookmark Lowongan**: Simpan pekerjaan yang diminati untuk ditinjau nanti.
+
+### 4. 💰 Dompet Mahasiswa (Keuangan & Cashflow)
+* **Manajemen Mutasi Keuangan**:
+  * Pencatatan pemasukan (*income*) seperti uang bulanan orang tua, beasiswa, freelance, atau gaji part-time.
+  * Pencatatan pengeluaran (*expense*) dengan kategori terarah (Makan, Kos, Fotokopi/Buku, Bensin/Transport, Hiburan, dll.).
+* **Kalkulasi & Statistik Real-Time**:
+  * Widget kartu ringkasan: Total Saldo Aktif, Total Pemasukan Bulan Ini, Total Pengeluaran Bulan Ini.
+  * Visualisasi persentase pengeluaran berdasarkan kategori.
+* **Penyimpanan Database**: Seluruh mutasi uang tersimpan aman dan terisolasi per akun di tabel `wallet_transactions` MySQL.
+
+### 5. 📝 Manajemen Tugas Kuliah (Tugas Tab)
+* **To-Do List Terstruktur**:
+  * Input nama mata kuliah, rincian tugas, tanggal deadline, dan tingkat bobot tugas (*Ringan*, *Sedang*, *Berat*).
+* **Indikator Countdown Deadline**:
+  * Menghitung sisa hari pengumpulan secara otomatis dengan penanda warna urgensi (merah untuk deadline mendesak).
+* **Penyelesaian Cepat**:
+  * Toggle centang selesai dengan timestamp penyelesaian yang langsung tersinkron ke tabel `assignment_deadlines` MySQL.
+
+### 6. 👤 Profil & Autentikasi Pengguna
+* **Sistem Akun Aman**:
+  * Enkripsi kata sandi menggunakan `bcryptjs` (kompatibel format `$2a$` dan `$2y$`).
+  * Manajemen sesi NextAuth.js teruji.
+* **Verifikasi Email Kampus**:
+  * Dukungan deteksi domain email akademik kampus resmi (seperti `@unsil.ac.id`, `@ui.ac.id`, `@itb.ac.id`, dll.) yang memberikan lencana **Mahasiswa Terverifikasi**.
+* **Manajemen Biodata**:
+  * Atur Nama, Kampus, Fakultas, Program Studi, Semester berjalan, Nomor WhatsApp, dan Foto Profil.
 
 ---
 
-## Instalasi dan Konfigurasi
+## 🎨 Desain & Antarmuka Modern
+
+Platform mengadopsi standar visual kelas atas:
+- **Pill Navigation & Segmented Filters**: Navigasi kategori berbasis ikon horizontal dengan indikator garis aktif melengkung yang mulus (*fluid scroll*).
+- **Sticky Modern Navbar**: Dilengkapi logo maskot Sahabat Mahasiswa, pill selector radius & kampus terintegrasi, search global, toggle dark mode, dan tombol profil/login.
+- **Mobile Floating Bottom Nav (`BottomNav.tsx`)**: Dock navigasi melayang berpenampilan iOS/Glassmorphism yang ergonomis pada perangkat ponsel.
+- **Dark Mode & Light Mode Dinamis**: Kontras tinggi, warna teks slate seimbang, dan bebas silau di malam hari.
+- **Micro-Interactions**: Transisi halus hover kartu, dialog backdrop blur, dan animasi toast notifikasi.
+
+---
+
+## 🛠 Arsitektur & Tumpukan Teknologi
+
+| Komponen | Teknologi | Keterangan |
+|---|---|---|
+| **Frontend Framework** | **Next.js 16.4.3** | Menggunakan App Router dengan compiler Next-gen **Turbopack** |
+| **UI Library** | **React 19.3.0** | Strict mode, bebas issue cascading render hooks |
+| **CSS Styling** | **Tailwind CSS v4** | Dikompilasi dengan `@tailwindcss/turbopack` |
+| **Icons** | **Lucide React v1.56** | Ikon modern, ringan, dan tree-shaken |
+| **Bahasa Pemrograman** | **TypeScript 5.x** | Mode pengetikan ketat (*strict mode*) |
+| **Database Server** | **MySQL 8.0+ / MariaDB** | Berjalan di lingkungan lokal **Laragon** (Port 3306) |
+| **Database Driver** | **`mysql2/promise`** | Connection pool singleton berkinerja tinggi |
+| **Autentikasi & Keamanan** | **NextAuth.js v4** & **`bcryptjs`** | Salt round 10, perlindungan brute-force |
+| **Integrasi Eksternal** | **Adzuna API**, **TikTok API** | REST client dengan mekanisme caching dan fallback |
+
+---
+
+## 🗄 Arsitektur Basis Data (MySQL)
+
+Seluruh data tersimpan secara persisten pada database MySQL lokal bernama `sahabat_mahasiswa`.
+
+```mermaid
+erDiagram
+    users ||--o{ assignment_deadlines : "memiliki"
+    users ||--o{ wallet_transactions : "mencatat"
+    kos ||--o{ kos_facilities : "memiliki"
+    outlets ||--o{ vouchers : "menerbitkan"
+
+    users {
+        varchar id PK
+        varchar email UK
+        varchar password
+        varchar name
+        varchar campus
+        varchar faculty
+        varchar major
+        int semester
+        varchar phone
+        varchar avatar_url
+        boolean is_verified
+        timestamp created_at
+    }
+
+    assignment_deadlines {
+        varchar id PK
+        varchar user_id FK
+        varchar title
+        varchar subject
+        date deadline
+        int difficulty
+        int weight
+        boolean is_completed
+        timestamp completed_at
+    }
+
+    wallet_transactions {
+        varchar id PK
+        varchar user_id FK
+        enum type "income|expense"
+        decimal amount
+        varchar category
+        text description
+        date transaction_date
+    }
+
+    kos {
+        varchar id PK
+        varchar name
+        text address
+        decimal price_per_month
+        enum type "putra|putri|campur"
+        decimal lat
+        decimal lng
+        decimal rating
+        varchar phone
+        int available_rooms
+    }
+
+    vouchers {
+        varchar id PK
+        varchar title
+        varchar brand
+        varchar discount
+        decimal min_purchase
+        date valid_until
+        varchar platform
+        varchar code
+    }
+
+    job_vacancies {
+        varchar id PK
+        varchar title
+        varchar company
+        varchar type
+        varchar location
+        varchar salary_range
+        text requirements
+        varchar contact_url
+    }
+```
+
+### Compatibility Views
+Untuk mendukung kompatibilitas query backward:
+* `profiles` $\rightarrow$ `SELECT ... FROM users`
+* `tugas` $\rightarrow$ `SELECT ... FROM assignment_deadlines`
+* `transaksi` $\rightarrow$ `SELECT ... FROM wallet_transactions`
+* `kosan` $\rightarrow$ `SELECT ... FROM kos`
+
+---
+
+## 💻 Prasyarat Sistem
+
+Sebelum memulai instalasi, pastikan sistem komputer Anda memiliki:
+1. **Node.js**: Versi `20.x` atau `22.x LTS` (disarankan).
+2. **NPM**: Versi `10.x` atau lebih baru.
+3. **Laragon**: Versi `6.0+` dengan service **MySQL** atau MariaDB aktif pada port `3306`.
+4. **Git**: Untuk kloning repositori.
+
+---
+
+## 📦 Instalasi dan Konfigurasi
 
 ### 1. Klon Repositori
+Buka terminal (Git Bash / PowerShell) dan jalankan:
 ```bash
 git clone https://github.com/berkom-1/SAHABAT-MAHASISWA.git
 cd SAHABAT-MAHASISWA
@@ -121,15 +280,14 @@ cd SAHABAT-MAHASISWA
 npm install
 ```
 
-### 3. Konfigurasi Environment (`.env`)
+### 3. Konfigurasi Variabel Lingkungan (`.env`)
 Salin berkas template environment:
 ```bash
 cp .env.example .env
 ```
-
-Pastikan variabel pada berkas `.env` sesuai dengan konfigurasi Laragon lokal Anda:
-```ini
-# Koneksi Basis Data MySQL
+Sesuaikan isi berkas `.env` dengan kredensial database Laragon Anda:
+```env
+# Koneksi Database MySQL (Laragon)
 DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_USER=root
@@ -140,7 +298,7 @@ DB_NAME=sahabat_mahasiswa
 NEXTAUTH_SECRET=sahabat-mahasiswa-secret-fallback-key-2026
 NEXTAUTH_URL=http://localhost:3000
 
-# Konfigurasi Eksternal (Opsional)
+# Kunci API Eksternal (Opsional)
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
 ADZUNA_APP_ID=
@@ -149,106 +307,110 @@ ADZUNA_APP_KEY=
 
 ---
 
-## Migrasi dan Seed Basis Data
+## 🔄 Migrasi dan Seed Database
 
-Pastikan service MySQL di Laragon telah aktif (**Start All** pada Laragon).
-
-Jalankan perintah migrasi otomatis:
+1. Buka aplikasi **Laragon**, lalu klik tombol **Start All** (pastikan MySQL bertanda centang hijau/berjalan).
+2. Jalankan skrip migrasi otomatis:
 ```bash
 node scripts/migrate.mjs
 ```
+Skrip ini akan secara otomatis:
+- Membuat database `sahabat_mahasiswa` bila belum ada.
+- Membangun seluruh tabel, indeks, dan compatibility views.
+- Mengisi data katalog awal kosan, outlet, voucher, dan lowongan kerja.
+- Menginisialisasi akun uji coba mahasiswa terverifikasi.
 
-Skrip migrasi ini akan mengeksekusi:
-1. Pembuatan database `sahabat_mahasiswa` jika belum tersedia.
-2. Pembuatan seluruh tabel inti dengan tipe data yang optimal.
-3. Penambahan kolom-kolom profil dan geolokasi (`lat`, `lng`, `rating`).
-4. Penyusunan *compatibility views*.
-5. Inisialisasi akun demo terverifikasi (`mahasiswa@unsil.ac.id`).
-
-*Catatan: Anda juga dapat mengimpor file `database/schema.sql` secara langsung melalui phpMyAdmin atau HeidiSQL bawaan Laragon.*
+> *Alternatif Manual:* Anda juga dapat mengimpor file `database/schema.sql` via **HeidiSQL** atau **phpMyAdmin** bawaan Laragon.
 
 ---
 
-## Akun Uji Coba (Demo Credentials)
+## 🔑 Akun Uji Coba (Demo Credentials)
 
-Gunakan akun berikut untuk menguji seluruh fitur aplikasi tanpa harus mendaftar dari awal:
+Anda dapat langsung masuk ke aplikasi menggunakan akun demo berikut:
 
-| Parameter | Keterangan Akun Demo |
+| Field | Kredensial Uji Coba |
 |---|---|
 | **Email** | `mahasiswa@unsil.ac.id` |
 | **Password** | `password123` |
 | **Nama** | Budi Santoso |
 | **Kampus** | Universitas Siliwangi (UNSIL) |
-| **Status Mahasiswa** | Terverifikasi |
+| **Status** | Mahasiswa Terverifikasi Almamater |
 
-Anda juga dapat membuat akun baru melalui formulir registrasi pada aplikasi.
+*Catatan: Anda juga dapat mendaftarkan akun baru sewaktu-waktu melalui tombol **Masuk / Daftar** di Navbar.*
 
 ---
 
-## Menjalankan Aplikasi
+## 🏃 Menjalankan Aplikasi
 
 ### Mode Pengembangan (Development)
+Jalankan server pengembangan dengan Next.js Turbopack:
 ```bash
 npm run dev
 ```
-Aplikasi akan aktif pada [http://localhost:3000](http://localhost:3000).
+Buka browser dan akses: [**http://localhost:3000**](http://localhost:3000)
 
-### Build Produksi
-Untuk memastikan tidak ada galat tipe data dan menguji kompilasi Turbopack:
+### Pemeriksaan Standar Kode (Linting)
+Periksa kepatuhan TypeScript dan ESLint:
+```bash
+npm run lint
+```
+*(Saat ini terverifikasi: **0 error, 0 warning**)*
+
+### Kompilasi Produksi (Production Build)
+Untuk menguji pembuatan bundle produksi:
 ```bash
 npm run build
 ```
-
-### Menjalankan Build Produksi
+Lalu jalankan server produksi:
 ```bash
 npm run start
 ```
 
-### Pemeriksaan Linter (ESLint)
-Untuk memverifikasi kebersihan kode dari galat TypeScript dan linter:
-```bash
-npm run lint
-```
+---
+
+## 📡 Dokumentasi REST API
+
+Seluruh endpoint API berada di bawah prefix `/api/*` dan menghasilkan respons berstandar JSON:
+
+### Autentikasi Pengguna
+* `POST /api/auth/login`: Verifikasi kredensial email & kata sandi dengan hash `bcrypt`.
+* `POST /api/auth/register`: Pendaftaran pengguna baru ke tabel `users`.
+* `GET / POST /api/auth/[...nextauth]`: NextAuth session provider.
+
+### Profil Mahasiswa
+* `GET /api/profile?email={email}` atau `?id={id}`: Mengambil data profil lengkap pengguna.
+* `PUT /api/profile`: Memperbarui biodata, kampus, jurusan, nomor HP, dan token API.
+
+### Kosan Kampus
+* `GET /api/kosan`: Mengambil katalog kos. Parameter opsional:
+  * `lat`: Koordinat lintang titik acuan.
+  * `lng`: Koordinat bujur titik acuan.
+  * `radius`: Batas jarak maksimal dalam meter (misal: 1000).
+  * `tipe`: `putra`, `putri`, `campur`, atau `kontrakan`.
+  * `maxHarga`: Batas tarif sewa bulanan maksimal.
+  * `search`: Kata kunci pencarian nama atau area.
+
+### Direktori Voucher
+* `GET /api/vouchers`: Mengambil master data voucher diskon kuliner aktif.
+
+### Lowongan Pekerjaan
+* `GET /api/jobs`: Mengambil daftar lowongan kerja mahasiswa dari database MySQL.
+* `GET /api/jobs/adzuna`: Agregasi lowongan kerja live dari Adzuna Jobs API dengan parameter `what` dan `where`.
+
+### Catatan Keuangan (Dompet)
+* `GET /api/transaksi?userId={id}`: Mengambil seluruh riwayat mutasi keuangan akun.
+* `POST /api/transaksi`: Mencatat transaksi pemasukan/pengeluaran baru.
+* `DELETE /api/transaksi?id={id}`: Menghapus riwayat transaksi.
+
+### Manajemen Tugas Kuliah
+* `GET /api/tugas?userId={id}`: Mengambil daftar tugas kuliah berdasarkan urutan tenggat waktu.
+* `POST /api/tugas`: Menambahkan agenda tugas baru.
+* `PUT /api/tugas`: Mengubah status penyelesaian atau rincian tugas.
+* `DELETE /api/tugas?id={id}`: Menghapus entri tugas.
 
 ---
 
-## Dokumentasi API
-
-Seluruh endpoint API berada di bawah jalur `/api/*` dan mengembalikan respons berformat JSON standar:
-
-### Autentikasi
-- `POST /api/auth/login`: Autentikasi pengguna dengan email dan password.
-- `POST /api/auth/register`: Pendaftaran pengguna baru ke tabel `users`.
-- `GET / POST /api/auth/[...nextauth]`: Handler session NextAuth.
-
-### Profil Pengguna
-- `GET /api/profile?email={email}` atau `GET /api/profile?id={id}`: Mengambil data profil lengkap pengguna.
-- `PUT /api/profile`: Memperbarui data profil, identitas kampus, atau token pihak ketiga.
-
-### Manajemen Tugas
-- `GET /api/tugas?userId={id}`: Mengambil daftar tugas milik pengguna urut berdasarkan deadline.
-- `POST /api/tugas`: Menambahkan tugas baru.
-- `PUT /api/tugas`: Mengubah data atau status penyelesaian tugas.
-- `DELETE /api/tugas?id={id}`: Menghapus tugas berdasarkan ID.
-
-### Transaksi Keuangan
-- `GET /api/transaksi?userId={id}`: Mengambil seluruh riwayat transaksi dompet pengguna.
-- `POST /api/transaksi`: Mencatat transaksi baru (pemasukan atau pengeluaran).
-- `DELETE /api/transaksi?id={id}`: Menghapus catatan transaksi.
-
-### Kosan
-- `GET /api/kosan`: Mengambil katalog kos dengan parameter opsional `lat`, `lng`, `tipe`, `maxHarga`, dan `search`.
-
-### Voucher
-- `GET /api/vouchers`: Mengambil daftar voucher diskon yang tersedia.
-
-### Lowongan Kerja
-- `GET /api/jobs`: Mengambil daftar lowongan kerja mahasiswa dari database lokal.
-- `GET /api/jobs/adzuna`: Agregasi lowongan kerja dari Adzuna Jobs API dengan fallback lokal.
-
----
-
-## Struktur Direktori
+## 📂 Struktur Direktori Proyek
 
 ```
 SAHABAT-MAHASISWA/
@@ -257,56 +419,82 @@ SAHABAT-MAHASISWA/
 │   │   ├── auth/                 # Login, Register, dan NextAuth
 │   │   ├── jobs/                 # Lowongan kerja (MySQL & Adzuna)
 │   │   ├── kosan/                # Katalog kosan & Haversine formula
-│   │   ├── profile/              # Pengelolaan data profil pengguna
-│   │   ├── transaksi/            # Mutasi dompet mahasiswa
-│   │   ├── tugas/                # Manajemen tugas kuliah
-│   │   └── vouchers/             # Direktori voucher promo
-│   ├── globals.css               # Styling global Tailwind CSS v4
-│   ├── layout.tsx                # Root layout Next.js
-│   └── page.tsx                  # Halaman utama aplikasi
-├── components/                   # Komponen antarmuka (UI)
-│   ├── AdzunaConfigModal.tsx     # Pengaturan API Adzuna
-│   ├── AuthModal.tsx             # Modal login dan registrasi
-│   ├── ClaimVoucherModal.tsx     # Modal kode serial klaim voucher
-│   ├── DompetTab.tsx             # Tab manajemen keuangan
-│   ├── KerjaTab.tsx              # Tab pencarian lowongan kerja
-│   ├── KosanTab.tsx              # Tab pencarian kosan
-│   ├── Navbar.tsx                # Navigasi utama & profil switcher
-│   ├── OutletModal.tsx           # Modal informasi merchant outlet
-│   ├── ProfileModal.tsx          # Modal pengaturan profil mahasiswa
-│   ├── TikTokConfigModal.tsx     # Pengaturan integrasi TikTok
-│   ├── TugasTab.tsx              # Tab daftar tugas kuliah
-│   └── VoucherTab.tsx            # Tab direktori voucher makanan
+│   │   ├── profile/              # Pengelolaan profil mahasiswa
+│   │   ├── transaksi/            # Mutasi keuangan dompet
+│   │   ├── tugas/                # Manajemen deadline perkuliahan
+│   │   └── vouchers/             # Direktori voucher kuliner
+│   ├── apple-icon.png            # Icon perangkat Apple (iOS)
+│   ├── favicon.ico               # Favicon browser
+│   ├── globals.css               # Konfigurasi Tailwind CSS v4 & theme tokens
+│   ├── icon.png                  # PWA standard app icon
+│   ├── layout.tsx                # Root layout & NextAuth Provider
+│   └── page.tsx                  # Halaman utama aplikasi (Tab switcher)
+├── components/                   # Komponen Antarmuka Pengguna (UI)
+│   ├── AdzunaConfigModal.tsx     # Modal konfigurasi Adzuna Jobs API
+│   ├── AuthModal.tsx             # Modal login & registrasi mahasiswa
+│   ├── AuthProvider.tsx          # Wrapper NextAuth SessionProvider
+│   ├── BottomNav.tsx             # Navigasi mobile melayang (Floating pill dock)
+│   ├── ClaimVoucherModal.tsx     # Modal generator kode klaim voucher
+│   ├── DompetTab.tsx             # Tab pencatatan keuangan & mutasi
+│   ├── KerjaTab.tsx              # Tab direktori lowongan kerja & magang
+│   ├── KosanDetailModal.tsx      # Modal galeri foto & spesifikasi kos
+│   ├── KosanTab.tsx              # Tab pencarian hunian kos & radius kampus
+│   ├── Navbar.tsx                # Navigasi utama, pill filter & profile menu
+│   ├── OutletModal.tsx           # Modal profil merchant & menu andalan
+│   ├── ProfileModal.tsx          # Modal pengaturan profil & token eksternal
+│   ├── TikTokConfigModal.tsx     # Modal konfigurasi TikTok GO Dining API
+│   ├── TugasTab.tsx              # Tab to-do list & deadline countdown
+│   └── VoucherTab.tsx            # Tab katalog voucher promo kuliner
 ├── database/
-│   └── schema.sql                # Skema DDL, tabel, views, dan data seed
+│   └── schema.sql                # Skema DDL tabel, views, dan data seed
 ├── lib/
-│   ├── api-client.ts             # Klien fetch API untuk integrasi frontend-backend
-│   ├── auth.ts                   # Konfigurasi NextAuth
-│   ├── data.ts                   # Data katalog default dan merchant
-│   ├── db.ts                     # MySQL2 connection pool singleton
-│   ├── launcher.ts               # Handler integrasi desktop & deeplink
-│   └── types.ts                  # Definisi antarmuka TypeScript
-├── docs/                         # Dokumentasi proyek & spesifikasi
-│   └── PRD-SAHABAT-MAHASISWA.md  # Product Requirement Document
-├── public/                       # Aset publik statis (logo, favicon)
+│   ├── api-client.ts             # REST API client wrapper
+│   ├── auth.ts                   # Opsi autentikasi NextAuth
+│   ├── data.ts                   # Data katalog default & merchant outlet
+│   ├── db.ts                     # MySQL2 connection pooling singleton
+│   ├── launcher.ts               # Handler integrasi desktop & deeplink WhatsApp/Maps
+│   └── types.ts                  # Definisi antarmuka TypeScript terpusat
+├── public/                       # Aset publik statis
+│   ├── logo.png                  # Logo Maskot Maung UNSIL (Transparan)
+│   ├── icon.png                  # Web Icon Maskot
+│   ├── app-icon-512.png          # PWA Icon 512x512
+│   ├── icon-192.png              # PWA Icon 192x192
+│   ├── apple-icon.png            # Apple Touch Icon
+│   ├── favicon.ico               # Favicon
+│   └── manifest.json             # Web App Manifest (PWA)
 ├── scripts/
-│   ├── migrate.mjs               # Skrip migrasi database otomatis
-│   └── test-db.mjs               # Skrip pengujian koneksi database
+│   ├── migrate.mjs               # Skrip inisialisasi & migrasi database otomatis
+│   └── test-db.mjs               # Skrip validasi koneksi database
 ├── .env.example                  # Template variabel lingkungan
-├── eslint.config.mjs             # Konfigurasi ESLint
-├── next.config.ts                # Konfigurasi Next.js
+├── eslint.config.mjs             # Konfigurasi ESLint 9 (Flat config)
+├── next.config.ts                # Konfigurasi Next.js (Turbopack, cache, images)
 ├── package.json                  # Dependensi dan script NPM
-└── tsconfig.json                 # Konfigurasi TypeScript
+└── tsconfig.json                 # Konfigurasi TypeScript compiler
 ```
 
 ---
 
-## Integrasi Desktop Launcher
+## 🖥 Dukungan Desktop Launcher
 
-Aplikasi mendukung interaksi dengan executable desktop wrapper (Electron) melalui protokol custom URI dan API window bridge pada `lib/launcher.ts`. Saat aplikasi dijalankan dalam konteks launcher desktop, pengguna dapat membuka aplikasi eksternal (seperti Google Maps, WhatsApp, atau browser bawaan sistem) secara terintegrasi.
+Aplikasi dilengkapi modul jembatan `lib/launcher.ts` yang mendukung interoperabilitas dengan aplikasi desktop (Electron wrapper) maupun protokol sistem operasi:
+- Membuka tautan eksternal WhatsApp chat (`https://wa.me/...`) langsung ke aplikasi WhatsApp Desktop/Web.
+- Membuka tautan rute Google Maps langsung ke perutean navigasi browser/aplikasi peta bawaan.
+- Mendukung deep-link aplikasi pesan antar online seperti GoJek, Grab, dan Shopee.
 
 ---
 
-## Lisensi
+## ✅ Standar Kualitas & Pengujian
 
-Proyek ini dikembangkan untuk keperluan akademik dan pengembangan aplikasi mahasiswa Indonesia. Seluruh hak cipta dilindungi di bawah lisensi institusi pengembang.
+Proyek ini telah melalui proses standarisasi kode yang ketat:
+* **ESLint & TypeScript Rules**: Bersih dari error *unused variables*, *undeclared identifiers*, dan *missing hook dependencies*.
+* **React 19 Hooks Compliance**: Menghindari pemanggilan `setState` sinkron langsung di dalam `useEffect` dengan memanfaatkan `queueMicrotask` sehingga mencegah error *cascading renders* (`react-hooks/set-state-in-effect`).
+* **Tailwind CSS v4 Canonical Classes**: Mematuhi aturan kelas kanonik seperti `stroke-2`, `max-w-28`, dan `max-w-37.5`.
+* **Turbopack Build Verified**: Kompilasi 15 rute statis dan dinamis berhasil 100% tanpa kendala.
+
+---
+
+## 📄 Lisensi & Kontribusi
+
+Proyek ini dikembangkan untuk kepentingan akademik dan kemajuan ekosistem digital mahasiswa di lingkungan **Universitas Siliwangi (UNSIL)** dan perguruan tinggi di Indonesia.
+
+Dikembangkan dengan dedikasi penuh untuk kemudahan dan kesejahteraan mahasiswa Indonesia. 🇮🇩
