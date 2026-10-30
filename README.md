@@ -1,11 +1,11 @@
-# 🎓 Sahabat Mahasiswa - Portal Terintegrasi Mahasiswa Indonesia
+# Sahabat Mahasiswa - Portal Terintegrasi Mahasiswa Indonesia
 
 <p align="center">
   <img src="public/logo.png" alt="Sahabat Mahasiswa Logo" width="180" />
 </p>
 
 <p align="center">
-  <strong>Platform All-in-One Kebutuhan Hidup & Perkuliahan Mahasiswa Indonesia</strong><br />
+  <strong>Platform All-in-One Kebutuhan Hidup dan Perkuliahan Mahasiswa Indonesia</strong><br />
   Pencarian Kos Kampus • Voucher Kuliner • Lowongan Magang/Part-time • Catatan Keuangan • Manajemen Tugas
 </p>
 
@@ -15,77 +15,77 @@
   <img src="https://img.shields.io/badge/Tailwind_CSS-v4-38bdf8?style=for-the-badge&logo=tailwind-css" alt="Tailwind CSS v4" />
   <img src="https://img.shields.io/badge/TypeScript-5.x-3178c6?style=for-the-badge&logo=typescript" alt="TypeScript" />
   <img src="https://img.shields.io/badge/MySQL-8.0_(Laragon)-00758f?style=for-the-badge&logo=mysql" alt="MySQL" />
-  <img src="https://img.shields.io/badge/License-Academic-emerald?style=for-the-badge" alt="License" />
+  <img src="https://img.shields.io/badge/License-MIT-emerald?style=for-the-badge" alt="MIT License" />
 </p>
 
 ---
 
-## 📌 Gambaran Umum (Overview)
+## Gambaran Umum
 
-**Sahabat Mahasiswa** adalah portal terintegrasi berbasis web dan mobile-responsive yang diciptakan untuk menyelesaikan persoalan esensial mahasiswa sehari-hari. Mulai dari mencari hunian kos strategis di sekitar kampus, menghemat pengeluaran melalui direktori voucher kuliner, memonitor sirkulasi uang saku bulanan, memanajemen tenggat tugas kuliah, hingga menemukan lowongan kerja paruh waktu dan magang.
+Sahabat Mahasiswa adalah portal terintegrasi berbasis web dan mobile-responsive yang diciptakan untuk menyelesaikan persoalan esensial mahasiswa sehari-hari. Mulai dari mencari hunian kos strategis di sekitar kampus, menghemat pengeluaran melalui direktori voucher kuliner, memonitor sirkulasi uang saku bulanan, memanajemen tenggat tugas kuliah, hingga menemukan lowongan kerja paruh waktu dan magang.
 
-Aplikasi dirancang dengan estetika antarmuka modern terinspirasi platform editorial travel/booking premium (seperti *Hide.com* dan *Airbnb*) dengan sentuhan identitas khas **Universitas Siliwangi (UNSIL)** — memadukan palet hijau almamater **Emerald Green** (`#064e3b`), aksen emas harimau **Tiger Amber Gold** (`#d97706`), tipografi tegas, serta maskot resmi **Maung UNSIL Sahabat Mahasiswa**.
-
----
-
-## 📑 Daftar Isi
-
-1. [Fitur Utama](#-fitur-utama)
-2. [Desain & Antarmuka Modern](#-desain--antarmuka-modern)
-3. [Arsitektur & Tumpukan Teknologi](#-arsitektur--tumpukan-teknologi)
-4. [Arsitektur Basis Data (MySQL)](#-arsitektur-basis-data-mysql)
-5. [Prasyarat Sistem](#-prasyarat-sistem)
-6. [Instalasi dan Konfigurasi](#-instalasi-dan-konfigurasi)
-7. [Migrasi dan Seed Database](#-migrasi-dan-seed-database)
-8. [Akun Uji Coba (Demo Credentials)](#-akun-uji-coba-demo-credentials)
-9. [Menjalankan Aplikasi](#-menjalankan-aplikasi)
-10. [Dokumentasi REST API](#-dokumentasi-rest-api)
-11. [Struktur Direktori Proyek](#-struktur-direktori-proyek)
-12. [Dukungan Desktop Launcher](#-dukungan-desktop-launcher)
-13. [Standar Kualitas & Pengujian](#-standar-kualitas--pengujian)
-14. [Lisensi & Kontribusi](#-lisensi--kontribusi)
+Aplikasi dirancang dengan estetika antarmuka modern terinspirasi platform editorial travel/booking premium (seperti Hide.com dan Airbnb) dengan sentuhan identitas khas Universitas Siliwangi (UNSIL) — memadukan palet hijau almamater Emerald Green (`#064e3b`), aksen emas harimau Tiger Amber Gold (`#d97706`), tipografi tegas, serta maskot resmi Maung UNSIL Sahabat Mahasiswa.
 
 ---
 
-## 🚀 Fitur Utama
+## Daftar Isi
 
-### 1. 🏠 Pencarian Kos Kampus (Kosan Tab)
+1. [Fitur Utama](#fitur-utama)
+2. [Desain dan Antarmuka](#desain-dan-antarmuka)
+3. [Arsitektur dan Tumpukan Teknologi](#arsitektur-dan-tumpukan-teknologi)
+4. [Arsitektur Basis Data (MySQL)](#arsitektur-basis-data-mysql)
+5. [Prasyarat Sistem](#prasyarat-sistem)
+6. [Instalasi dan Konfigurasi](#instalasi-dan-konfigurasi)
+7. [Migrasi dan Seed Database](#migrasi-dan-seed-database)
+8. [Akun Uji Coba (Demo Credentials)](#akun-uji-coba-demo-credentials)
+9. [Menjalankan Aplikasi](#menjalankan-aplikasi)
+10. [Dokumentasi REST API](#dokumentasi-rest-api)
+11. [Struktur Direktori Proyek](#struktur-direktori-proyek)
+12. [Dukungan Desktop Launcher](#dukungan-desktop-launcher)
+13. [Standar Kualitas dan Pengujian](#standar-kualitas-dan-pengujian)
+14. [Lisensi](#lisensi)
+
+---
+
+## Fitur Utama
+
+### 1. Pencarian Kos Kampus (Kosan Tab)
 * **Kategori Horisontal Cerdas**: Filter cepat kategori yang lazim digunakan mahasiswa:
-  * *Semua Kos*
-  * *Kos Putra*
-  * *Kos Putri*
-  * *Kos Campur*
-  * *Kos Eksklusif*
-  * *Kos Hemat* (< Rp 600.000 / bulan)
-  * *Kontrakan & Rumah* (pilihan sewa kelompok/tahunan)
+  * Semua Kos
+  * Kos Putra
+  * Kos Putri
+  * Kos Campur
+  * Kos Eksklusif
+  * Kos Hemat (< Rp 600.000 / bulan)
+  * Kontrakan & Rumah (pilihan sewa kelompok/tahunan)
 * **Perhitungan Jarak GPS Presisi (Haversine Formula)**:
   * Menghitung jarak lurus kilometer aktual antara lokasi kos dengan titik koordinat kampus secara akurat.
-  * Opsi referensi kampus fleksibel: **UNSIL Kampus 1 (Mugarsari / Siliwangi)** dan **UNSIL Kampus 2 (Tamansari)**.
+  * Opsi referensi kampus fleksibel: UNSIL Kampus 1 (Mugarsari / Siliwangi) dan UNSIL Kampus 2 (Tamansari).
 * **Filter Multi-Kriteria**:
-  * Pilihan radius: *Semua Jarak*, *< 500m*, *< 1 km*, *< 2 km*, atau *< 5 km*.
+  * Pilihan radius: Semua Jarak, < 500m, < 1 km, < 2 km, atau < 5 km.
   * Filter rentang harga maksimal bulanan.
   * Pencarian kata kunci nama kos, jalan, atau fasilitas.
 * **Kartu Kosan Editorial**:
   * Badge harga bulanan dengan opsi format per tahun.
   * Rating bintang dan ulasan penghuni.
   * Indikator sisa kamar kosong real-time.
-  * Tombol aksi instan: Hubungi Pengelola via **WhatsApp API** dan petunjuk rute di **Google Maps**.
+  * Tombol aksi instan: Hubungi Pengelola via WhatsApp API dan petunjuk rute di Google Maps.
 * **Modal Detail Kosan Lengkap (`KosanDetailModal`)**:
   * Menampilkan galeri foto kamar, daftar fasilitas (WiFi, KM Dalam, Kasur, Lemari, Dapur, Parkir), peraturan kos, simulasi biaya sewa, dan bio pemilik.
 * **Sistem Favorit**: Bookmark kosan tersimpan secara persisten pada `localStorage`.
 
-### 2. 🍔 Voucher & Promo Kuliner Mahasiswa (Voucher Tab)
+### 2. Voucher dan Promo Kuliner (Voucher Tab)
 * **Horizontal Icon Rail**:
-  * *Semua Menu*
-  * *Makanan Berat* (Ayam Geprek, Nasi Padang, Warteg, Ricebowl)
-  * *Kopi & Minuman* (Kopi Susu, Boba, Es Teh, Minuman Dingin)
-  * *Camilan & Roti* (Toast, Croissant, Dimsum, Pastry)
-  * *Fast Food* (Burger, Fried Chicken, Pizza)
-  * *Ayam & Bebek* (Spesialis olahan unggas)
-  * *TikTok GO* (Promo eksklusif TikTok Dining)
-* **Sorting & Filter Praktis**:
+  * Semua Menu
+  * Makanan Berat (Ayam Geprek, Nasi Padang, Warteg, Ricebowl)
+  * Kopi & Minuman (Kopi Susu, Boba, Es Teh, Minuman Dingin)
+  * Camilan & Roti (Toast, Croissant, Dimsum, Pastry)
+  * Fast Food (Burger, Fried Chicken, Pizza)
+  * Ayam & Bebek (Spesialis olahan unggas)
+  * TikTok GO (Promo eksklusif TikTok Dining)
+* **Sorting dan Filter Praktis**:
   * Pengurutan berdasarkan Diskon Terbesar, Harga Termurah, atau Rating Toko.
-  * Quick filter platform: *Semua*, *GoFood*, *GrabFood*, *ShopeeFood*, *Dine-in Langsung*.
+  * Quick filter platform: Semua, GoFood, GrabFood, ShopeeFood, Dine-in Langsung.
 * **Modal Outlet Merchant (`OutletModal`)**:
   * Profil merchant/outlet mitra sekitar kampus, jam buka-tutup operasional, alamat lengkap, pin Google Maps, dan menu terlaris.
 * **Klaim Voucher Deterministik (`ClaimVoucherModal`)**:
@@ -93,61 +93,61 @@ Aplikasi dirancang dengan estetika antarmuka modern terinspirasi platform editor
 * **Integrasi TikTok GO Dining API (`TikTokConfigModal`)**:
   * Konfigurasi API Client Key & Access Token merchant untuk sinkronisasi promo secara live.
 
-### 3. 💼 Lowongan Kerja & Magang (Kerja Tab)
+### 3. Lowongan Kerja dan Magang (Kerja Tab)
 * **Kategori Profesi Mahasiswa**:
-  * *IT & Tech* (Frontend, Backend, Mobile, WordPress, IT Support)
-  * *Design & UI/UX* (Graphic Designer, Illustrator, Video Editor)
-  * *Marketing & Sosmed* (Content Creator, Social Media Specialist, Admin Live Streaming)
-  * *FnB & Barista* (Barista Coffee Shop, Crew Resto, Kasir)
-  * *Admin & Data* (Data Entry, Staf Administrasi, Pengarsipan)
+  * IT & Tech (Frontend, Backend, Mobile, WordPress, IT Support)
+  * Design & UI/UX (Graphic Designer, Illustrator, Video Editor)
+  * Marketing & Sosmed (Content Creator, Social Media Specialist, Admin Live Streaming)
+  * FnB & Barista (Barista Coffee Shop, Crew Resto, Kasir)
+  * Admin & Data (Data Entry, Staf Administrasi, Pengarsipan)
 * **Dual Data Engine**:
   * Mengambil data lowongan lokal dari database MySQL.
-  * Integrasi **Adzuna Job Search API** secara live dengan fallback otomatis.
+  * Integrasi Adzuna Job Search API secara live dengan fallback otomatis.
   * Modal kustomisasi konfigurasi API Adzuna (`AdzunaConfigModal`).
 * **Lamar Cepat**:
   * Tombol tautan WhatsApp HRD/Owner, email pengiriman CV, atau portal karir resmi perusahaan.
 * **Bookmark Lowongan**: Simpan pekerjaan yang diminati untuk ditinjau nanti.
 
-### 4. 💰 Dompet Mahasiswa (Keuangan & Cashflow)
+### 4. Dompet Mahasiswa (Keuangan)
 * **Manajemen Mutasi Keuangan**:
-  * Pencatatan pemasukan (*income*) seperti uang bulanan orang tua, beasiswa, freelance, atau gaji part-time.
-  * Pencatatan pengeluaran (*expense*) dengan kategori terarah (Makan, Kos, Fotokopi/Buku, Bensin/Transport, Hiburan, dll.).
-* **Kalkulasi & Statistik Real-Time**:
+  * Pencatatan pemasukan (income) seperti uang bulanan orang tua, beasiswa, freelance, atau gaji part-time.
+  * Pencatatan pengeluaran (expense) dengan kategori terarah (Makan, Kos, Fotokopi/Buku, Bensin/Transport, Hiburan, dll.).
+* **Kalkulasi dan Statistik Real-Time**:
   * Widget kartu ringkasan: Total Saldo Aktif, Total Pemasukan Bulan Ini, Total Pengeluaran Bulan Ini.
   * Visualisasi persentase pengeluaran berdasarkan kategori.
 * **Penyimpanan Database**: Seluruh mutasi uang tersimpan aman dan terisolasi per akun di tabel `wallet_transactions` MySQL.
 
-### 5. 📝 Manajemen Tugas Kuliah (Tugas Tab)
+### 5. Manajemen Tugas Kuliah (Tugas Tab)
 * **To-Do List Terstruktur**:
-  * Input nama mata kuliah, rincian tugas, tanggal deadline, dan tingkat bobot tugas (*Ringan*, *Sedang*, *Berat*).
+  * Input nama mata kuliah, rincian tugas, tanggal deadline, dan tingkat bobot tugas (Ringan, Sedang, Berat).
 * **Indikator Countdown Deadline**:
   * Menghitung sisa hari pengumpulan secara otomatis dengan penanda warna urgensi (merah untuk deadline mendesak).
 * **Penyelesaian Cepat**:
   * Toggle centang selesai dengan timestamp penyelesaian yang langsung tersinkron ke tabel `assignment_deadlines` MySQL.
 
-### 6. 👤 Profil & Autentikasi Pengguna
+### 6. Profil dan Autentikasi Pengguna
 * **Sistem Akun Aman**:
   * Enkripsi kata sandi menggunakan `bcryptjs` (kompatibel format `$2a$` dan `$2y$`).
   * Manajemen sesi NextAuth.js teruji.
 * **Verifikasi Email Kampus**:
-  * Dukungan deteksi domain email akademik kampus resmi (seperti `@unsil.ac.id`, `@ui.ac.id`, `@itb.ac.id`, dll.) yang memberikan lencana **Mahasiswa Terverifikasi**.
+  * Dukungan deteksi domain email akademik kampus resmi (seperti `@unsil.ac.id`, `@ui.ac.id`, `@itb.ac.id`, dll.) yang memberikan lencana Mahasiswa Terverifikasi.
 * **Manajemen Biodata**:
   * Atur Nama, Kampus, Fakultas, Program Studi, Semester berjalan, Nomor WhatsApp, dan Foto Profil.
 
 ---
 
-## 🎨 Desain & Antarmuka Modern
+## Desain dan Antarmuka
 
 Platform mengadopsi standar visual kelas atas:
-- **Pill Navigation & Segmented Filters**: Navigasi kategori berbasis ikon horizontal dengan indikator garis aktif melengkung yang mulus (*fluid scroll*).
+- **Pill Navigation dan Segmented Filters**: Navigasi kategori berbasis ikon horizontal dengan indikator garis aktif melengkung yang mulus (fluid scroll).
 - **Sticky Modern Navbar**: Dilengkapi logo maskot Sahabat Mahasiswa, pill selector radius & kampus terintegrasi, search global, toggle dark mode, dan tombol profil/login.
 - **Mobile Floating Bottom Nav (`BottomNav.tsx`)**: Dock navigasi melayang berpenampilan iOS/Glassmorphism yang ergonomis pada perangkat ponsel.
-- **Dark Mode & Light Mode Dinamis**: Kontras tinggi, warna teks slate seimbang, dan bebas silau di malam hari.
+- **Dark Mode dan Light Mode Dinamis**: Kontras tinggi, warna teks slate seimbang, dan bebas silau di malam hari.
 - **Micro-Interactions**: Transisi halus hover kartu, dialog backdrop blur, dan animasi toast notifikasi.
 
 ---
 
-## 🛠 Arsitektur & Tumpukan Teknologi
+## Arsitektur dan Tumpukan Teknologi
 
 | Komponen | Teknologi | Keterangan |
 |---|---|---|
@@ -155,7 +155,7 @@ Platform mengadopsi standar visual kelas atas:
 | **UI Library** | **React 19.3.0** | Strict mode, bebas issue cascading render hooks |
 | **CSS Styling** | **Tailwind CSS v4** | Dikompilasi dengan `@tailwindcss/turbopack` |
 | **Icons** | **Lucide React v1.56** | Ikon modern, ringan, dan tree-shaken |
-| **Bahasa Pemrograman** | **TypeScript 5.x** | Mode pengetikan ketat (*strict mode*) |
+| **Bahasa Pemrograman** | **TypeScript 5.x** | Mode pengetikan ketat (strict mode) |
 | **Database Server** | **MySQL 8.0+ / MariaDB** | Berjalan di lingkungan lokal **Laragon** (Port 3306) |
 | **Database Driver** | **`mysql2/promise`** | Connection pool singleton berkinerja tinggi |
 | **Autentikasi & Keamanan** | **NextAuth.js v4** & **`bcryptjs`** | Salt round 10, perlindungan brute-force |
@@ -163,7 +163,7 @@ Platform mengadopsi standar visual kelas atas:
 
 ---
 
-## 🗄 Arsitektur Basis Data (MySQL)
+## Arsitektur Basis Data (MySQL)
 
 Seluruh data tersimpan secara persisten pada database MySQL lokal bernama `sahabat_mahasiswa`.
 
@@ -256,7 +256,7 @@ Untuk mendukung kompatibilitas query backward:
 
 ---
 
-## 💻 Prasyarat Sistem
+## Prasyarat Sistem
 
 Sebelum memulai instalasi, pastikan sistem komputer Anda memiliki:
 1. **Node.js**: Versi `20.x` atau `22.x LTS` (disarankan).
@@ -266,7 +266,7 @@ Sebelum memulai instalasi, pastikan sistem komputer Anda memiliki:
 
 ---
 
-## 📦 Instalasi dan Konfigurasi
+## Instalasi dan Konfigurasi
 
 ### 1. Klon Repositori
 Buka terminal (Git Bash / PowerShell) dan jalankan:
@@ -307,7 +307,7 @@ ADZUNA_APP_KEY=
 
 ---
 
-## 🔄 Migrasi dan Seed Database
+## Migrasi dan Seed Database
 
 1. Buka aplikasi **Laragon**, lalu klik tombol **Start All** (pastikan MySQL bertanda centang hijau/berjalan).
 2. Jalankan skrip migrasi otomatis:
@@ -324,7 +324,7 @@ Skrip ini akan secara otomatis:
 
 ---
 
-## 🔑 Akun Uji Coba (Demo Credentials)
+## Akun Uji Coba (Demo Credentials)
 
 Anda dapat langsung masuk ke aplikasi menggunakan akun demo berikut:
 
@@ -340,7 +340,7 @@ Anda dapat langsung masuk ke aplikasi menggunakan akun demo berikut:
 
 ---
 
-## 🏃 Menjalankan Aplikasi
+## Menjalankan Aplikasi
 
 ### Mode Pengembangan (Development)
 Jalankan server pengembangan dengan Next.js Turbopack:
@@ -368,7 +368,7 @@ npm run start
 
 ---
 
-## 📡 Dokumentasi REST API
+## Dokumentasi REST API
 
 Seluruh endpoint API berada di bawah prefix `/api/*` dan menghasilkan respons berstandar JSON:
 
@@ -410,7 +410,7 @@ Seluruh endpoint API berada di bawah prefix `/api/*` dan menghasilkan respons be
 
 ---
 
-## 📂 Struktur Direktori Proyek
+## Struktur Direktori Proyek
 
 ```
 SAHABAT-MAHASISWA/
@@ -467,6 +467,7 @@ SAHABAT-MAHASISWA/
 │   └── test-db.mjs               # Skrip validasi koneksi database
 ├── .env.example                  # Template variabel lingkungan
 ├── eslint.config.mjs             # Konfigurasi ESLint 9 (Flat config)
+├── LICENSE                       # Berkas Lisensi MIT
 ├── next.config.ts                # Konfigurasi Next.js (Turbopack, cache, images)
 ├── package.json                  # Dependensi dan script NPM
 └── tsconfig.json                 # Konfigurasi TypeScript compiler
@@ -474,7 +475,7 @@ SAHABAT-MAHASISWA/
 
 ---
 
-## 🖥 Dukungan Desktop Launcher
+## Dukungan Desktop Launcher
 
 Aplikasi dilengkapi modul jembatan `lib/launcher.ts` yang mendukung interoperabilitas dengan aplikasi desktop (Electron wrapper) maupun protokol sistem operasi:
 - Membuka tautan eksternal WhatsApp chat (`https://wa.me/...`) langsung ke aplikasi WhatsApp Desktop/Web.
@@ -483,18 +484,16 @@ Aplikasi dilengkapi modul jembatan `lib/launcher.ts` yang mendukung interoperabi
 
 ---
 
-## ✅ Standar Kualitas & Pengujian
+## Standar Kualitas dan Pengujian
 
 Proyek ini telah melalui proses standarisasi kode yang ketat:
-* **ESLint & TypeScript Rules**: Bersih dari error *unused variables*, *undeclared identifiers*, dan *missing hook dependencies*.
-* **React 19 Hooks Compliance**: Menghindari pemanggilan `setState` sinkron langsung di dalam `useEffect` dengan memanfaatkan `queueMicrotask` sehingga mencegah error *cascading renders* (`react-hooks/set-state-in-effect`).
+* **ESLint & TypeScript Rules**: Bersih dari error unused variables, undeclared identifiers, dan missing hook dependencies.
+* **React 19 Hooks Compliance**: Menghindari pemanggilan `setState` sinkron langsung di dalam `useEffect` dengan memanfaatkan `queueMicrotask` sehingga mencegah error cascading renders (`react-hooks/set-state-in-effect`).
 * **Tailwind CSS v4 Canonical Classes**: Mematuhi aturan kelas kanonik seperti `stroke-2`, `max-w-28`, dan `max-w-37.5`.
 * **Turbopack Build Verified**: Kompilasi 15 rute statis dan dinamis berhasil 100% tanpa kendala.
 
 ---
 
-## 📄 Lisensi & Kontribusi
+## Lisensi
 
-Proyek ini dikembangkan untuk kepentingan akademik dan kemajuan ekosistem digital mahasiswa di lingkungan **Universitas Siliwangi (UNSIL)** dan perguruan tinggi di Indonesia.
-
-Dikembangkan dengan dedikasi penuh untuk kemudahan dan kesejahteraan mahasiswa Indonesia. 🇮🇩
+Proyek ini didistribusikan di bawah naungan lisensi **MIT License**. Silakan merujuk ke berkas [LICENSE](LICENSE) untuk informasi lebih lanjut.
