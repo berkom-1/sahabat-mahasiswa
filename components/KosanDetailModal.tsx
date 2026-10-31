@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Kosan } from "@/lib/types";
-import { formatWhatsAppUrl } from "@/lib/launcher";
+import { formatWhatsAppUrl, buildKosanWhatsAppMessage } from "@/lib/launcher";
 import {
   X,
   MapPin,
@@ -29,6 +29,8 @@ export default function KosanDetailModal({
   kosan,
   currentLocationName,
 }: KosanDetailModalProps) {
+  const [copied, setCopied] = useState(false);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -51,10 +53,12 @@ export default function KosanDetailModal({
 
   const mapDirectionUrl = `https://www.google.com/maps/dir/?api=1&destination=${kosan.lat},${kosan.lng}`;
   const mapSearchUrl = `https://www.google.com/maps/search/?api=1&query=${kosan.lat},${kosan.lng}`;
-  const waUrl = formatWhatsAppUrl(
-    kosan.telp,
-    `Halo pengelola ${kosan.nama}, saya melihat info kosan ini di aplikasi Sahabat Mahasiswa (jarak: ${kosan.jarak ?? 0} km dari ${currentLocationName}). Apakah saat ini masih ada kamar yang tersedia?`
+  const pesanWa = buildKosanWhatsAppMessage(
+    kosan.nama,
+    kosan.jarak,
+    currentLocationName
   );
+  const waUrl = formatWhatsAppUrl(kosan.telp, pesanWa);
 
   const handleShare = () => {
     if (navigator.share) {
@@ -67,7 +71,8 @@ export default function KosanDetailModal({
       navigator.clipboard.writeText(
         `Kosan: ${kosan.nama}\nHarga: ${formatRupiah(kosan.harga)}/bulan\nAlamat: ${kosan.area}\nMaps: ${mapDirectionUrl}`
       );
-      alert("Info kosan berhasil disalin ke clipboard.");
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     }
   };
 
@@ -234,8 +239,17 @@ export default function KosanDetailModal({
               onClick={handleShare}
               className="w-full py-2 px-4 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 font-medium text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
             >
-              <Share2 className="w-3.5 h-3.5 text-slate-500" />
-              <span>Bagikan / Salin Info Kos Ini</span>
+              {copied ? (
+                <>
+                  <Check className="w-3.5 h-3.5 text-emerald-500" />
+                  <span className="text-emerald-600 dark:text-emerald-400 font-semibold">Info Kosan Berhasil Disalin!</span>
+                </>
+              ) : (
+                <>
+                  <Share2 className="w-3.5 h-3.5 text-slate-500" />
+                  <span>Bagikan / Salin Info Kos Ini</span>
+                </>
+              )}
             </button>
           </div>
         </div>

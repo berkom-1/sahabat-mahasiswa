@@ -18,17 +18,13 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get("userId");
 
-    let sql = "SELECT * FROM transaksi";
-    const params: unknown[] = [];
-
-    if (userId && !isNaN(Number(userId))) {
-      sql += " WHERE user_id = ?";
-      params.push(Number(userId));
+    // Protect privacy: userId is required; never dump all user transactions globally
+    if (!userId || isNaN(Number(userId))) {
+      return NextResponse.json({ success: true, data: [] });
     }
 
-    sql += " ORDER BY tanggal DESC, id DESC";
-
-    const rows = await query<TransaksiRow[]>(sql, params);
+    const sql = "SELECT * FROM transaksi WHERE user_id = ? ORDER BY tanggal DESC, id DESC";
+    const rows = await query<TransaksiRow[]>(sql, [Number(userId)]);
 
     const data = rows.map((r) => ({
       id: String(r.id),

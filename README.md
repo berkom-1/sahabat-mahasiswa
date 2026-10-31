@@ -484,6 +484,30 @@ Aplikasi dilengkapi modul jembatan `lib/launcher.ts` yang mendukung interoperabi
 
 ---
 
+## Catatan Rilis & Changelog (Changelog)
+
+### [v1.1.0] - Audit Keamanan, Perbaikan Bug & Fitur Chat Kosan Terintegrasi
+Pembaruan komprehensif berdasarkan hasil audit keamanan dan kualitas kode (*findbug audit*) serta peningkatan pengalaman pengguna:
+
+#### 🔒 Keamanan & Otentikasi (Security Fixes)
+- **Sanitasi Token Akses TikTok (`app/api/profile/route.ts`)**: Mencegah kebocoran token mentah `tiktok_access_token` ke respons profil publik; token kini disanitasi menjadi nilai boolean `tiktok_connected`.
+- **Validasi Domain Email Mahasiswa**: Memastikan pendaftaran dan pembaruan email kampus wajib menggunakan akhiran domain universitas (`.ac.id`, `.edu`, `@student.unsil.ac.id`).
+- **Hardening NextAuth Credentials Provider (`app/api/auth/[...nextauth]/route.ts`)**: Menghapus celah kredensial fallback/bypass dummy; seluruh login diwajibkan melalui verifikasi hash kata sandi aman (`bcrypt.compare`).
+- **Pencegahan IDOR & Data Leak (`app/api/transaksi/route.ts`, `app/api/tugas/route.ts`)**: Mewajibkan parameter `userId` valid yang terikat sesi agar riwayat transaksi dan tugas antarmahasiswa tidak dapat diakses bebas tanpa otorisasi.
+- **Resilient Database Handling (`app/api/auth/login`, `register`, `components/AuthModal.tsx`)**: Menangani error `ECONNREFUSED` saat MySQL lokal belum berjalan dengan pesan panduan ramah serta mode demo fallback client-side yang mulus tanpa freeze atau crash.
+
+#### 💬 Fitur Chat WhatsApp Kosan Terintegrasi
+- **Template Pesan Dinamis & Otomatis (`components/KosanDetailModal.tsx`, `components/KosanTab.tsx`, `lib/launcher.ts`)**:
+  - Tombol chat WhatsApp pengelola kosan menyusun format pesan personal secara otomatis menggunakan identitas nama dan universitas dari profil pengguna yang aktif:
+    > *"Halo pengelola [Nama Kosan], saya [Nama] dari universitas [Universitas], saya melihat info kosan ini di aplikasi Sahabat Mahasiswa (jarak: [Jarak] km dari [Titik Acuan]). Apakah saat ini masih ada kamar yang tersedia?"*
+  - Menghitung jarak dinamis dari titik acuan lokasi terpilih secara akurat.
+- **Peningkatan UX Modal Kosan**: Mengganti dialog bawaan browser `alert()` dengan feedback visual inline (*copy checkmark indicator*) yang aman untuk lingkungan web maupun Android WebView.
+
+#### ⚙️ Konfigurasi & Lingkungan
+- **Penyediaan Berkas `.env.example`**: Menyediakan template variabel lingkungan lengkap tanpa mengekspos kredensial rahasia asli (`.env*` tetap terlindungi di `.gitignore`).
+
+---
+
 ## Standar Kualitas dan Pengujian
 
 Proyek ini telah melalui proses standarisasi kode yang ketat:

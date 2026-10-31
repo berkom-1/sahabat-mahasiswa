@@ -27,6 +27,51 @@ export function formatWhatsAppUrl(telp: string, pesan: string): string {
   return `https://wa.me/${cleaned}?text=${encodeURIComponent(pesan)}`;
 }
 
+export function getUserProfileSummary(): { nama: string; kampus: string } {
+  if (typeof window === "undefined") {
+    return { nama: "Mahasiswa", kampus: "Universitas Siliwangi (UNSIL)" };
+  }
+  try {
+    const cached = localStorage.getItem("sm_user_profile_cache");
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      if (parsed.nama || parsed.kampus) {
+        return {
+          nama: parsed.nama || "Mahasiswa",
+          kampus: parsed.kampus || "Universitas Siliwangi (UNSIL)",
+        };
+      }
+    }
+    const localUser = localStorage.getItem("sm_mysql_user");
+    if (localUser) {
+      const parsed = JSON.parse(localUser);
+      return {
+        nama: parsed.name || parsed.nama || "Mahasiswa",
+        kampus: parsed.kampus || "Universitas Siliwangi (UNSIL)",
+      };
+    }
+  } catch {}
+  return { nama: "Mahasiswa", kampus: "Universitas Siliwangi (UNSIL)" };
+}
+
+export function buildKosanWhatsAppMessage(
+  kosanNama: string,
+  jarak: number | string | undefined,
+  lokasiAcuan: string,
+  userProfile?: { nama?: string; kampus?: string }
+): string {
+  const profile = userProfile || getUserProfileSummary();
+  const nama = profile.nama || "Mahasiswa";
+  const kampus = profile.kampus || "Universitas Siliwangi (UNSIL)";
+  const jarakStr =
+    typeof jarak === "number"
+      ? (Number.isInteger(jarak) ? jarak.toString() : jarak.toFixed(1))
+      : (jarak || "0");
+  const lokasiStr = lokasiAcuan || "Lokasi GPS Saya Saat Ini";
+
+  return `Halo pengelola ${kosanNama}, saya ${nama} dari universitas ${kampus}, saya melihat info kosan ini di aplikasi Sahabat Mahasiswa (jarak: ${jarakStr} km dari ${lokasiStr}). Apakah saat ini masih ada kamar yang tersedia?`;
+}
+
 export function bukaUrlAman(url: string) {
   if (!url) return;
 

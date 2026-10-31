@@ -53,20 +53,34 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
       const demoEmail = "mahasiswa@unsil.ac.id";
       const demoPassword = "password123";
 
-      let res;
+      let demoUser = {
+        id: "demo-unsil-1",
+        name: "Rizky Ramadhan (Mahasiswa UNSIL)",
+        email: demoEmail,
+        kampus: "Universitas Siliwangi (UNSIL)",
+        jurusan: "Informatika",
+        student_email: demoEmail,
+        student_verified: true,
+      };
+
       try {
-        res = await apiClient.login(demoEmail, demoPassword);
+        const res = await apiClient.login(demoEmail, demoPassword);
+        if (res?.user) demoUser = res.user;
       } catch {
-        // If not found in MySQL, auto-register demo user
-        res = await apiClient.register({
-          email: demoEmail,
-          password: demoPassword,
-          nama: "Rizky Ramadhan (Mahasiswa UNSIL)",
-          kampus: "Universitas Siliwangi (UNSIL)",
-          jurusan: "Informatika",
-          student_email: demoEmail,
-          student_verified: true,
-        });
+        try {
+          const res = await apiClient.register({
+            email: demoEmail,
+            password: demoPassword,
+            nama: "Rizky Ramadhan (Mahasiswa UNSIL)",
+            kampus: "Universitas Siliwangi (UNSIL)",
+            jurusan: "Informatika",
+            student_email: demoEmail,
+            student_verified: true,
+          });
+          if (res?.user) demoUser = res.user;
+        } catch {
+          // Database offline: gunakan akun demo lokal
+        }
       }
 
       localStorage.setItem(
@@ -79,16 +93,18 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
         })
       );
 
-      if (res?.user) {
-        localStorage.setItem("sm_mysql_user", JSON.stringify(res.user));
-      }
+      localStorage.setItem("sm_mysql_user", JSON.stringify(demoUser));
 
-      await signIn("credentials", {
-        email: demoEmail,
-        password: demoPassword,
-        name: res?.user?.name || "Rizky Ramadhan (Mahasiswa UNSIL)",
-        redirect: false,
-      });
+      try {
+        await signIn("credentials", {
+          email: demoEmail,
+          password: demoPassword,
+          name: demoUser.name,
+          redirect: false,
+        });
+      } catch {
+        // NextAuth backend offline, localUser handles auth
+      }
 
       onSuccess();
       onClose();

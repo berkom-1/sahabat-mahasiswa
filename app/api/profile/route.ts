@@ -66,8 +66,8 @@ export async function GET(request: Request) {
         student_verified: Boolean(row.student_verified),
         google_email: row.google_email,
         google_linked: Boolean(row.google_linked),
-        tiktok_client_key: row.tiktok_client_key,
-        tiktok_access_token: row.tiktok_access_token,
+        tiktok_client_key: row.tiktok_client_key || null,
+        tiktok_connected: Boolean(row.tiktok_access_token),
       },
     });
   } catch (error) {
@@ -142,11 +142,14 @@ export async function PUT(request: Request) {
     }
     if (student_email !== undefined) {
       fields.push("student_email = ?");
-      values.push(student_email);
+      values.push(student_email ? String(student_email).trim().toLowerCase() : null);
     }
     if (student_verified !== undefined) {
+      const emailToCheck = String(student_email || email || "").toLowerCase();
+      const isCampusDomain = emailToCheck.includes(".ac.id") || emailToCheck.includes(".edu");
+      // Only grant student_verified if student has a valid campus domain or is already verified
       fields.push("student_verified = ?");
-      values.push(student_verified ? 1 : 0);
+      values.push(student_verified && (isCampusDomain || !student_email) ? 1 : 0);
     }
     if (google_email !== undefined) {
       fields.push("google_email = ?");

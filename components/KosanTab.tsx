@@ -8,7 +8,7 @@ import {
   getCoordinatesForLocation,
   UNIVERSITAS_LIST,
 } from "@/lib/data";
-import { formatWhatsAppUrl } from "@/lib/launcher";
+import { formatWhatsAppUrl, buildKosanWhatsAppMessage } from "@/lib/launcher";
 import { apiClient } from "@/lib/api-client";
 import KosanDetailModal from "./KosanDetailModal";
 import {
@@ -579,7 +579,11 @@ export default function KosanTab({
           const mapDirectionUrl = `https://www.google.com/maps/dir/?api=1&destination=${kos.lat},${kos.lng}`;
           const waUrl = formatWhatsAppUrl(
             kos.telp,
-            `Halo pengelola ${kos.nama}, saya melihat info kosan ini di Sahabat Mahasiswa (jarak: ${kos.jarak ?? 0} km dari ${currentLocation.name}). Apakah masih ada kamar kosong?`
+            buildKosanWhatsAppMessage(
+              kos.nama,
+              kos.jarak,
+              currentLocation.name
+            )
           );
 
           // Discount / Promo tag mapping

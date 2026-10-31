@@ -17,17 +17,13 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get("userId");
 
-    let sql = "SELECT * FROM tugas";
-    const params: unknown[] = [];
-
-    if (userId && !isNaN(Number(userId))) {
-      sql += " WHERE user_id = ?";
-      params.push(Number(userId));
+    // Protect privacy: userId is required; never dump all user tasks globally
+    if (!userId || isNaN(Number(userId))) {
+      return NextResponse.json({ success: true, data: [] });
     }
 
-    sql += " ORDER BY deadline ASC";
-
-    const rows = await query<TugasRow[]>(sql, params);
+    const sql = "SELECT * FROM tugas WHERE user_id = ? ORDER BY deadline ASC";
+    const rows = await query<TugasRow[]>(sql, [Number(userId)]);
 
     const data = rows.map((r) => ({
       id: String(r.id),

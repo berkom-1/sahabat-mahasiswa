@@ -86,7 +86,10 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error("Register API Error:", error);
-    const message = error instanceof Error ? error.message : "Terjadi kesalahan saat memproses pendaftaran.";
+    let message = error instanceof Error ? error.message : "Terjadi kesalahan saat memproses pendaftaran.";
+    if (message.includes("ECONNREFUSED") || message.includes("3306")) {
+      message = "Koneksi database terputus. Pastikan service MySQL (port 3306) di XAMPP / Laragon sudah dinyalakan, atau gunakan tombol 'Masuk Cepat Demo'.";
+    }
     return NextResponse.json(
       { error: message },
       { status: 500 }
