@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { X, Copy, Check, ExternalLink, MapPin, ShieldCheck } from "lucide-react";
 import { Voucher, Outlet } from "@/lib/types";
 import { OUTLETS } from "@/lib/data";
@@ -29,7 +29,7 @@ function generateBarcodeLines(serial: string) {
   return bars;
 }
 
-// Generator Serial Voucher Deterministik (Purity-safe untuk React render)
+// Generator Serial Voucher Deterministik
 function getDeterministicSerial(brand: string, id: string | number) {
   let hash = 0;
   const str = `${brand}-${id}`;
@@ -49,12 +49,22 @@ export default function ClaimVoucherModal({
 }: ClaimVoucherModalProps) {
   const [copied, setCopied] = useState(false);
 
+  // Close on Escape
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    if (isOpen) {
+      window.addEventListener("keydown", handleKeyDown);
+    }
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen || !voucher) return null;
 
   const bKey = voucher.brandKey || voucher.brand.toLowerCase().replace(/\s+/g, "");
   const outlet: Outlet | undefined = OUTLETS[bKey];
   const platform = voucher.platform || "TikTok GO Dining";
-  const platformColor = voucher.platformColor || "#FE2C55";
   const tiktokUsername = voucher.tiktokUsername || outlet?.tiktokUsername || "mixueindonesia";
 
   const promoCode =
@@ -69,7 +79,7 @@ export default function ClaimVoucherModal({
   const handleCopy = () => {
     navigator.clipboard.writeText(promoCode);
     setCopied(true);
-    onToast(`📋 Kode promo ${promoCode} berhasil disalin!`);
+    onToast(`Kode promo ${promoCode} berhasil disalin!`);
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -81,78 +91,74 @@ export default function ClaimVoucherModal({
   const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapQuery)}`;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 w-full max-w-md shadow-2xl relative my-6 animate-in fade-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+      <div
+        className="fixed inset-0"
+        onClick={onClose}
+        aria-hidden="true"
+      />
+
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 w-full max-w-md shadow-xl relative my-6 z-10 space-y-4">
         {/* Close Button */}
         <button
+          type="button"
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+          className="absolute top-4 right-4 p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Top Title */}
-        <div className="text-center mb-4 pr-6">
-          <span className="text-[11px] font-black uppercase tracking-widest text-[#FE2C55]">
-            KLAIM VOUCHER DIGITAL
+        <div className="text-center pr-6">
+          <span className="text-xs font-semibold text-rose-600 dark:text-rose-400">
+            Klaim Voucher Digital
           </span>
-          <h3 className="font-black text-base text-slate-900 dark:text-white mt-0.5">
-            {voucher.brand} · Diskon {voucher.diskonPersen}%
+          <h3 className="font-bold text-base text-slate-900 dark:text-white mt-0.5 tabular-nums">
+            {voucher.brand} &bull; Diskon {voucher.diskonPersen}%
           </h3>
         </div>
 
-        {/* Voucher Info Card */}
-        <div
-          className="p-4 rounded-2xl mb-4 border relative overflow-hidden text-white shadow-lg"
-          style={{
-            background: `linear-gradient(135deg, ${platformColor} 0%, #0f172a 100%)`,
-            borderColor: `${platformColor}40`,
-          }}
-        >
-          <div className="flex justify-between items-center mb-2.5">
-            <span className="text-[10px] font-black px-2.5 py-1 rounded-full bg-white/20 backdrop-blur-md uppercase tracking-wider">
+        {/* Voucher Info Card: Grounded Resting Style */}
+        <div className="p-4 rounded-xl border border-slate-800 bg-slate-900 text-white space-y-2">
+          <div className="flex justify-between items-center">
+            <span className="text-xs font-medium px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 border border-slate-700">
               {platform}
             </span>
-            <span className="text-[11px] font-bold text-emerald-300 flex items-center gap-1">
+            <span className="text-xs font-medium text-emerald-400 flex items-center gap-1">
               <ShieldCheck className="w-3.5 h-3.5" /> Terverifikasi Aktif
             </span>
           </div>
 
-          <div className="flex items-center gap-3.5 mt-2">
-            <div className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-2xl shrink-0 border border-white/20">
-              {voucher.brandLogo || "🍽️"}
-            </div>
-            <div>
-              <h4 className="font-black text-sm text-white leading-snug line-clamp-2">
-                {voucher.namaVoucher}
-              </h4>
-              <p className="text-xs text-white/80 mt-0.5">{voucher.brand} Indonesia</p>
-            </div>
+          <div className="pt-1">
+            <h4 className="font-bold text-sm text-white leading-snug line-clamp-2">
+              {voucher.namaVoucher}
+            </h4>
+            <p className="text-xs text-slate-400 mt-0.5">{voucher.brand} Indonesia</p>
           </div>
 
-          <div className="mt-3 pt-3 border-t border-white/15 flex justify-between items-baseline">
+          <div className="pt-2 border-t border-slate-800 flex justify-between items-baseline">
             <div>
-              <span className="text-xs text-white/60 line-through mr-2">
+              <span className="text-xs text-slate-400 line-through mr-2 tabular-nums">
                 Rp {voucher.hargaAsli.toLocaleString("id-ID")}
               </span>
-              <span className="text-xl font-black text-white">
+              <span className="text-xl font-bold text-white tabular-nums">
                 Rp {voucher.hargaDiskon.toLocaleString("id-ID")}
               </span>
             </div>
-            <span className="px-2 py-0.5 rounded-lg bg-white text-slate-900 text-xs font-black shadow">
+            <span className="px-2 py-0.5 rounded-md bg-white text-slate-900 text-xs font-bold tabular-nums">
               -{voucher.diskonPersen}%
             </span>
           </div>
         </div>
 
         {/* Digital Barcode Kasir Box */}
-        <div className="bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-2xl p-4 text-center mb-4 shadow-inner">
-          <div className="text-[10px] font-black tracking-widest text-slate-500 dark:text-slate-400 uppercase mb-2">
-            BARCODE KASIR (SCAN & REDEEM)
+        <div className="bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl p-4 text-center">
+          <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">
+            Barcode Kasir (Scan & Redeem)
           </div>
 
           {/* Barcode SVG Container */}
-          <div className="bg-white p-2.5 rounded-xl border border-slate-200 flex justify-center items-center overflow-hidden my-2 shadow-sm">
+          <div className="bg-white p-2.5 rounded-lg border border-slate-200 flex justify-center items-center overflow-hidden my-2">
             <svg width="260" height="48" viewBox="0 0 260 48" className="max-w-full block">
               {barcodeBars.map((bar, idx) => (
                 <rect key={idx} x={bar.x} y="2" width={bar.width} height="44" fill="#111827" />
@@ -160,49 +166,44 @@ export default function ClaimVoucherModal({
             </svg>
           </div>
 
-          <div className="font-mono text-sm font-black tracking-widest text-slate-900 dark:text-white mt-1">
+          <div className="font-mono text-xs font-bold tracking-widest text-slate-900 dark:text-white mt-1 tabular-nums">
             {serialVoucher}
           </div>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
-            Tunjukkan barcode ini ke kasir <strong>{voucher.brand}</strong> untuk potongan harga saat memesan.
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+            Tunjukkan barcode ini ke kasir <strong>{voucher.brand}</strong> untuk potongan harga langsung.
           </p>
         </div>
 
         {/* Online Promo Code Box */}
-        <div className="p-3 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex justify-between items-center mb-4">
+        <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex justify-between items-center">
           <div>
-            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+            <div className="text-xs font-medium text-slate-500 dark:text-slate-400">
               Kode Promo Online
             </div>
-            <div className="font-mono font-black text-sm text-emerald-600 dark:text-emerald-400 mt-0.5">
+            <div className="font-mono font-bold text-sm text-emerald-600 dark:text-emerald-400 mt-0.5">
               {promoCode}
             </div>
           </div>
           <button
             type="button"
             onClick={handleCopy}
-            className="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-700 text-slate-800 dark:text-white text-xs font-bold border border-slate-200 dark:border-slate-600 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-600 transition flex items-center gap-1.5 active:scale-95"
+            className="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-700 text-slate-800 dark:text-white text-xs font-semibold border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors flex items-center gap-1.5 cursor-pointer"
           >
             {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
-            {copied ? "Tersalin" : "Salin Kode"}
+            <span>{copied ? "Tersalin" : "Salin Kode"}</span>
           </button>
         </div>
 
         {/* Action Buttons */}
-        <div className="space-y-2">
-          {/* Main Launch Button (Deep link to TikTok app) */}
+        <div className="space-y-2 pt-1">
+          {/* Main Launch Button */}
           <button
             type="button"
             onClick={handleLaunchApp}
-            className="w-full py-3.5 rounded-2xl text-white text-xs font-black shadow-lg flex items-center justify-center gap-2 transition active:scale-[0.98]"
-            style={{
-              backgroundColor: platformColor,
-              boxShadow: `0 8px 20px ${platformColor}40`,
-            }}
+            className="w-full py-2.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 text-xs font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer"
           >
-            <span>🚀</span>
             <span>Buka di Aplikasi {platform.includes("TikTok") ? `TikTok (@${tiktokUsername})` : platform}</span>
-            <ExternalLink className="w-4 h-4 ml-0.5" />
+            <ExternalLink className="w-3.5 h-3.5" />
           </button>
 
           {/* Maps Direction Link */}
@@ -210,9 +211,9 @@ export default function ClaimVoucherModal({
             href={mapUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold flex items-center justify-center gap-1.5 transition text-center border border-slate-200 dark:border-slate-700"
+            className="w-full py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-medium flex items-center justify-center gap-1.5 transition-colors text-center border border-slate-200 dark:border-slate-700 cursor-pointer"
           >
-            <MapPin className="w-3.5 h-3.5 text-rose-500" />
+            <MapPin className="w-3.5 h-3.5 text-slate-500" />
             <span>Petunjuk Arah Outlet Terdekat</span>
           </a>
         </div>

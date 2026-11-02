@@ -13,6 +13,7 @@ import {
   Check,
   Trash2,
   PieChart,
+  X,
 } from "lucide-react";
 
 interface DompetTabProps {
@@ -62,12 +63,24 @@ export default function DompetTab({ userId }: DompetTabProps) {
   const [transaksiList, setTransaksiList] = useState<Transaksi[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [copiedSummary, setCopiedSummary] = useState(false);
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
 
   // Form State
   const [jenis, setJenis] = useState<"masuk" | "keluar">("keluar");
   const [kategori, setKategori] = useState(KATEGORI_OPTIONS[0]);
   const [nominal, setNominal] = useState("");
   const [catatan, setCatatan] = useState("");
+
+  // Close modal on escape
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setShowAddModal(false);
+    };
+    if (showAddModal) {
+      window.addEventListener("keydown", handleKeyDown);
+    }
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [showAddModal]);
 
   // Load transactions from MySQL
   useEffect(() => {
@@ -175,11 +188,11 @@ export default function DompetTab({ userId }: DompetTabProps) {
 
   // Copy Summary
   const handleCopySummary = () => {
-    const text = `📊 *Laporan Keuangan Sahabat Mahasiswa*\n💰 Sisa Saldo: ${formatRupiah(
+    const text = `Laporan Keuangan Sahabat Mahasiswa\nSisa Saldo: ${formatRupiah(
       sisaSaldo
-    )}\n📅 Sisa Hari Bulan Ini: ${daysRemaining} hari\n🎯 Batas Belanja Harian Aman: ${formatRupiah(
+    )}\nSisa Hari Bulan Ini: ${daysRemaining} hari\nBatas Belanja Harian Aman: ${formatRupiah(
       dailyLimit
-    )}/hari\n🔻 Total Pengeluaran: ${formatRupiah(totalKeluar)}`;
+    )}/hari\nTotal Pengeluaran: ${formatRupiah(totalKeluar)}`;
     navigator.clipboard.writeText(text);
     setCopiedSummary(true);
     setTimeout(() => setCopiedSummary(false), 2000);
@@ -193,126 +206,185 @@ export default function DompetTab({ userId }: DompetTabProps) {
     }).format(val);
   };
 
+  const filteredTx = transaksiList.filter((t) => {
+    if (categoryFilter === "all") return true;
+    if (categoryFilter === "masuk") return t.jenis === "masuk";
+    if (categoryFilter === "keluar") return t.jenis === "keluar";
+    return t.kategori.toLowerCase().includes(categoryFilter.toLowerCase());
+  });
+
   return (
     <div className="space-y-6 pb-24">
-      {/* Smart Daily Budget Card */}
-      <div className="rounded-3xl bg-linear-to-br from-emerald-600 via-teal-700 to-cyan-800 p-6 text-white shadow-xl shadow-teal-500/20 relative overflow-hidden">
-        <div className="absolute top-0 right-0 -mr-8 -mt-8 w-44 h-44 rounded-full bg-white/10 blur-2xl pointer-events-none" />
-        <div className="relative z-10">
-          <div className="flex items-center justify-between">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-xs font-semibold">
-              <Wallet className="w-3.5 h-3.5 text-emerald-200" /> Smart Daily Budget
-            </span>
-            <span className="text-xs text-teal-100 flex items-center gap-1">
-              <Calendar className="w-3.5 h-3.5" /> Sisa {daysRemaining} hari bulan ini
+      {/* 1. TOP STATS CARDS (Hide.com luxury cards layout) */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {/* Card 1: Saldo */}
+        <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
+              <span>Sisa Saldo Dompet</span>
+              <Wallet className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
+            </div>
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-white tabular-nums tracking-tight">
+              {formatRupiah(sisaSaldo)}
+            </h2>
+          </div>
+          <div className="pt-3 mt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs text-slate-500">
+            <span>Status keuangan</span>
+            <span className={`font-semibold ${sisaSaldo >= 0 ? "text-emerald-500" : "text-rose-500"}`}>
+              {sisaSaldo >= 0 ? "Aman / Surplus" : "Defisit"}
             </span>
           </div>
+        </div>
 
-          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <p className="text-xs text-teal-100 font-medium">Sisa Saldo Dompet</p>
-              <h2 className="text-2xl sm:text-3xl font-black tracking-tight mt-0.5">
-                {formatRupiah(sisaSaldo)}
-              </h2>
+        {/* Card 2: Batas Harian */}
+        <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
+              <span>Batas Belanja Harian</span>
+              <Calendar className="w-4 h-4 text-amber-500" />
             </div>
-            <div className="bg-white/15 backdrop-blur-md rounded-2xl p-3 border border-white/20">
-              <p className="text-[11px] text-teal-100 font-medium">Batas Aman Belanja Harian</p>
-              <h3 className="text-xl sm:text-2xl font-black text-amber-300 mt-0.5">
-                {formatRupiah(dailyLimit)}
-                <span className="text-xs text-white/80 font-normal"> / hari</span>
-              </h3>
-              <p className="text-[10px] text-teal-100/80 mt-1">
-                Rumus: Sisa Saldo &divide; Sisa Hari Bulan Ini
-              </p>
+            <h3 className="text-2xl font-bold text-amber-600 dark:text-amber-400 tabular-nums tracking-tight">
+              {formatRupiah(dailyLimit)}
+              <span className="text-xs font-normal text-slate-400 ml-1">/ hari</span>
+            </h3>
+          </div>
+          <div className="pt-3 mt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs text-slate-500">
+            <span>Sisa hari bulan ini</span>
+            <span className="font-semibold text-slate-800 dark:text-slate-200 tabular-nums">
+              {daysRemaining} Hari
+            </span>
+          </div>
+        </div>
+
+        {/* Card 3: In vs Out */}
+        <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs flex flex-col justify-between">
+          <div>
+            <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">
+              Arus Kas Bulan Ini
+            </div>
+            <div className="space-y-1.5 text-xs">
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400">
+                  <TrendingUp className="w-3.5 h-3.5 text-emerald-500" /> Pemasukan:
+                </span>
+                <span className="font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">
+                  {formatRupiah(totalMasuk)}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400">
+                  <TrendingDown className="w-3.5 h-3.5 text-rose-500" /> Pengeluaran:
+                </span>
+                <span className="font-bold text-rose-600 dark:text-rose-400 tabular-nums">
+                  {formatRupiah(totalKeluar)}
+                </span>
+              </div>
             </div>
           </div>
 
-          {/* Quick Stats: In vs Out */}
-          <div className="mt-5 pt-4 border-t border-white/15 grid grid-cols-2 gap-3 text-xs">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-300">
-                <TrendingUp className="w-4 h-4" />
-              </div>
-              <div>
-                <span className="text-teal-200 text-[10px] block">Pemasukan</span>
-                <span className="font-bold">{formatRupiah(totalMasuk)}</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-xl bg-rose-500/20 flex items-center justify-center text-rose-300">
-                <TrendingDown className="w-4 h-4" />
-              </div>
-              <div>
-                <span className="text-teal-200 text-[10px] block">Pengeluaran</span>
-                <span className="font-bold">{formatRupiah(totalKeluar)}</span>
-              </div>
-            </div>
+          <div className="pt-3 mt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs">
+            <span className="text-slate-500">Total Transaksi</span>
+            <span className="font-semibold text-slate-900 dark:text-white tabular-nums">
+              {transaksiList.length} Catatan
+            </span>
           </div>
         </div>
       </div>
 
-      {/* Action Buttons: Add Transaction & Copy Summary */}
-      <div className="flex items-center justify-between gap-3">
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="flex-1 inline-flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-600/25 active:scale-95 transition-all"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Catat Pengeluaran / Pemasukan</span>
-        </button>
+      {/* 2. SUB-FILTER PILLS & ACTION BUTTONS */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+        {/* Filter Pills */}
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+          {[
+            { id: "all", label: "Semua Catatan" },
+            { id: "keluar", label: "Pengeluaran" },
+            { id: "masuk", label: "Pemasukan" },
+            { id: "Makan", label: "Makan & Minum" },
+            { id: "Kos", label: "Uang Kos" },
+            { id: "Kuliah", label: "Bahan Kuliah" },
+          ].map((cat) => (
+            <button
+              key={cat.id}
+              type="button"
+              onClick={() => setCategoryFilter(cat.id)}
+              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                categoryFilter === cat.id
+                  ? "border border-emerald-500 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-bold"
+                  : "border border-slate-200 dark:border-emerald-900/40 text-slate-700 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
+              }`}
+            >
+              {cat.label}
+            </button>
+          ))}
+        </div>
 
-        <button
-          onClick={handleCopySummary}
-          className="inline-flex items-center gap-1.5 py-3 px-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 font-semibold text-xs shadow-sm hover:bg-slate-50 transition-colors"
-        >
-          {copiedSummary ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
-          <span>{copiedSummary ? "Tersalin" : "Salin Laporan"}</span>
-        </button>
+        {/* Action Triggers */}
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={handleCopySummary}
+            className="px-3.5 py-1.5 rounded-full border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-medium text-slate-700 dark:text-slate-300 transition-colors flex items-center gap-1.5 cursor-pointer"
+          >
+            {copiedSummary ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5 text-slate-500" />}
+            <span>{copiedSummary ? "Tersalin" : "Salin Laporan"}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setShowAddModal(true)}
+            className="px-4 py-1.5 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Catat Transaksi</span>
+          </button>
+        </div>
       </div>
 
-      {/* Transaction History List */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="font-extrabold text-slate-900 dark:text-white text-base flex items-center gap-2">
-            <PieChart className="w-4 h-4 text-indigo-600" />
-            <span>Riwayat Transaksi Mahasiswa</span>
+      {/* 3. TRANSACTION LIST CARDS (AirBnB style clean rows) */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 shadow-xs">
+        <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+          <h3 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
+            <PieChart className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
+            <span>Riwayat Transaksi Dompet</span>
           </h3>
-          <span className="text-xs text-slate-400">{transaksiList.length} transaksi</span>
+          <span className="text-xs text-slate-500 tabular-nums">
+            {filteredTx.length} dari {transaksiList.length} transaksi
+          </span>
         </div>
 
-        <div className="divide-y divide-slate-100 dark:divide-slate-800">
-          {transaksiList.map((tx) => (
+        <div className="divide-y divide-slate-100 dark:divide-slate-800/80">
+          {filteredTx.map((tx) => (
             <div
               key={tx.id}
-              className="py-3 flex items-center justify-between gap-3 group hover:bg-slate-50 dark:hover:bg-slate-800/40 px-2 rounded-xl transition-colors"
+              className="py-3.5 flex items-center justify-between gap-3 group hover:bg-slate-50 dark:hover:bg-slate-800/40 px-2 rounded-xl transition-colors"
             >
               <div className="flex items-center gap-3">
                 <div
-                  className={`w-9 h-9 rounded-2xl flex items-center justify-center ${
+                  className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${
                     tx.jenis === "masuk"
-                      ? "bg-emerald-100 dark:bg-emerald-950/50 text-emerald-600"
-                      : "bg-rose-100 dark:bg-rose-950/50 text-rose-600"
+                      ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400"
+                      : "bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400"
                   }`}
                 >
                   {tx.jenis === "masuk" ? (
-                    <TrendingUp className="w-5 h-5" />
+                    <TrendingUp className="w-4 h-4" />
                   ) : (
-                    <TrendingDown className="w-5 h-5" />
+                    <TrendingDown className="w-4 h-4" />
                   )}
                 </div>
                 <div>
-                  <h4 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">
+                  <h4 className="font-semibold text-sm text-slate-900 dark:text-white">
                     {tx.kategori}
                   </h4>
-                  <p className="text-[11px] text-slate-400">
-                    {tx.catatan || "Tidak ada catatan"} &bull; {tx.tanggal}
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    {tx.catatan || "Tidak ada catatan"} &bull; <span className="tabular-nums">{tx.tanggal}</span>
                   </p>
                 </div>
               </div>
 
               <div className="flex items-center gap-3">
                 <span
-                  className={`font-black text-xs sm:text-sm ${
+                  className={`font-bold text-sm tabular-nums ${
                     tx.jenis === "masuk"
                       ? "text-emerald-600 dark:text-emerald-400"
                       : "text-rose-600 dark:text-rose-400"
@@ -321,9 +393,10 @@ export default function DompetTab({ userId }: DompetTabProps) {
                   {tx.jenis === "masuk" ? "+" : "-"} {formatRupiah(tx.nominal)}
                 </span>
                 <button
+                  type="button"
                   onClick={() => handleDelete(tx.id)}
-                  className="opacity-0 group-hover:opacity-100 p-1.5 text-slate-400 hover:text-rose-500 rounded-lg transition-all"
-                  title="Hapus"
+                  className="opacity-0 group-hover:opacity-100 p-1.5 text-slate-400 hover:text-rose-600 rounded-full transition-all cursor-pointer"
+                  title="Hapus Transaksi"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -331,58 +404,85 @@ export default function DompetTab({ userId }: DompetTabProps) {
             </div>
           ))}
 
-          {transaksiList.length === 0 && (
-            <p className="text-center text-xs text-slate-400 py-6">
-              Belum ada transaksi tercatat. Mulai catat keuangan Anda hari ini!
+          {filteredTx.length === 0 && (
+            <p className="text-center text-xs text-slate-400 py-10">
+              Belum ada transaksi di kategori ini.
             </p>
           )}
         </div>
       </div>
 
-      {/* Modal Tambah Transaksi */}
+      {/* MODAL TAMBAH TRANSAKSI */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4">
-            <h3 className="font-extrabold text-lg text-slate-900 dark:text-white">
-              Catat Transaksi Baru
-            </h3>
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
+          <div className="fixed inset-0" onClick={() => setShowAddModal(false)} />
+          <div className="relative bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-md p-6 z-10 space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+              <h3 className="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
+                <Plus className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
+                <span>Catat Transaksi Baru</span>
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowAddModal(false)}
+                className="p-1 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
 
             <form onSubmit={handleAddTransaksi} className="space-y-4">
-              {/* Jenis Toggle */}
-              <div className="grid grid-cols-2 gap-2 bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl">
+              {/* Jenis Transaksi Pills */}
+              <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
                   onClick={() => setJenis("keluar")}
-                  className={`py-2 rounded-xl text-xs font-bold transition-all ${
+                  className={`py-2 px-3 rounded-full text-xs font-semibold transition-all cursor-pointer ${
                     jenis === "keluar"
-                      ? "bg-rose-600 text-white shadow-sm"
-                      : "text-slate-600 dark:text-slate-300"
+                      ? "bg-rose-500 text-white shadow-xs"
+                      : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
                   }`}
                 >
-                  Pengeluaran
+                  Pengeluaran (-)
                 </button>
                 <button
                   type="button"
                   onClick={() => setJenis("masuk")}
-                  className={`py-2 rounded-xl text-xs font-bold transition-all ${
+                  className={`py-2 px-3 rounded-full text-xs font-semibold transition-all cursor-pointer ${
                     jenis === "masuk"
-                      ? "bg-emerald-600 text-white shadow-sm"
-                      : "text-slate-600 dark:text-slate-300"
+                      ? "bg-emerald-600 text-white shadow-xs"
+                      : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
                   }`}
                 >
-                  Pemasukan
+                  Pemasukan (+)
                 </button>
+              </div>
+
+              {/* Nominal Input */}
+              <div>
+                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 block">
+                  Nominal (Rp)
+                </label>
+                <input
+                  type="number"
+                  required
+                  min="100"
+                  value={nominal}
+                  onChange={(e) => setNominal(e.target.value)}
+                  placeholder="Contoh: 25000"
+                  className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-base font-bold outline-none focus:border-emerald-600 tabular-nums"
+                />
               </div>
 
               {/* Kategori Select */}
               <div>
-                <label className="text-xs font-bold text-slate-600 dark:text-slate-300 block mb-1">
+                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 block">
                   Kategori
                 </label>
                 <select
                   value={kategori}
                   onChange={(e) => setKategori(e.target.value)}
-                  className="w-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-xl p-3 outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-medium outline-none focus:border-emerald-600 cursor-pointer"
                 >
                   {KATEGORI_OPTIONS.map((k) => (
                     <option key={k} value={k}>
@@ -392,47 +492,32 @@ export default function DompetTab({ userId }: DompetTabProps) {
                 </select>
               </div>
 
-              {/* Nominal Input */}
-              <div>
-                <label className="text-xs font-bold text-slate-600 dark:text-slate-300 block mb-1">
-                  Nominal (Rp)
-                </label>
-                <input
-                  type="number"
-                  placeholder="Contoh: 25000"
-                  value={nominal}
-                  onChange={(e) => setNominal(e.target.value)}
-                  required
-                  min="1"
-                  className="w-full text-sm font-bold bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-xl p-3 outline-none focus:ring-2 focus:ring-indigo-500"
-                />
-              </div>
-
               {/* Catatan Input */}
               <div>
-                <label className="text-xs font-bold text-slate-600 dark:text-slate-300 block mb-1">
-                  Catatan (Opsional)
+                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 block">
+                  Catatan Tambahan
                 </label>
                 <input
                   type="text"
-                  placeholder="Contoh: Beli makan siang nasi padang"
                   value={catatan}
                   onChange={(e) => setCatatan(e.target.value)}
-                  className="w-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-xl p-3 outline-none focus:ring-2 focus:ring-indigo-500"
+                  placeholder="Contoh: Nasi padang lauk rendang..."
+                  className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs outline-none focus:border-emerald-600"
                 />
               </div>
 
-              <div className="flex gap-2 pt-2">
+              {/* Submit Button */}
+              <div className="pt-2 flex items-center justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-600 dark:text-slate-300"
+                  className="px-4 py-2 rounded-full border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 rounded-xl bg-indigo-600 text-white font-bold text-xs shadow-md shadow-indigo-600/30"
+                  className="px-5 py-2 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
                 >
                   Simpan Transaksi
                 </button>

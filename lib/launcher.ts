@@ -17,13 +17,72 @@ export interface LaunchConfig {
   onToast?: (msg: string) => void;
 }
 
+export function formatWhatsAppUrl(telp: string, pesan: string): string {
+  let cleaned = (telp || "").replace(/\D/g, "");
+  if (cleaned.startsWith("0")) {
+    cleaned = "62" + cleaned.slice(1);
+  } else if (!cleaned.startsWith("62") && cleaned.length > 0) {
+    cleaned = "62" + cleaned;
+  }
+  return `https://wa.me/${cleaned}?text=${encodeURIComponent(pesan)}`;
+}
+
+export function getUserProfileSummary(): { nama: string; kampus: string } {
+  if (typeof window === "undefined") {
+    return { nama: "Mahasiswa", kampus: "Universitas Siliwangi (UNSIL)" };
+  }
+  try {
+    const cached = localStorage.getItem("sm_user_profile_cache");
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      if (parsed.nama || parsed.kampus) {
+        return {
+          nama: parsed.nama || "Mahasiswa",
+          kampus: parsed.kampus || "Universitas Siliwangi (UNSIL)",
+        };
+      }
+    }
+    const localUser = localStorage.getItem("sm_mysql_user");
+    if (localUser) {
+      const parsed = JSON.parse(localUser);
+      return {
+        nama: parsed.name || parsed.nama || "Mahasiswa",
+        kampus: parsed.kampus || "Universitas Siliwangi (UNSIL)",
+      };
+    }
+  } catch {}
+  return { nama: "Mahasiswa", kampus: "Universitas Siliwangi (UNSIL)" };
+}
+
+export function buildKosanWhatsAppMessage(
+  kosanNama: string,
+  jarak: number | string | undefined,
+  lokasiAcuan: string,
+  userProfile?: { nama?: string; kampus?: string }
+): string {
+  const profile = userProfile || getUserProfileSummary();
+  const nama = profile.nama || "Mahasiswa";
+  const kampus = profile.kampus || "Universitas Siliwangi (UNSIL)";
+  const jarakStr =
+    typeof jarak === "number"
+      ? (Number.isInteger(jarak) ? jarak.toString() : jarak.toFixed(1))
+      : (jarak || "0");
+  const lokasiStr = lokasiAcuan || "Lokasi GPS Saya Saat Ini";
+
+  return `Halo pengelola ${kosanNama}, saya ${nama} dari universitas ${kampus}, saya melihat info kosan ini di aplikasi Sahabat Mahasiswa (jarak: ${jarakStr} km dari ${lokasiStr}). Apakah saat ini masih ada kamar yang tersedia?`;
+}
+
 export function bukaUrlAman(url: string) {
   if (!url) return;
 
   // 1. Windows Electron (.exe) Support
   if (typeof window !== "undefined" && window.electronAPI?.openExternal) {
-    window.electronAPI.openExternal(url);
-    return;
+    try {
+      window.electronAPI.openExternal(url);
+      return;
+    } catch {
+      // fallback to browser
+    }
   }
 
   // 2. Mobile Android / iOS
@@ -39,15 +98,9 @@ export function bukaUrlAman(url: string) {
 
   // 3. Desktop Browser
   try {
-    const win = window.open(url, "_blank");
-    if (!win) {
-      const a = document.createElement("a");
-      a.href = url;
-      a.target = "_blank";
-      a.rel = "noopener noreferrer";
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(() => a.remove(), 250);
+    const win = window.open(url, "_blank", "noopener,noreferrer");
+    if (!win || win.closed || typeof win.closed === "undefined") {
+      window.location.assign(url);
     }
   } catch {
     window.location.href = url;

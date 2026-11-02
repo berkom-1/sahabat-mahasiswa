@@ -5,11 +5,13 @@ import { Tugas } from "@/lib/types";
 import { apiClient } from "@/lib/api-client";
 import {
   CheckSquare,
-  Clock,
   Plus,
   Trash2,
   CheckCircle2,
   Calendar,
+  X,
+  Flame,
+  Check,
 } from "lucide-react";
 
 interface TugasTabProps {
@@ -43,6 +45,7 @@ const INITIAL_TUGAS: Tugas[] = [
 export default function TugasTab({ userId }: TugasTabProps) {
   const [tugasList, setTugasList] = useState<Tugas[]>([]);
   const [activeFilter, setActiveFilter] = useState<"aktif" | "selesai">("aktif");
+  const [weightFilter, setWeightFilter] = useState<number | "all">("all");
   const [showAddModal, setShowAddModal] = useState(false);
 
   // Form State
@@ -53,6 +56,17 @@ export default function TugasTab({ userId }: TugasTabProps) {
     return d.toISOString().split("T")[0];
   });
   const [bobot, setBobot] = useState<number>(2);
+
+  // Close modal on escape
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setShowAddModal(false);
+    };
+    if (showAddModal) {
+      window.addEventListener("keydown", handleKeyDown);
+    }
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [showAddModal]);
 
   // Load Tasks from MySQL
   useEffect(() => {
@@ -153,10 +167,18 @@ export default function TugasTab({ userId }: TugasTabProps) {
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   };
 
+  const activeCount = tugasList.filter((t) => !t.selesai).length;
+  const urgentCount = tugasList.filter((t) => !t.selesai && getDaysLeft(t.deadline) <= 2 && getDaysLeft(t.deadline) >= 0).length;
+  const completedCount = tugasList.filter((t) => t.selesai).length;
+
   const filteredTasks = tugasList
-    .filter((t) => (activeFilter === "aktif" ? !t.selesai : t.selesai))
+    .filter((t) => {
+      if (activeFilter === "aktif" && t.selesai) return false;
+      if (activeFilter === "selesai" && !t.selesai) return false;
+      if (weightFilter !== "all" && t.bobot !== weightFilter) return false;
+      return true;
+    })
     .sort((a, b) => {
-      // Sort: closest deadline first, then highest weight
       const daysA = getDaysLeft(a.deadline);
       const daysB = getDaysLeft(b.deadline);
       if (daysA !== daysB) return daysA - daysB;
@@ -165,58 +187,119 @@ export default function TugasTab({ userId }: TugasTabProps) {
 
   return (
     <div className="space-y-6 pb-24">
-      {/* Banner */}
-      <div className="rounded-3xl bg-linear-to-br from-purple-600 via-indigo-600 to-blue-700 p-6 text-white shadow-xl shadow-purple-500/20 relative overflow-hidden">
-        <div className="absolute top-0 right-0 -mr-8 -mt-8 w-44 h-44 rounded-full bg-white/10 blur-2xl pointer-events-none" />
-        <div className="relative z-10 max-w-xl">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-xs font-semibold mb-3">
-            <CheckSquare className="w-3.5 h-3.5 text-purple-200" /> Deadline & Priority Manager
+      {/* 1. TOP STATS CARDS (Luxury 3-col grid) */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {/* Card 1: Aktif */}
+        <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs flex items-center justify-between">
+          <div>
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+              Tugas Aktif Berjalan
+            </span>
+            <div className="text-2xl font-bold text-slate-900 dark:text-white tabular-nums mt-0.5">
+              {activeCount} Tugas
+            </div>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-            Pengingat Tugas Kuliah
-          </h1>
-          <p className="text-purple-100 text-sm mt-1">
-            Urutkan tugas berdasarkan tingkat urgensi deadline dan bobot kesulitan mata kuliah.
-          </p>
+          <div className="w-10 h-10 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 flex items-center justify-center">
+            <CheckSquare className="w-5 h-5" />
+          </div>
+        </div>
+
+        {/* Card 2: Deadline Mendesak */}
+        <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs flex items-center justify-between">
+          <div>
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+              Deadline Mendesak (&le; 2 hari)
+            </span>
+            <div className="text-2xl font-bold text-amber-600 dark:text-amber-400 tabular-nums mt-0.5">
+              {urgentCount} Tugas
+            </div>
+          </div>
+          <div className="w-10 h-10 rounded-full bg-amber-50 dark:bg-amber-950/40 text-amber-500 flex items-center justify-center">
+            <Flame className="w-5 h-5" />
+          </div>
+        </div>
+
+        {/* Card 3: Selesai */}
+        <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs flex items-center justify-between">
+          <div>
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+              Telah Diselesaikan
+            </span>
+            <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 tabular-nums mt-0.5">
+              {completedCount} Tugas
+            </div>
+          </div>
+          <div className="w-10 h-10 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-500 flex items-center justify-center">
+            <CheckCircle2 className="w-5 h-5" />
+          </div>
         </div>
       </div>
 
-      {/* Filter Tabs & Add Button */}
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl">
+      {/* 2. SUB-FILTER PILLS & TOOLBAR */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+        {/* Status & Priority Filter Pills */}
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
           <button
+            type="button"
             onClick={() => setActiveFilter("aktif")}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+            className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
               activeFilter === "aktif"
-                ? "bg-indigo-600 text-white shadow-sm"
-                : "text-slate-600 dark:text-slate-300"
+                ? "border border-emerald-500 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-bold"
+                : "border border-slate-200 dark:border-emerald-900/40 text-slate-700 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
             }`}
           >
-            Aktif ({tugasList.filter((t) => !t.selesai).length})
+            Aktif ({activeCount})
           </button>
+
           <button
+            type="button"
             onClick={() => setActiveFilter("selesai")}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+            className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
               activeFilter === "selesai"
-                ? "bg-indigo-600 text-white shadow-sm"
-                : "text-slate-600 dark:text-slate-300"
+                ? "border border-emerald-500 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-bold"
+                : "border border-slate-200 dark:border-emerald-900/40 text-slate-700 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
             }`}
           >
-            Selesai ({tugasList.filter((t) => t.selesai).length})
+            Selesai ({completedCount})
           </button>
+
+          <div className="h-4 w-px bg-slate-200 dark:bg-emerald-900/40 mx-1" />
+
+          {/* Bobot Filter Pills */}
+          {[
+            { val: "all", label: "Semua Bobot" },
+            { val: 3, label: "Bobot Berat" },
+            { val: 2, label: "Sedang" },
+            { val: 1, label: "Ringan" },
+          ].map((w) => (
+            <button
+              key={w.label}
+              type="button"
+              onClick={() => setWeightFilter(w.val as number | "all")}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all cursor-pointer ${
+                weightFilter === w.val
+                  ? "border border-emerald-500 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-bold"
+                  : "border border-slate-200 dark:border-emerald-900/40 text-slate-700 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
+              }`}
+            >
+              {w.label}
+            </button>
+          ))}
         </div>
 
+        {/* Add Button */}
         <button
+          type="button"
           onClick={() => setShowAddModal(true)}
-          className="inline-flex items-center gap-1.5 py-2.5 px-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-600/25 active:scale-95 transition-all"
+          className="px-4 py-1.5 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer shrink-0"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-3.5 h-3.5" />
           <span>Tambah Tugas</span>
         </button>
       </div>
 
-      {/* Task List */}
-      <div className="space-y-3">
+      {/* 3. TASK CARDS GRID (Hide.com luxury cards) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredTasks.map((t) => {
           const daysLeft = getDaysLeft(t.deadline);
           const isOverdue = daysLeft < 0;
@@ -226,151 +309,168 @@ export default function TugasTab({ userId }: TugasTabProps) {
           return (
             <div
               key={t.id}
-              className={`p-4 rounded-3xl border transition-all duration-200 flex items-center justify-between gap-3 ${
+              className={`p-5 rounded-2xl border transition-all flex flex-col justify-between group shadow-xs ${
                 t.selesai
-                  ? "bg-slate-50 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800 opacity-60"
-                  : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md"
+                  ? "bg-slate-50/60 dark:bg-slate-900/40 border-slate-200/80 dark:border-slate-800/80 opacity-70"
+                  : "bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800 hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700"
               }`}
             >
-              <div className="flex items-center gap-3.5 flex-1 min-w-0">
-                {/* Custom Checkbox */}
-                <button
-                  onClick={() => handleToggleSelesai(t.id, t.selesai)}
-                  className={`w-6 h-6 rounded-lg flex items-center justify-center transition-all ${
-                    t.selesai
-                      ? "bg-emerald-500 text-white"
-                      : "border-2 border-slate-300 dark:border-slate-600 hover:border-indigo-600"
-                  }`}
-                >
-                  {t.selesai && <CheckCircle2 className="w-4 h-4" />}
-                </button>
-
-                <div className="min-w-0 flex-1">
-                  <h4
-                    className={`font-bold text-sm text-slate-900 dark:text-white truncate ${
-                      t.selesai ? "line-through text-slate-400 dark:text-slate-500" : ""
+              <div>
+                {/* Top Badge Row */}
+                <div className="flex items-center justify-between gap-2 mb-2.5">
+                  <span
+                    className={`text-[11px] font-bold px-2 py-0.5 rounded-md ${
+                      isOverdue
+                        ? "bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-400"
+                        : isToday
+                        ? "bg-rose-500 text-white"
+                        : isUrgent
+                        ? "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300"
+                        : "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300"
                     }`}
                   >
-                    {t.nama_tugas}
-                  </h4>
+                    {isOverdue
+                      ? `Terlambat ${Math.abs(daysLeft)} hari`
+                      : isToday
+                      ? "Deadline Hari Ini!"
+                      : `${daysLeft} hari lagi`}
+                  </span>
 
-                  <div className="flex flex-wrap items-center gap-2 mt-1">
-                    {/* Urgency Badge */}
-                    <span
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1 ${
-                        isOverdue
-                          ? "bg-rose-500/10 text-rose-600 border border-rose-500/20"
-                          : isToday
-                          ? "bg-amber-500/10 text-amber-600 border border-amber-500/20"
-                          : isUrgent
-                          ? "bg-orange-500/10 text-orange-600 border border-orange-500/20"
-                          : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
-                      }`}
-                    >
-                      <Clock className="w-2.5 h-2.5" />
-                      {isOverdue
-                        ? `Terlewat ${Math.abs(daysLeft)} hari`
-                        : isToday
-                        ? "Hari Ini!"
-                        : `${daysLeft} hari lagi`}
-                    </span>
-
-                    {/* Weight Badge */}
-                    <span
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
-                        t.bobot === 3
-                          ? "bg-rose-100 dark:bg-rose-950/50 text-rose-700 dark:text-rose-400"
-                          : t.bobot === 2
-                          ? "bg-blue-100 dark:bg-blue-950/50 text-blue-700 dark:text-blue-400"
-                          : "bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400"
-                      }`}
-                    >
-                      {t.bobot === 3 ? "🔥 Bobot Berat" : t.bobot === 2 ? "⚡ Sedang" : "🌱 Ringan"}
-                    </span>
-
-                    <span className="text-[11px] text-slate-400 flex items-center gap-1">
-                      <Calendar className="w-3 h-3" /> {t.deadline}
-                    </span>
-                  </div>
+                  <span
+                    className={`text-[11px] font-semibold px-2 py-0.5 rounded-md ${
+                      t.bobot === 3
+                        ? "bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900"
+                        : t.bobot === 2
+                        ? "bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-900"
+                        : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
+                    }`}
+                  >
+                    {t.bobot === 3 ? "Bobot Berat" : t.bobot === 2 ? "Bobot Sedang" : "Bobot Ringan"}
+                  </span>
                 </div>
+
+                {/* Task Title */}
+                <h3
+                  className={`font-bold text-sm text-slate-900 dark:text-white leading-snug line-clamp-2 ${
+                    t.selesai ? "line-through text-slate-400 dark:text-slate-500" : ""
+                  }`}
+                >
+                  {t.nama_tugas}
+                </h3>
               </div>
 
-              {/* Delete Button */}
-              <button
-                onClick={() => handleDeleteTugas(t.id)}
-                className="p-2 text-slate-300 hover:text-rose-500 rounded-xl transition-colors"
-                title="Hapus Tugas"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
+              {/* Bottom Meta & Action Row */}
+              <div className="pt-3 mt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-2">
+                <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5 tabular-nums">
+                  <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                  <span>{t.deadline}</span>
+                </span>
+
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => handleToggleSelesai(t.id, t.selesai)}
+                    className={`px-3 py-1 rounded-full text-xs font-semibold transition-all flex items-center gap-1 cursor-pointer ${
+                      t.selesai
+                        ? "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200"
+                        : "bg-emerald-600 hover:bg-emerald-500 text-white shadow-xs"
+                    }`}
+                  >
+                    <Check className="w-3 h-3" />
+                    <span>{t.selesai ? "Batal" : "Selesai"}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteTugas(t.id)}
+                    className="p-1.5 text-slate-400 hover:text-rose-600 rounded-full transition-colors cursor-pointer"
+                    title="Hapus Tugas"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
             </div>
           );
         })}
-
-        {filteredTasks.length === 0 && (
-          <div className="text-center py-10 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6">
-            <p className="text-slate-400 text-xs">
-              {activeFilter === "aktif"
-                ? "Hebat! Tidak ada tugas kuliah yang tertunda."
-                : "Belum ada tugas yang diselesaikan."}
-            </p>
-          </div>
-        )}
       </div>
 
-      {/* Modal Tambah Tugas */}
+      {filteredTasks.length === 0 && (
+        <div className="py-16 text-center rounded-3xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 text-slate-400 max-w-md mx-auto shadow-xs">
+          <CheckCircle2 className="w-12 h-12 text-slate-400 mx-auto mb-3" />
+          <div className="font-bold text-slate-900 dark:text-white text-base">
+            Tidak Ada Tugas di Kategori Ini
+          </div>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            Semua tugas terselesaikan atau belum ada tugas yang dicatat.
+          </p>
+        </div>
+      )}
+
+      {/* MODAL TAMBAH TUGAS */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4">
-            <h3 className="font-extrabold text-lg text-slate-900 dark:text-white">
-              Tambah Tugas Kuliah
-            </h3>
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
+          <div className="fixed inset-0" onClick={() => setShowAddModal(false)} />
+          <div className="relative bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-md p-6 z-10 space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+              <h3 className="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
+                <Plus className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
+                <span>Tambah Tugas Baru</span>
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowAddModal(false)}
+                className="p-1 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
 
             <form onSubmit={handleAddTugas} className="space-y-4">
               <div>
-                <label className="text-xs font-bold text-slate-600 dark:text-slate-300 block mb-1">
+                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 block">
                   Nama Tugas / Mata Kuliah
                 </label>
                 <input
                   type="text"
-                  placeholder="Contoh: Makalah Pancasila Bab 2"
+                  required
                   value={namaTugas}
                   onChange={(e) => setNamaTugas(e.target.value)}
-                  required
-                  className="w-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-xl p-3 outline-none focus:ring-2 focus:ring-indigo-500"
+                  placeholder="Contoh: Makalah Pancasila Bab 2..."
+                  className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs outline-none focus:border-emerald-600"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-600 dark:text-slate-300 block mb-1">
-                  Batas Waktu (Deadline)
+                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 block">
+                  Tenggat Waktu (Deadline)
                 </label>
                 <input
                   type="date"
+                  required
                   value={deadline}
                   onChange={(e) => setDeadline(e.target.value)}
-                  required
-                  className="w-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-xl p-3 outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs outline-none focus:border-emerald-600 cursor-pointer"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-600 dark:text-slate-300 block mb-1">
-                  Bobot Kesulitan
+                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 block">
+                  Tingkat Bobot / Urgensi
                 </label>
                 <div className="grid grid-cols-3 gap-2">
                   {[
-                    { val: 1, label: "🌱 Ringan" },
-                    { val: 2, label: "⚡ Sedang" },
-                    { val: 3, label: "🔥 Berat" },
+                    { val: 1, label: "Ringan" },
+                    { val: 2, label: "Sedang" },
+                    { val: 3, label: "Berat" },
                   ].map((b) => (
                     <button
                       key={b.val}
                       type="button"
                       onClick={() => setBobot(b.val)}
-                      className={`py-2 rounded-xl text-xs font-bold transition-all ${
+                      className={`py-2 px-3 rounded-full text-xs font-semibold transition-all cursor-pointer ${
                         bobot === b.val
-                          ? "bg-indigo-600 text-white shadow-sm"
+                          ? "bg-emerald-700 text-white shadow-xs"
                           : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
                       }`}
                     >
@@ -380,17 +480,17 @@ export default function TugasTab({ userId }: TugasTabProps) {
                 </div>
               </div>
 
-              <div className="flex gap-2 pt-2">
+              <div className="pt-2 flex items-center justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-600 dark:text-slate-300"
+                  className="px-4 py-2 rounded-full border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 rounded-xl bg-indigo-600 text-white font-bold text-xs shadow-md shadow-indigo-600/30"
+                  className="px-5 py-2 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
                 >
                   Simpan Tugas
                 </button>

@@ -20,23 +20,24 @@ export default function BottomNav({ activeTab, onChangeTab }: BottomNavProps) {
   ] as const;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-30 pointer-events-none pb-2 sm:pb-4 flex justify-center px-3">
-      <nav className="pointer-events-auto bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200/90 dark:border-slate-800/90 shadow-2xl shadow-indigo-950/20 rounded-2xl sm:rounded-3xl p-1.5 flex items-center justify-between gap-1 w-full max-w-md">
+    <div className="fixed bottom-4 left-0 right-0 z-30 pointer-events-none flex justify-center px-4 animate-in fade-in slide-in-from-bottom-2">
+      <nav className="pointer-events-auto bg-white/90 dark:bg-[#0c111d]/90 backdrop-blur-xl border border-slate-200/90 dark:border-slate-800 shadow-xl rounded-full p-1.5 flex items-center justify-between gap-1 w-full max-w-md">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.key;
           return (
             <button
+              type="button"
               key={tab.key}
               onClick={() => onChangeTab(tab.key)}
-              className={`flex-1 flex flex-col items-center justify-center py-1.5 px-1 rounded-xl sm:rounded-2xl transition-all duration-200 ${
+              className={`flex-1 flex flex-col items-center justify-center py-2 px-1 rounded-full transition-all cursor-pointer ${
                 isActive
-                  ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30 scale-100 font-semibold"
-                  : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/50"
+                  ? "bg-emerald-800 dark:bg-emerald-700 text-white font-semibold shadow-xs"
+                  : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
               }`}
             >
-              <Icon className={`w-5 h-5 ${isActive ? "stroke-[2.5]" : "stroke-[1.8]"}`} />
-              <span className="text-[10px] sm:text-[11px] tracking-tight mt-0.5">
+              <Icon className="w-4 h-4 stroke-2" />
+              <span className="text-[11px] tracking-tight mt-0.5">
                 {tab.label}
               </span>
             </button>

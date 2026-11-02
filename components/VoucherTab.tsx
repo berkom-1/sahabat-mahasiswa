@@ -1,7 +1,22 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Search, MapPin, Store } from "lucide-react";
+import {
+  Search,
+  Store,
+  UtensilsCrossed,
+  Flame,
+  Music2,
+  ExternalLink,
+  Star,
+  Coffee,
+  Sparkles,
+  Heart,
+  Pizza,
+  Cookie,
+  ArrowUpDown,
+  Tag,
+} from "lucide-react";
 import { Voucher } from "@/lib/types";
 import { DEFAULT_VOUCHERS } from "@/lib/data";
 import { bukaAplikasiPlatform } from "@/lib/launcher";
@@ -14,41 +29,40 @@ export default function VoucherTab() {
   const [search, setSearch] = useState("");
   const [platformFilter, setPlatformFilter] = useState<string>("all");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [favorites, setFavorites] = useState<string[]>([]);
+  const [sortBy, setSortBy] = useState<"discount" | "price" | "rating">("discount");
 
   // Selected modals
   const [selectedClaimVoucher, setSelectedClaimVoucher] = useState<Voucher | null>(null);
   const [selectedOutletBrandKey, setSelectedOutletBrandKey] = useState<string | null>(null);
   const [showTikTokConfig, setShowTikTokConfig] = useState(false);
 
-  // TikTok API status
-  const [hasTikTokKey, setHasTikTokKey] = useState<boolean>(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const saved = localStorage.getItem("sm_tiktok_dining_config");
-        if (saved) return !!JSON.parse(saved).clientKey;
-      } catch {}
-    }
-    return false;
-  });
   const [toastMsg, setToastMsg] = useState<string | null>(null);
 
-  const checkTikTokConfig = () => {
-    try {
-      const saved = localStorage.getItem("sm_tiktok_dining_config");
-      setHasTikTokKey(saved ? !!JSON.parse(saved).clientKey : false);
-    } catch {
-      setHasTikTokKey(false);
-    }
-  };
-
+  // Load favorites
   useEffect(() => {
-    window.addEventListener("storage", checkTikTokConfig);
-    window.addEventListener("sm_profile_updated", checkTikTokConfig);
-    return () => {
-      window.removeEventListener("storage", checkTikTokConfig);
-      window.removeEventListener("sm_profile_updated", checkTikTokConfig);
-    };
+    try {
+      const saved = localStorage.getItem("sm_voucher_favorites");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        queueMicrotask(() => {
+          setFavorites(parsed);
+        });
+      }
+    } catch {}
   }, []);
+
+  const toggleFavorite = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    const updated = favorites.includes(id)
+      ? favorites.filter((favId) => favId !== id)
+      : [...favorites, id];
+    setFavorites(updated);
+    try {
+      localStorage.setItem("sm_voucher_favorites", JSON.stringify(updated));
+    } catch {}
+    showToast(favorites.includes(id) ? "Dihapus dari voucher favorit" : "Disimpan ke voucher favorit");
+  };
 
   const showToast = (msg: string) => {
     setToastMsg(msg);
@@ -67,10 +81,13 @@ export default function VoucherTab() {
     if (!matchSearch) return false;
 
     // Platform filter
-    if (platformFilter !== "all" && platformFilter !== "diskon") {
+    if (platformFilter !== "all" && platformFilter !== "diskon50") {
       if (v.platform !== platformFilter && !v.platform.toLowerCase().includes(platformFilter.toLowerCase())) {
         return false;
       }
+    }
+    if (platformFilter === "diskon50" && v.diskonPersen < 50) {
+      return false;
     }
 
     // Category filter
@@ -85,32 +102,57 @@ export default function VoucherTab() {
           v.brandKey === "wartegbahari" ||
           v.brandKey === "dkriuk" ||
           v.brandKey === "rocketchicken" ||
-          v.brandKey === "richeese";
+          v.brandKey === "miegacoan";
         if (!isBerat) return false;
-      } else if (categoryFilter === "mie") {
-        if (!v.brandKey?.includes("miegacoan") && !v.kategori.toLowerCase().includes("mie")) return false;
       } else if (categoryFilter === "kopi_minuman") {
         const isMinum =
-          v.brandKey === "mixue" ||
-          v.brandKey === "kopikenangan" ||
-          v.brandKey === "janjijiwa" ||
-          v.brandKey === "chatime" ||
-          v.kategori.toLowerCase().includes("kopi") ||
-          v.kategori.toLowerCase().includes("es krim") ||
           v.kategori.toLowerCase().includes("minuman") ||
-          v.kategori.toLowerCase().includes("teh");
+          v.kategori.toLowerCase().includes("kopi") ||
+          v.brandKey === "mixue" ||
+          v.brandKey === "kopi-kenangan" ||
+          v.brandKey === "janji-jiwa" ||
+          v.brandKey === "chatime" ||
+          v.brandKey === "haus" ||
+          v.brandKey === "estehindonesia";
         if (!isMinum) return false;
-      } else if (categoryFilter === "burger") {
-        if (!v.brandKey?.includes("burger") && !v.namaVoucher.toLowerCase().includes("burger")) return false;
+      } else if (categoryFilter === "camilan") {
+        const isCamilan =
+          v.kategori.toLowerCase().includes("camilan") ||
+          v.kategori.toLowerCase().includes("snack") ||
+          v.brandKey === "rotio" ||
+          v.brandKey === "jco" ||
+          v.brandKey === "shihlin";
+        if (!isCamilan) return false;
+      } else if (categoryFilter === "fast_food") {
+        const isFastFood =
+          v.brandKey === "mcdonalds" ||
+          v.brandKey === "kfc" ||
+          v.brandKey === "aw" ||
+          v.brandKey === "burgerking" ||
+          v.brandKey === "lazatto";
+        if (!isFastFood) return false;
+      } else if (categoryFilter === "ayam") {
+        const isAyam =
+          v.brandKey === "lazatto" ||
+          v.brandKey === "ayamhayam" ||
+          v.brandKey === "dkriuk" ||
+          v.brandKey === "rocketchicken" ||
+          v.namaVoucher.toLowerCase().includes("ayam");
+        if (!isAyam) return false;
+      } else if (categoryFilter === "tiktok") {
+        if (!v.platform.toLowerCase().includes("tiktok")) return false;
       }
     }
 
     return true;
   });
 
-  if (platformFilter === "diskon") {
-    filtered = [...filtered].sort((a, b) => b.diskonPersen - a.diskonPersen);
-  }
+  // Sort
+  filtered = filtered.sort((a, b) => {
+    if (sortBy === "discount") return b.diskonPersen - a.diskonPersen;
+    if (sortBy === "price") return a.hargaDiskon - b.hargaDiskon;
+    return Number(b.rating || 4.8) - Number(a.rating || 4.8);
+  });
 
   const handleBuyDirect = (e: React.MouseEvent, v: Voucher) => {
     e.stopPropagation();
@@ -123,220 +165,286 @@ export default function VoucherTab() {
     setSelectedOutletBrandKey(bKey);
   };
 
+  const categoryRail = [
+    { id: "all", label: "Semua Menu", icon: UtensilsCrossed },
+    { id: "makanan_berat", label: "Makanan Berat", icon: Pizza },
+    { id: "kopi_minuman", label: "Kopi & Minuman", icon: Coffee },
+    { id: "camilan", label: "Camilan & Roti", icon: Cookie },
+    { id: "fast_food", label: "Fast Food", icon: Flame },
+    { id: "ayam", label: "Ayam & Bebek", icon: Sparkles },
+    { id: "tiktok", label: "TikTok GO", icon: Music2 },
+  ] as const;
+
   return (
-    <div className="space-y-5 pb-24">
+    <div className="space-y-6 pb-24">
       {/* Toast Notification Container */}
       {toastMsg && (
-        <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 bg-slate-900/90 text-white dark:bg-white dark:text-slate-900 px-5 py-2.5 rounded-full text-xs font-bold shadow-2xl backdrop-blur-md border border-white/20 animate-in fade-in slide-in-from-top-4 duration-200 text-center max-w-[90vw]">
+        <div className="fixed top-22 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white dark:bg-white dark:text-slate-900 px-5 py-2.5 rounded-full text-xs font-semibold shadow-xl border border-slate-700 dark:border-slate-200 text-center max-w-[90vw] animate-in fade-in slide-in-from-top-2">
           {toastMsg}
         </div>
       )}
 
-      {/* Header Banner & API Key Status */}
-      <div className="p-5 rounded-3xl bg-linear-to-r from-[#FE2C55]/15 via-rose-500/10 to-indigo-600/10 border border-[#FE2C55]/20 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-xl">🍽️</span>
-            <h2 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">
-              Voucher & Promo Kuliner Kampus
-            </h2>
-          </div>
-          <p className="text-xs text-slate-600 dark:text-slate-400 max-w-md leading-relaxed">
-            Diskon makanan hemat hingga 58% dari TikTok GO Dining, GrabFood, GoFood & ShopeeFood (Lazatto, Hayam Sambel Korek, Mie Gacoan, Richeese, KFC & Mixue).
-          </p>
-        </div>
+      {/* 1. HORIZONTAL ICON CATEGORY RAIL (Hide.com style) */}
+      <div className="pt-2 border-b border-slate-200/80 dark:border-slate-800">
+        <div className="flex items-center gap-7 sm:gap-9 overflow-x-auto no-scrollbar pb-3">
+          {categoryRail.map((item) => {
+            const Icon = item.icon;
+            const isActive = categoryFilter === item.id;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setCategoryFilter(item.id)}
+                className={`flex flex-col items-center gap-1.5 shrink-0 transition-all cursor-pointer relative py-1 group ${
+                  isActive
+                    ? "text-emerald-800 dark:text-emerald-300 font-bold"
+                    : "text-slate-500 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-300"
+                }`}
+              >
+                <Icon
+                  className={`w-6 h-6 stroke-[1.6] transition-transform group-hover:scale-110 ${
+                    isActive ? "stroke-emerald-700 dark:stroke-emerald-400" : "stroke-current"
+                  }`}
+                />
+                <span className="text-xs whitespace-nowrap tracking-tight font-medium">
+                  {item.label}
+                </span>
 
-        {/* TikTok GO API Button */}
-        <button
-          type="button"
-          onClick={() => setShowTikTokConfig(true)}
-          className={`px-3.5 py-2 rounded-2xl text-xs font-extrabold flex items-center justify-center gap-2 shadow-sm transition active:scale-95 shrink-0 ${
-            hasTikTokKey
-              ? "bg-emerald-600 text-white shadow-emerald-600/25 hover:bg-emerald-700"
-              : "bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100"
-          }`}
-          title="Pengaturan Kunci API TikTok GO Dining"
-        >
-          <span>{hasTikTokKey ? "🟢" : "🎵"}</span>
-          <span>{hasTikTokKey ? "TikTok GO API Aktif ↗" : "Hubungkan TikTok GO (API) ↗"}</span>
-        </button>
+                {/* Active Indicator Underline */}
+                {isActive && (
+                  <span className="absolute -bottom-3 left-0 right-0 h-0.5 bg-emerald-700 dark:bg-emerald-400 rounded-full" />
+                )}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      {/* Search Bar & Filter Chips */}
-      <div className="space-y-3">
-        <div className="relative">
-          <Search className="absolute left-3.5 top-3 w-4 h-4 text-slate-400" />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Cari Lazatto, Hayam, Mie Gacoan, Nasi Padang, Warteg, Mixue..."
-            className="w-full text-xs font-medium bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-2xl pl-10 pr-4 py-3 border border-slate-200 dark:border-slate-800 shadow-sm outline-none focus:ring-2 focus:ring-[#FE2C55]"
-          />
-        </div>
+      {/* 2. SUB-FILTER PILLS & TOOLBAR (Hide.com style) */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+        {/* Left: Filter Pills */}
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+          {/* Pill: All */}
+          <button
+            type="button"
+            onClick={() => {
+              setPlatformFilter("all");
+              setCategoryFilter("all");
+            }}
+            className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+              platformFilter === "all" && categoryFilter === "all"
+                ? "border border-emerald-500 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-bold"
+                : "border border-slate-200 dark:border-emerald-900/40 text-slate-700 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
+            }`}
+          >
+            All Promo
+          </button>
 
-        {/* Horizontal Category Pills */}
-        <div className="flex gap-2 overflow-x-auto pb-1 text-xs font-bold no-scrollbar">
-          {[
-            { id: "all", label: "Semua Menu", icon: "🍽️" },
-            { id: "makanan_berat", label: "Makanan Berat (Lazatto, Hayam)", icon: "🍗" },
-            { id: "mie", label: "Mie Gacoan & Dimsum", icon: "🍜" },
-            { id: "kopi_minuman", label: "Kopi & Minuman", icon: "☕" },
-            { id: "burger", label: "Burger & Fast Food", icon: "🍔" },
-          ].map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => setCategoryFilter(cat.id)}
-              className={`px-3.5 py-1.5 rounded-xl whitespace-nowrap transition flex items-center gap-1.5 text-[11px] font-black ${
-                categoryFilter === cat.id
-                  ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/25"
-                  : "bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
-              }`}
-            >
-              <span>{cat.icon}</span>
-              <span>{cat.label}</span>
-            </button>
-          ))}
-        </div>
+          {/* Pill: Diskon >50% */}
+          <button
+            type="button"
+            onClick={() => setPlatformFilter(platformFilter === "diskon50" ? "all" : "diskon50")}
+            className={`px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all cursor-pointer flex items-center gap-1 ${
+              platformFilter === "diskon50"
+                ? "border border-emerald-500 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-bold"
+                : "border border-slate-200 dark:border-emerald-900/40 text-slate-700 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
+            }`}
+          >
+            <Tag className="w-3 h-3 text-amber-500" />
+            <span>Diskon &gt; 50%</span>
+          </button>
 
-        {/* Horizontal Platform Filter Row */}
-        <div className="flex gap-2 overflow-x-auto pb-1 text-xs font-bold no-scrollbar">
+          {/* Platform Pills */}
           {[
-            { id: "all", label: "Semua Platform", icon: "🌐" },
-            { id: "TikTok GO Dining", label: "TikTok GO", icon: "🎵" },
-            { id: "GrabFood", label: "GrabFood", icon: "🟢" },
-            { id: "GoFood", label: "GoFood", icon: "🔴" },
-            { id: "ShopeeFood", label: "ShopeeFood", icon: "🟠" },
-            { id: "diskon", label: "Diskon Terbesar", icon: "🔥" },
+            { id: "TikTok GO Dining", label: "TikTok GO" },
+            { id: "GrabFood", label: "GrabFood" },
+            { id: "GoFood", label: "GoFood" },
+            { id: "ShopeeFood", label: "ShopeeFood" },
           ].map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setPlatformFilter(tab.id)}
-              className={`px-3.5 py-2 rounded-xl whitespace-nowrap transition flex items-center gap-1.5 shadow-sm ${
+              type="button"
+              onClick={() => setPlatformFilter(platformFilter === tab.id ? "all" : tab.id)}
+              className={`px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all cursor-pointer ${
                 platformFilter === tab.id
-                  ? "bg-[#FE2C55] text-white shadow-[#FE2C55]/25"
-                  : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800"
+                  ? "border border-emerald-500 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-bold"
+                  : "border border-slate-200 dark:border-emerald-900/40 text-slate-700 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
               }`}
             >
-              <span>{tab.icon}</span>
-              <span>{tab.label}</span>
+              {tab.label}
             </button>
           ))}
         </div>
+
+        {/* Right: Search & Sorter */}
+        <div className="flex items-center gap-2 shrink-0">
+          {/* Quick Search */}
+          <div className="relative">
+            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Cari Lazatto, Mixue..."
+              className="pl-8 pr-3 py-1.5 rounded-full border border-slate-200 dark:border-slate-800 text-xs bg-transparent text-slate-900 dark:text-slate-100 placeholder-slate-400 outline-none w-36 sm:w-48 focus:border-emerald-600"
+            />
+          </div>
+
+          <div className="relative">
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as "discount" | "price" | "rating")}
+              className="appearance-none pl-3.5 pr-8 py-1.5 rounded-full border border-slate-200 dark:border-slate-800 text-xs font-medium bg-transparent text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer outline-none"
+            >
+              <option value="discount" className="bg-white dark:bg-slate-900">Sort: Diskon %</option>
+              <option value="price" className="bg-white dark:bg-slate-900">Sort: Termurah</option>
+              <option value="rating" className="bg-white dark:bg-slate-900">Sort: Terlaris</option>
+            </select>
+            <ArrowUpDown className="w-3 h-3 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+          </div>
+        </div>
       </div>
 
-      {/* Empty State */}
-      {filtered.length === 0 && (
-        <div className="p-12 text-center rounded-3xl bg-white dark:bg-slate-900 border border-dashed border-slate-200 dark:border-slate-800 text-slate-400">
-          <div className="text-4xl mb-2">🍽️</div>
-          <div className="font-black text-slate-800 dark:text-white text-sm">
-            Tidak Ada Promo Kuliner Ditemukan
-          </div>
-          <p className="text-xs text-slate-500 mt-1">
-            Coba pilih platform lain atau gunakan kata kunci pencarian berbeda.
-          </p>
-        </div>
-      )}
-
-      {/* Grid List Voucher Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* 3. 4-COLUMN LUXURY FOOD & DINING VOUCHER GRID (Hide.com style) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {filtered.map((v) => {
-          const platformColor = v.platformColor || "#FE2C55";
+          const isFav = favorites.includes(String(v.id));
+          // High quality food image lookup
+          const foodPhoto =
+            v.brandKey === "mixue"
+              ? "https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=600&q=80"
+              : v.brandKey === "lazatto" || v.brandKey === "ayamhayam"
+              ? "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&w=600&q=80"
+              : v.brandKey === "miegacoan"
+              ? "https://images.unsplash.com/photo-1612927601601-6638404737ce?auto=format&fit=crop&w=600&q=80"
+              : v.brandKey === "kopi-kenangan" || v.brandKey === "janji-jiwa"
+              ? "https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=600&q=80"
+              : "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&q=80";
+
           return (
             <article
               key={v.id}
               onClick={() => setSelectedClaimVoucher(v)}
-              className="p-4 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-[#FE2C55]/40 dark:hover:border-[#FE2C55]/40 shadow-sm transition hover:shadow-md cursor-pointer flex flex-col justify-between group"
+              className="group flex flex-col cursor-pointer transition-all duration-300"
             >
-              <div>
-                {/* Baris Atas: Brand & Platform Badge */}
-                <div className="flex justify-between items-center mb-2.5">
-                  <div className="flex items-center gap-2">
-                    <span className="text-2xl">{v.brandLogo}</span>
-                    <span className="font-black text-xs text-slate-900 dark:text-white tracking-wide">
-                      {v.brand}
-                    </span>
-                  </div>
+              {/* Photo Container (Hide.com 4:3 rounded image) */}
+              <div className="relative aspect-4/3 w-full rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800 shadow-xs mb-3">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={foodPhoto}
+                  alt={v.brand}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  loading="lazy"
+                />
 
-                  <span
-                    className="text-[10px] font-extrabold px-2.5 py-1 rounded-full text-white flex items-center gap-1 shadow-sm"
-                    style={{ backgroundColor: platformColor }}
-                  >
-                    <span>{v.platformIcon}</span>
-                    <span>{v.platform}</span>
+                {/* Top-Left Siliwangi Emerald Discount Tag */}
+                <div className="absolute top-3 left-3 flex items-center gap-1.5 flex-wrap">
+                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-emerald-800 text-white shadow-xs tabular-nums">
+                    -{v.diskonPersen}% Off
+                  </span>
+                  <span className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-white shadow-xs">
+                    {v.platform}
                   </span>
                 </div>
 
-                {/* Sub Meta: Rating & Jarak */}
-                <div className="flex items-center justify-between text-[11px] text-slate-400 pb-2 mb-2 border-b border-slate-100 dark:border-slate-800">
-                  <span className="text-amber-500 font-bold flex items-center gap-1">
-                    ⭐ {v.rating || "4.8"} ({v.terjual || "1.5rb"} terjual)
-                  </span>
-                  <span className="flex items-center gap-1 text-slate-500 dark:text-slate-400 truncate max-w-42.5">
-                    <MapPin className="w-3 h-3 text-rose-500 shrink-0" />
-                    <span>{v.mapQuery ? "📍 Outlet Terdekat" : "🌐 Berlaku Online"}</span>
-                  </span>
-                </div>
+                {/* Top-Right Circular Glass Heart */}
+                <button
+                  type="button"
+                  onClick={(e) => toggleFavorite(e, String(v.id))}
+                  title={isFav ? "Hapus dari favorit" : "Simpan ke favorit"}
+                  className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 dark:bg-neutral-900/90 backdrop-blur-md flex items-center justify-center text-slate-700 dark:text-neutral-200 hover:text-emerald-600 transition-transform active:scale-90 shadow-xs cursor-pointer"
+                >
+                  <Heart
+                    className={`w-4 h-4 transition-colors ${
+                      isFav ? "fill-emerald-600 text-emerald-600" : "text-slate-700 dark:text-slate-300"
+                    }`}
+                  />
+                </button>
 
-                {/* Badge Terlaris & Nama Voucher */}
-                <div className="mb-2">
-                  <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-[#FE2C55]/10 text-[#FE2C55] inline-block mb-1.5">
-                    {v.badgeTerlaris || "Promo Mahasiswa"} 🔥
-                  </span>
-                  <h3 className="font-black text-sm text-slate-900 dark:text-white leading-snug line-clamp-2 group-hover:text-[#FE2C55] transition">
-                    {v.namaVoucher}
-                  </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed">
-                    {v.deskripsi}
-                  </p>
+                {/* Bottom-Right Terjual Tag */}
+                <div className="absolute bottom-2.5 right-2.5 bg-black/60 backdrop-blur-md text-white text-[11px] font-medium px-2 py-0.5 rounded-full flex items-center gap-1 tabular-nums">
+                  <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                  <span>{v.rating || "4.8"}</span>
+                  <span className="text-slate-300 text-[10px]">({v.terjual || "1.2k"})</span>
                 </div>
               </div>
 
-              {/* Baris Bawah: Harga & Tombol Aksi */}
-              <div className="pt-3 mt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
-                <div>
-                  <div className="text-[11px] text-slate-400 line-through">
-                    Rp {v.hargaAsli.toLocaleString("id-ID")}
-                  </div>
-                  <div className="flex items-baseline gap-1.5">
-                    <span className="text-base font-black text-slate-900 dark:text-white">
-                      Rp {v.hargaDiskon.toLocaleString("id-ID")}
-                    </span>
-                    <span className="text-[11px] font-extrabold px-1.5 py-0.2 rounded bg-rose-500 text-white">
-                      -{v.diskonPersen}%
-                    </span>
-                  </div>
+              {/* Details Below Image */}
+              <div className="flex-1 flex flex-col justify-between space-y-1.5">
+                {/* Secondary Meta Tags */}
+                <div className="flex items-center gap-1.5 overflow-hidden">
+                  <span className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 whitespace-nowrap">
+                    {v.badgeTerlaris || "Diskon Kampus"}
+                  </span>
+                  <span className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 whitespace-nowrap truncate">
+                    {v.kategori}
+                  </span>
                 </div>
 
-                <div className="flex items-center gap-1.5">
-                  {/* Button Info Outlet */}
-                  <button
-                    type="button"
-                    onClick={(e) => handleOpenOutlet(e, v)}
-                    className="px-2.5 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold transition flex items-center gap-1"
-                    title="Lihat Storefront Outlet"
-                  >
-                    <Store className="w-3.5 h-3.5" />
-                    <span className="hidden sm:inline">Outlet</span>
-                  </button>
+                {/* Brand & Voucher Title */}
+                <div>
+                  <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                    {v.brand}
+                  </div>
+                  <h3 className="font-bold text-sm text-slate-900 dark:text-white leading-snug line-clamp-1 group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
+                    {v.namaVoucher}
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">
+                    {v.deskripsi}
+                  </p>
+                </div>
 
-                  {/* Button Beli Direct Deep Link */}
-                  <button
-                    type="button"
-                    onClick={(e) => handleBuyDirect(e, v)}
-                    className="px-3 py-2 rounded-xl text-white text-xs font-black shadow-md transition active:scale-95 flex items-center gap-1"
-                    style={{ backgroundColor: platformColor }}
-                    title={`Buka di ${v.platform}`}
-                  >
-                    <span>🚀</span>
-                    <span>Beli di {v.platform.split(" ")[0]}</span>
-                  </button>
+                {/* Price & Action Row */}
+                <div className="pt-2 flex items-center justify-between gap-2 border-t border-slate-100 dark:border-slate-800/80 mt-1">
+                  <div>
+                    <div className="text-[11px] text-slate-400 line-through tabular-nums leading-none">
+                      Rp {v.hargaAsli.toLocaleString("id-ID")}
+                    </div>
+                    <div className="text-base font-bold text-slate-900 dark:text-white tabular-nums">
+                      Rp {v.hargaDiskon.toLocaleString("id-ID")}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={(e) => handleOpenOutlet(e, v)}
+                      title="Lihat Outlet"
+                      className="px-2.5 py-1.5 rounded-full border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold transition-colors flex items-center gap-1 cursor-pointer"
+                    >
+                      <Store className="w-3 h-3 text-slate-500" />
+                      <span className="hidden sm:inline">Outlet</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={(e) => handleBuyDirect(e, v)}
+                      title={`Buka di ${v.platform}`}
+                      className="px-3.5 py-1.5 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold transition-colors flex items-center gap-1 shadow-xs cursor-pointer"
+                    >
+                      <span>Klaim</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </button>
+                  </div>
                 </div>
               </div>
             </article>
           );
         })}
       </div>
+
+      {/* Empty State */}
+      {filtered.length === 0 && (
+        <div className="py-16 text-center rounded-3xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 text-slate-400 max-w-md mx-auto shadow-xs">
+          <UtensilsCrossed className="w-12 h-12 text-slate-400 mx-auto mb-3" />
+          <div className="font-bold text-slate-900 dark:text-white text-base">
+            Tidak Ada Promo Kuliner Ditemukan
+          </div>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 px-4">
+            Coba pilih platform lain atau gunakan kata kunci pencarian berbeda.
+          </p>
+        </div>
+      )}
 
       {/* MODAL 1: KLAIM VOUCHER & BARCODE KASIR */}
       <ClaimVoucherModal
@@ -359,7 +467,7 @@ export default function VoucherTab() {
       <TikTokConfigModal
         isOpen={showTikTokConfig}
         onClose={() => setShowTikTokConfig(false)}
-        onSavedSuccess={checkTikTokConfig}
+        onSavedSuccess={() => showToast("Koneksi TikTok berhasil diperbarui")}
       />
     </div>
   );
