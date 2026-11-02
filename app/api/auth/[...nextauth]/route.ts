@@ -1,17 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import NextAuth, { type NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { query, execute } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
-import { RowDataPacket } from "mysql2";
-
-interface UserRow extends RowDataPacket {
-  id: number;
-  name: string;
-  email: string;
-  password?: string;
-  avatar_url?: string;
-}
 
 const providers: NextAuthOptions["providers"] = [];
 
@@ -20,7 +12,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    })
+    }),
   );
 }
 
@@ -39,60 +31,59 @@ providers.push(
       const cleanEmail = credentials.email.trim().toLowerCase();
 
       try {
-        // Find existing user in MySQL
-        const users = await query<UserRow[]>(
-          "SELECT id, name, email, password, avatar_url FROM users WHERE LOWER(email) = ? LIMIT 1",
-          [cleanEmail]
-        );
+        const user = await prisma.user.findUnique({
+          where: { email: cleanEmail },
+        });
 
-        if (users.length > 0) {
-          const user = users[0];
-          // If password was sent, verify it
+        if (user) {
           if (credentials.password && user.password) {
             const normalized = user.password.replace(/^\$2y\$/, "$2a$");
             const match = await bcrypt.compare(credentials.password, normalized);
             if (!match) return null;
           }
+
           return {
-            id: String(user.id),
+            id: user.id,
             email: user.email,
-            name: user.name,
+            name: user.nama,
             image: user.avatar_url || null,
           };
         }
 
-        // If user does not exist yet (e.g. Google email or quick student login)
-        const name = credentials.name || cleanEmail.split("@")[0];
+        const nameInput = credentials.name || cleanEmail.split("@")[0];
         const isCampus =
           cleanEmail.includes(".ac.id") ||
           cleanEmail.includes("kampus.uc.id") ||
           cleanEmail.includes(".edu");
 
-        const dummyHash = await bcrypt.hash(credentials.password || "student123", 10);
-        const res = await execute(
-          `INSERT INTO users (name, email, password, student_email, student_verified, created_at, updated_at)
-           VALUES (?, ?, ?, ?, ?, NOW(), NOW())`,
-          [name, cleanEmail, dummyHash, isCampus ? cleanEmail : null, isCampus ? 1 : 0]
+        const dummyHash = await bcrypt.hash(
+          credentials.password || "student123",
+          10
         );
 
+        const newUser = await prisma.user.create({
+          data: {
+            nama: nameInput,
+            email: cleanEmail,
+            password: dummyHash,
+            student_email: isCampus ? cleanEmail : null,
+            student_verified: isCampus,
+            auth_provider: credentials.provider || "email",
+          },
+        });
+
         return {
-          id: String(res.insertId),
-          email: cleanEmail,
-          name: name,
-          image: null,
+          id: newUser.id,
+          email: newUser.email,
+          name: newUser.nama,
+          image: newUser.avatar_url || null,
         };
       } catch (err) {
-        console.warn("NextAuth MySQL authorize error:", err);
-        // Fallback so user is not locked out
-        return {
-          id: cleanEmail,
-          email: cleanEmail,
-          name: credentials.name || cleanEmail.split("@")[0],
-          image: null,
-        };
+        console.error("NextAuth Prisma authorize error:", err);
+        return null;
       }
     },
-  })
+  }),
 );
 
 export const authOptions: NextAuthOptions = {
@@ -105,10 +96,11 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async session({ session, token }) {
       if (session.user && token.sub) {
-        if (token.name) session.user.name = token.name;
-        if (token.email) session.user.email = token.email;
-        if (token.picture) session.user.image = token.picture;
-        (session.user as { id?: string }).id = token.sub;
+        session.user.name = token.name;
+        session.user.email = token.email;
+        session.user.image = token.picture as string | null | undefined;
+        // Inject custom ID secara aman tanpa memicu error tipe NextAuth
+        (session.user as any).id = token.sub;
       }
       return session;
     },

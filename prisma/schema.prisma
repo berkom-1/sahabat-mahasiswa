@@ -1,0 +1,103 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ==========================================
+// 1. TABEL USER 
+// ==========================================
+model User {
+  id               String    @id @default(uuid())
+  email            String    @unique
+  password         String?  
+  nama             String
+  kampus           String?
+  fakultas         String?
+  jurusan          String?
+  semester         Int?
+  alamat           String?
+  avatar_url       String?
+  telp             String?
+  student_email    String?   
+  auth_provider    String?   @default("email") 
+  student_verified Boolean   @default(false)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  // Relasi
+  transaksi        Transaksi[]
+  tugas            Tugas[]
+}
+
+// ==========================================
+// 2. TABEL TRANSAKSI / KEUANGAN (DompetTab)
+// ==========================================
+model Transaksi {
+  id        String   @id @default(uuid())
+  jenis     String   // "masuk" atau "keluar"
+  kategori  String
+  nominal   Int
+  catatan   String?  @db.Text
+  tanggal   DateTime
+  
+  user_id   String
+  user      User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+}
+
+// ==========================================
+// 3. TABEL TUGAS / JADWAL (TugasTab)
+// ==========================================
+model Tugas {
+  id         String   @id @default(uuid())
+  nama_tugas String
+  deadline   DateTime
+  bobot      Int      // 1: Ringan, 2: Sedang, 3: Berat
+  selesai    Boolean  @default(false)
+  
+  user_id    String
+  user      User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  
+  createdAt  DateTime @default(now())
+}
+
+// ==========================================
+// 4. TABEL KOSAN
+// ==========================================
+model Kosan {
+  id         Int      @id @default(autoincrement())
+  nama       String
+  area       String
+  harga      Int
+  tipe       String?  // "putra", "putri", "campur"
+  lat        Float
+  lng        Float
+  telp       String
+  fasilitas  String   @db.Text 
+  foto_url   String?
+  sumber     String?  @default("kurasi")
+  rating     Float?
+  sisa_kamar Int?     @default(1)
+}
+
+// ==========================================
+// 5. TABEL LOKER (Lowongan Kerja)
+// ==========================================
+model LowonganKerja {
+  id         Int      @id @default(autoincrement())
+  posisi     String
+  perusahaan String?
+  tipe       String   // "Part-time", "Freelance", "Magang"
+  gaji       Int
+  jam        Int
+  lokasi     String
+  hrd        String?
+  syarat     String   @db.Text
+  url_lamar  String?
+  tanggal    String?
+}
