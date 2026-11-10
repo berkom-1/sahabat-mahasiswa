@@ -36,26 +36,33 @@ export default function Home() {
   // Shared Search & Location State for Hide.com Navbar + Kosan
   const [searchQuery, setSearchQuery] = useState("");
   const [radius, setRadius] = useState<number | "all">(10);
+  
+  // 1. Inisialisasi awal statis untuk menghindari Hydration Error
   const [currentLocation, setCurrentLocation] = useState<{
     name: string;
     lat: number;
     lng: number;
     area: string;
-  }>(() => {
-    if (typeof window !== "undefined") {
+  }>(getCoordinatesForLocation("Universitas Siliwangi (UNSIL)"));
+
+  const [gpsLoading, setGpsLoading] = useState(false);
+
+  // 2. Ambil data localStorage HANYA setelah komponen dimuat di browser
+  useEffect(() => {
+    const timer = setTimeout(() => {
       try {
         const cached = localStorage.getItem("sm_user_profile_cache");
         if (cached) {
           const parsed = JSON.parse(cached);
           if (parsed.kampus && parsed.kampus.trim()) {
-            return getCoordinatesForLocation(parsed.kampus);
+            setCurrentLocation(getCoordinatesForLocation(parsed.kampus));
           }
         }
       } catch {}
-    }
-    return getCoordinatesForLocation("Universitas Siliwangi (UNSIL)");
-  });
-  const [gpsLoading, setGpsLoading] = useState(false);
+    }, 0);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleGetLiveGPS = () => {
     if (typeof window === "undefined" || !navigator.geolocation) return;

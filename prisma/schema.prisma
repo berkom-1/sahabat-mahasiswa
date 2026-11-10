@@ -71,6 +71,7 @@ model Tugas {
 // ==========================================
 model Kosan {
   id         Int      @id @default(autoincrement())
+  slug       String   @unique
   nama       String
   area       String
   harga      Int

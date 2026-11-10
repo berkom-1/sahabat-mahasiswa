@@ -1,5 +1,6 @@
 export interface Kosan {
   id: number | string;
+  slug?: string; 
   nama: string;
   area: string;
   harga: number;

@@ -97,25 +97,28 @@ export default function KosanTab({
 
   const [, setActiveLocationMode] = useState<"campus" | "gps" | "custom">("campus");
 
-  // State koordinat titik acuan aktif (internal fallback)
+  // State koordinat titik acuan aktif (internal fallback) - Diambil dari localStorage saat render awal client
   const [internalLocation, setInternalLocation] = useState<{
     name: string;
     lat: number;
     lng: number;
     area: string;
   }>(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const cachedProfile = localStorage.getItem("sm_user_profile_cache");
-        if (cachedProfile) {
-          const parsed = JSON.parse(cachedProfile);
-          if (parsed.kampus && parsed.kampus.trim()) {
-            return getCoordinatesForLocation(parsed.kampus);
-          }
+    const defaultLocation = getCoordinatesForLocation("Universitas Siliwangi (UNSIL)");
+
+    if (typeof window === "undefined") return defaultLocation;
+
+    try {
+      const cachedProfile = localStorage.getItem("sm_user_profile_cache");
+      if (cachedProfile) {
+        const parsed = JSON.parse(cachedProfile);
+        if (parsed.kampus && parsed.kampus.trim()) {
+          return getCoordinatesForLocation(parsed.kampus);
         }
-      } catch {}
-    }
-    return getCoordinatesForLocation("Universitas Siliwangi (UNSIL)");
+      }
+    } catch {}
+
+    return defaultLocation;
   });
 
   const currentLocation = externalCurrentLocation || internalLocation;
